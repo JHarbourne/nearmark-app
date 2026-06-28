@@ -1,0 +1,35 @@
+{
+  "name": "nearmark",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nearmark — a location-aware heritage walking-tour platform (mobile PWA + admin backoffice). Deploy your own city guide.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "supabase:gen-seed": "node supabase/gen-seed-sql.mjs",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "img-comparison-slider": "^8.0.7",
+    "leaflet": "^1.9.4",
+    "posthog-js": "^1.393.5",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "axe-core": "^4.12.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-vue": "^10.9.2",
+    "eslint-plugin-vuejs-accessibility": "^2.5.0",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "vite": "^5.2.0",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

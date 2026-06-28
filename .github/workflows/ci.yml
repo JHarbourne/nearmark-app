@@ -1,0 +1,21 @@
+name: CI
+
+# Lint and build on every push and pull request. No secrets are required:
+# the build falls back to bundled seed data when Supabase env vars are absent.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

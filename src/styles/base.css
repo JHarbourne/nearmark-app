@@ -1,0 +1,58 @@
+/* Global base — keyframes and resets copied from the prototype (BRD §6.3). */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: #0e0a14;
+  color: #F6EFE6;
+  font-family: 'Hanken Grotesk', sans-serif;
+  overscroll-behavior: none;
+}
+
+@keyframes pulsering { 0% { transform: translate(-50%,-50%) scale(0.7); opacity: 0.9; } 100% { transform: translate(-50%,-50%) scale(1.8); opacity: 0; } }
+@keyframes pulsedot  { 0% { transform: translate(-50%,-50%) scale(0.6); opacity: 0.7; } 100% { transform: translate(-50%,-50%) scale(2.6); opacity: 0; } }
+@keyframes fadeUp    { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sheetUp   { from { transform: translateY(102%); } to { transform: translateY(0); } }
+@keyframes bannerDown{ from { transform: translateY(-130%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes barflow   { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+/* App is a fixed 390×844 "phone" on desktop, full-bleed on real devices. */
+.phone-frame {
+  width: 390px;
+  height: 844px;
+  max-height: 100dvh; /* never overflow a short desktop viewport */
+  position: relative;
+  overflow: hidden;
+  background: #17111f;
+  color: #F6EFE6;
+  font-family: 'Hanken Grotesk', sans-serif;
+  margin: 0 auto;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+}
+/* Real phones (incl. large ones) and the installed PWA: fill the screen edge to
+   edge — no mock phone frame, no surrounding gradient. */
+@media (max-width: 480px), (display-mode: standalone) {
+  .phone-frame {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    box-shadow: none;
+  }
+  .app-stage { background: #17111f; }
+}
+.app-stage {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 80% at 50% 0%, #1a1326 0%, #0e0a14 70%);
+}
+
+/* Leaflet overrides so the live map matches the prototype's flat parchment look */
+.leaflet-container { background: #E7E4DD; font-family: 'Hanken Grotesk', sans-serif; }
+.leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(255,255,255,0.7);
+}
+.marker-pin { background: none; border: none; }

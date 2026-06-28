@@ -1,0 +1,355 @@
+<!-- A4 Location editor (BRD §11.4) — the most important backoffice screen.
+     Full form + click-to-place map + accent picker + preview + draft/publish. -->
+<template>
+  <div>
+    <div class="pagehead">
+      <h1>{{ isNew ? 'New location' : 'Edit location' }}</h1>
+      <button class="btn btn-ghost" @click="back">← Back to list</button>
+    </div>
+
+    <div class="editor-cols" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:start;">
+      <!-- left: fields -->
+      <div class="card" style="padding:22px;">
+        <label for="loc-title">Title</label>
+        <input id="loc-title" type="text" v-model="form.title" placeholder="Story card heading" />
+
+        <div class="field-row">
+          <div>
+            <label for="loc-city">City</label>
+            <select id="loc-city" v-model="form.city"><option>London</option><option>Manchester</option><option>Brighton</option></select>
+          </div>
+          <div>
+            <label for="loc-period">Period / date <span class="hint">free text</span></label>
+            <input id="loc-period" type="text" v-model="form.period" placeholder="1890s · 1967 · c. 1985" />
+          </div>
+        </div>
+
+        <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
+        <input id="loc-significance" type="text" v-model="form.significance" />
+
+        <label for="loc-summary">Summary text <span class="hint">~80–100 words</span></label>
+        <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
+
+        <label for="loc-wiki">Wiki article URL</label>
+        <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
+        <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
+
+        <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
+        <textarea id="loc-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
+
+        <div class="field-row">
+          <div>
+            <label for="loc-radius">Trigger radius <span class="hint">metres</span></label>
+            <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
+          </div>
+          <div>
+            <label for="loc-tournum">Tour stop #</label>
+            <input id="loc-tournum" type="number" v-model.number="form.tourNum" placeholder="—" min="1" />
+          </div>
+        </div>
+
+        <span class="field-label" id="loc-hue-label">Accent colour</span>
+        <div role="group" aria-labelledby="loc-hue-label" style="display:flex; gap:8px;">
+          <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
+        </div>
+
+        <p class="muted" style="font-size:12.5px; margin:0 0 8px;">These two images form the before/after slider — the columns are in the same order they appear on the story card.</p>
+
+        <!-- image source + upload -->
+        <div class="field-row">
+          <div>
+            <label for="loc-historic-url">Historic image <span class="hint">“before” · slider LEFT</span></label>
+            <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="https://… or upload ↓" />
+            <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
+              {{ uploading.historic ? 'Uploading…' : '⬆ Upload image' }}
+              <input type="file" accept="image/*" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
+            </label>
+            <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
+          </div>
+          <div>
+            <label for="loc-hero-url">Hero image <span class="hint">“today” · slider RIGHT</span></label>
+            <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="https://… or upload ↓" />
+            <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
+              {{ uploading.hero ? 'Uploading…' : '⬆ Upload image' }}
+              <input type="file" accept="image/*" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
+            </label>
+            <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
+          </div>
+        </div>
+
+        <!-- focal point -->
+        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+          <div>
+            <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition)" aria-label="Historic image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
+              <span :style="focalDot(form.historicPosition)"></span>
+            </div>
+            <p v-if="form.historicImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
+          </div>
+          <div>
+            <div v-if="form.heroImageUrl" role="button" tabindex="0" :style="focalBox(form.heroImageUrl, form.heroPosition)" aria-label="Hero image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'heroPosition')" @keydown="nudgeFocal($event,'heroPosition')">
+              <span :style="focalDot(form.heroPosition)"></span>
+            </div>
+            <p v-if="form.heroImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
+          </div>
+        </div>
+
+        <!-- alt text -->
+        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+          <div>
+            <template v-if="form.historicImageUrl">
+              <label for="loc-historic-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
+              <input id="loc-historic-alt" type="text" v-model="form.historicAlt" placeholder="e.g. The Domino Room, c.1893" />
+            </template>
+          </div>
+          <div>
+            <template v-if="form.heroImageUrl">
+              <label for="loc-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
+              <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
+            </template>
+          </div>
+        </div>
+
+        <!-- slider captions (only when both images form a slider) -->
+        <div class="field-row" v-if="form.heroImageUrl && form.historicImageUrl">
+          <div>
+            <label for="loc-historic-slabel">Slider caption <span class="hint">over the LEFT image</span></label>
+            <input id="loc-historic-slabel" type="text" v-model="form.historicLabel" :placeholder="form.period ? `default: ${form.period}` : 'e.g. 1890s'" />
+          </div>
+          <div>
+            <label for="loc-hero-slabel">Slider caption <span class="hint">over the RIGHT image</span></label>
+            <input id="loc-hero-slabel" type="text" v-model="form.imageLabel" placeholder="e.g. Today · Reconstruction" />
+          </div>
+        </div>
+        <button v-if="form.heroImageUrl || form.historicImageUrl" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="swapImages">⇄ Swap hero / historic images</button>
+
+        <template v-if="form.heroImageUrl || form.historicImageUrl">
+          <label for="loc-caption">Image caption <span class="hint">shown under the photo · also read by screen readers, in place of alt text</span></label>
+          <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Café Royal’s Domino Room, then and now" />
+        </template>
+        <!-- credits: left column = historic (left) image, right column = hero (right) image -->
+        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+          <div>
+            <template v-if="form.historicImageUrl">
+              <label for="loc-historic-credit">Historic photo credit <span class="hint">the “before” image</span></label>
+              <input id="loc-historic-credit" type="text" v-model="form.historicCredit" placeholder="Archive / source" />
+              <label for="loc-historic-credit-link">Credit link <span class="hint">optional</span></label>
+              <input id="loc-historic-credit-link" type="url" v-model="form.historicCreditUrl" placeholder="https://…" />
+            </template>
+          </div>
+          <div>
+            <template v-if="form.heroImageUrl">
+              <label for="loc-hero-credit">Hero photo credit <span class="hint">contemporary photo</span></label>
+              <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
+              <label for="loc-hero-credit-link">Credit link <span class="hint">optional</span></label>
+              <input id="loc-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
+            </template>
+          </div>
+        </div>
+
+        <label for="loc-audio">Audio narration <span class="hint">mp3/m4a</span></label>
+        <input id="loc-audio" type="url" v-model="form.audioUrl" placeholder="https://… or upload ↓" />
+        <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
+          {{ uploading.audio ? 'Uploading…' : '⬆ Upload audio' }}
+          <input type="file" accept="audio/*" style="display:none" @change="up($event,'audioUrl','audio','audio')" />
+        </label>
+        <button v-if="canUndo('audioUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('audioUrl')">↩ Undo</button>
+        <div class="field-row">
+          <div>
+            <label for="loc-audio-dur">Audio duration <span class="hint">secs</span></label>
+            <input id="loc-audio-dur" type="number" v-model.number="form.audioDuration" min="0" />
+          </div>
+          <div>
+            <label for="loc-video">Video URL <span class="hint">optional, mp4</span></label>
+            <input id="loc-video" type="url" v-model="form.videoUrl" placeholder="https://…" />
+          </div>
+        </div>
+
+        <label for="loc-related">Related locations <span class="hint">powers “Nearby stories”</span></label>
+        <select id="loc-related" multiple v-model="form.relatedIds" style="height:96px;">
+          <option v-for="l in others" :key="l.id" :value="l.id">{{ l.title }}</option>
+        </select>
+
+        <label for="loc-notes">Internal notes <span class="hint">never shown in the app</span></label>
+        <textarea id="loc-notes" v-model="form.notesInternal" rows="2"></textarea>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-top:22px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" @click="save('draft')" :disabled="saving">Save draft</button>
+          <button class="btn btn-primary" @click="save('published')" :disabled="saving">{{ saving ? 'Saving…' : 'Publish' }}</button>
+          <span class="muted" style="font-size:13px;">Status: <span class="badge" :class="form.status">{{ form.status }}</span></span>
+          <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
+        </div>
+      </div>
+
+      <!-- right: map + preview -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="card" style="padding:18px;">
+          <span class="field-label" style="margin-top:0;">Location <span class="hint">click map to place pin</span></span>
+          <PlaceMap v-model="coords" :hue="form.hue" :center="mapCenter" />
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:15px;">Preview</h3>
+            <button class="btn btn-ghost btn-sm" @click="showPreview = !showPreview">{{ showPreview ? 'Hide' : 'Preview as story card' }}</button>
+          </div>
+          <div v-if="showPreview" :style="previewCard">
+            <div :style="previewHero">
+              <span :style="previewPeriod">{{ form.period }}</span>
+            </div>
+            <div style="padding:14px 16px;">
+              <div style="font-family:'Bricolage Grotesque'; font-weight:700; font-size:20px;">{{ form.title || 'Untitled' }}</div>
+              <div style="color:#A99BB8; font-size:12.5px; margin-top:5px;">{{ form.significance }}</div>
+              <p style="font-family:'Newsreader'; color:#E8E0EE; font-size:14px; line-height:1.6; margin:12px 0 0; white-space:pre-line;">{{ form.summary }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive, ref, computed, watch } from 'vue'
+import { store } from '../store.js'
+import { HUE_OPTIONS } from '../../lib/tokens.js'
+import { config, wikiDomain } from '../../config.js'
+import PlaceMap from '../components/PlaceMap.vue'
+
+const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
+
+const hues = HUE_OPTIONS
+const mapCenter = { lat: 51.5137, lng: -0.1341 }
+
+const existing = store.params.id ? store.locations.find((l) => l.id === store.params.id) : null
+const isNew = !existing
+
+const blank = {
+  id: 'loc-' + Math.random().toString(36).slice(2, 8),
+  recordId: undefined, title: '', city: 'London', period: '', significance: '', summary: '',
+  wikiUrl: config.wikiBaseUrl, lat: null, lng: null, triggerRadius: 80,
+  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
+  caption: '', links: '',
+  hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
+}
+const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
+
+// ── replace-undo + orphan cleanup (so old uploads don't pile up in storage) ──
+const undoBuf = reactive({})                                   // field -> value before the last replace
+const sessionUploads = []                                      // every file uploaded during this edit
+const originalImages = { heroImageUrl: form.heroImageUrl || '', historicImageUrl: form.historicImageUrl || '', audioUrl: form.audioUrl || '' }
+function undoReplace(field) { if (field in undoBuf) { form[field] = undoBuf[field]; delete undoBuf[field] } }
+function canUndo(field) { return field in undoBuf }
+const coords = ref(form.lat != null ? { lat: form.lat, lng: form.lng } : null)
+watch(coords, (c) => { if (c) { form.lat = c.lat; form.lng = c.lng } })
+
+const showPreview = ref(false)
+const others = computed(() => store.locations.filter((l) => l.id !== form.id))
+const validWiki = computed(() => !wikiDomain || form.wikiUrl.includes(wikiDomain))
+
+// swap the hero (today) and historic (before) image and all their paired fields
+function swapImages() {
+  const pairs = [
+    ['heroImageUrl', 'historicImageUrl'], ['heroPosition', 'historicPosition'],
+    ['imageAlt', 'historicAlt'], ['photoCredit', 'historicCredit'], ['photoCreditUrl', 'historicCreditUrl'],
+  ]
+  for (const [a, b] of pairs) { const tmp = form[a]; form[a] = form[b]; form[b] = tmp }
+}
+
+// ── focal point picker (click the preview to set what stays in view when cropped) ──
+function focalBox(url, pos) {
+  return {
+    marginTop: '8px', height: '120px', borderRadius: '10px', border: '1px solid var(--line)',
+    backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: pos || '50% 50%',
+    backgroundRepeat: 'no-repeat', position: 'relative', cursor: 'crosshair',
+  }
+}
+function focalDot(pos) {
+  const [x, y] = (pos || '50% 50%').split(' ')
+  return {
+    position: 'absolute', left: x, top: y, transform: 'translate(-50%,-50%)',
+    width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(107,70,229,0.9)',
+    border: '2px solid #fff', boxShadow: '0 0 0 2px rgba(0,0,0,0.35)', pointerEvents: 'none',
+  }
+}
+function setFocal(e, field) {
+  const r = e.currentTarget.getBoundingClientRect()
+  const x = Math.round(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)))
+  const y = Math.round(Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)))
+  form[field] = `${x}% ${y}%`
+}
+// keyboard alternative to the click picker: arrow keys nudge the focal point 5%
+function nudgeFocal(e, field) {
+  const step = { ArrowLeft: [-5, 0], ArrowRight: [5, 0], ArrowUp: [0, -5], ArrowDown: [0, 5] }[e.key]
+  if (!step) return
+  e.preventDefault()
+  const [cx, cy] = (form[field] || '50% 50%').split(' ').map((v) => parseInt(v, 10) || 0)
+  const x = Math.max(0, Math.min(100, cx + step[0]))
+  const y = Math.max(0, Math.min(100, cy + step[1]))
+  form[field] = `${x}% ${y}%`
+}
+
+// ── file uploads to Supabase Storage ──
+const uploading = reactive({ hero: false, historic: false, audio: false })
+async function up(e, field, kind, key) {
+  const file = e.target.files[0]
+  if (!file) return
+  uploading[key] = true
+  const prev = form[field]
+  try {
+    const url = await store.upload(file, kind)
+    undoBuf[field] = prev            // allow undoing this replace
+    sessionUploads.push(url)         // track for orphan cleanup on save
+    form[field] = url
+    // auto-fill audio duration from the file's metadata
+    if (kind === 'audio') {
+      const a = new Audio(URL.createObjectURL(file))
+      a.addEventListener('loadedmetadata', () => { if (a.duration && isFinite(a.duration)) form.audioDuration = Math.round(a.duration) })
+    }
+  } catch (err) {
+    alert('Upload failed: ' + err.message)
+  } finally {
+    uploading[key] = false
+    e.target.value = ''
+  }
+}
+
+const saving = ref(false)
+const flash = ref('')
+let flashTimer
+async function save(status) {
+  if (!form.title) { alert('Title is required.'); return }
+  if (form.lat == null) { alert('Drop a pin on the map to set the location.'); return }
+  form.status = status
+  saving.value = true
+  try {
+    await store.saveLocation({ ...form })
+    // a newly created record now exists — adopt its id so the next save updates
+    // (rather than creating a duplicate) and we can stay on the page
+    if (!form.recordId) {
+      const saved = store.locations.find((l) => l.id === form.id)
+      if (saved) form.recordId = saved.recordId
+    }
+    // delete orphaned uploads: anything uploaded this session, or originally set,
+    // that the saved record no longer uses (no-op for external URLs)
+    const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.audioUrl].filter(Boolean))
+    const candidates = new Set([...sessionUploads, originalImages.heroImageUrl, originalImages.historicImageUrl, originalImages.audioUrl].filter(Boolean))
+    for (const url of candidates) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
+    flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
+    clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => { flash.value = '' }, 4000)
+  } catch (e) {
+    alert('Save failed: ' + e.message)
+  } finally {
+    saving.value = false
+  }
+}
+function back() { store.go('locations') }
+
+const previewCard = { background: '#1c1526', color: '#F6EFE6', borderRadius: '14px', overflow: 'hidden', marginTop: '12px' }
+const previewHero = computed(() => ({
+  height: '110px', position: 'relative',
+  background: form.heroImageUrl ? `center/cover no-repeat url(${form.heroImageUrl})` : `linear-gradient(150deg, ${form.hue} 0%, #2a1d38 80%)`,
+}))
+const previewPeriod = { position: 'absolute', bottom: '8px', left: '14px', fontFamily: "'Bricolage Grotesque'", fontWeight: 800, fontSize: '28px', color: 'rgba(255,255,255,0.96)', letterSpacing: '-1px' }
+</script>
