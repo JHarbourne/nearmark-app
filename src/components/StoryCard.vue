@@ -73,9 +73,9 @@
 
           <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0; white-space: pre-line;">{{ loc.summary }}</p>
 
-          <!-- in-body portrait (e.g. a photo of the artist) – not full-bleed -->
+          <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
           <figure v-if="loc.portraitUrl" :style="portraitFig">
-            <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – portrait')" :style="portraitImg" />
+            <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" />
             <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ loc.portraitCaption }}</figcaption>
           </figure>
 

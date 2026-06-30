@@ -177,8 +177,8 @@
           </div>
         </div>
 
-        <!-- in-body portrait image (e.g. a photo of the artist), shown within the story text -->
-        <label for="loc-portrait-url">Artist portrait <span class="hint">in-body photo, separate from the hero</span></label>
+        <!-- second in-body image (a person, a detail, anything), shown within the story text, separate from the hero -->
+        <label for="loc-portrait-url">Second photo <span class="hint">shown within the story text, separate from the hero</span></label>
         <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="https://… or upload ↓" />
         <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
           {{ uploading.portrait ? 'Uploading…' : '⬆ Upload image' }}
@@ -187,12 +187,12 @@
         <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
         <div class="field-row" v-if="form.portraitUrl">
           <div>
-            <label for="loc-portrait-alt">Portrait alt text <span class="hint">screen readers</span></label>
-            <input id="loc-portrait-alt" type="text" v-model="form.portraitAlt" placeholder="e.g. Portrait of the artist in her studio" />
+            <label for="loc-portrait-alt">Alt text <span class="hint">describe the photo for screen readers</span></label>
+            <input id="loc-portrait-alt" type="text" v-model="form.portraitAlt" placeholder="Describe the photo" />
           </div>
           <div>
-            <label for="loc-portrait-cap">Portrait caption <span class="hint">shown under the photo</span></label>
-            <input id="loc-portrait-cap" type="text" v-model="form.portraitCaption" placeholder="e.g. Jane Smith in her studio" />
+            <label for="loc-portrait-cap">Caption <span class="hint">optional, shown under the photo</span></label>
+            <input id="loc-portrait-cap" type="text" v-model="form.portraitCaption" placeholder="Optional caption" />
           </div>
         </div>
 
