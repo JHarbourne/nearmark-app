@@ -181,25 +181,46 @@ function parseLinks(raw) {
 }
 
 // ── Media library: list everything in the 'media' bucket + editable metadata ──
+const AUDIO_EXT = ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'oga']
+const VIDEO_EXT = ['mp4', 'webm', 'mov', 'm4v']
+const typeFromName = (name) => {
+  const ext = (name.split('.').pop() || '').toLowerCase()
+  return AUDIO_EXT.includes(ext) ? 'audio' : VIDEO_EXT.includes(ext) ? 'video' : 'image'
+}
 export async function listStorageMedia() {
   const out = []
+  const seen = new Set()
+  const add = (path, type, f) => {
+    if (seen.has(path)) return
+    seen.add(path)
+    out.push({
+      path,
+      url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl,
+      type,
+      defaultName: f.name.replace(/^\d+-/, ''), // strip the timestamp prefix
+      sizeBytes: f.metadata?.size || null,
+      createdAt: f.created_at || null,
+    })
+  }
+  // The app's own uploader files things under type subfolders.
   for (const folder of ['image', 'audio', 'video']) {
     const { data, error } = await supabase.storage.from('media').list(folder, {
       limit: 1000, sortBy: { column: 'created_at', order: 'desc' },
     })
     if (error || !data) continue
     for (const f of data) {
-      if (!f.name) continue
-      const path = `${folder}/${f.name}`
-      out.push({
-        path,
-        url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl,
-        type: folder,
-        defaultName: f.name.replace(/^\d+-/, ''), // strip the timestamp prefix
-        sizeBytes: f.metadata?.size || null,
-        createdAt: f.created_at || null,
-      })
+      if (f.name) add(`${folder}/${f.name}`, folder, f)
     }
+  }
+  // Also surface files uploaded straight to the bucket root (e.g. via the
+  // Supabase dashboard), classified by extension. Folder entries (image/…)
+  // come back with no metadata, and placeholders start with a dot — skip both.
+  const { data: root } = await supabase.storage.from('media').list('', {
+    limit: 1000, sortBy: { column: 'created_at', order: 'desc' },
+  })
+  for (const f of root || []) {
+    if (!f.name || !f.metadata || f.name.startsWith('.')) continue
+    add(f.name, typeFromName(f.name), f)
   }
   return out
 }
