@@ -1,6 +1,7 @@
 <!-- Admin backoffice shell: login gate + sidebar nav + state-driven view router. -->
 <template>
-  <Login v-if="!store.authed" />
+  <SetPassword v-if="store.recoveryMode" />
+  <Login v-else-if="!store.authed" />
   <div v-else class="admin-shell">
     <!-- mobile top bar with burger (hidden on desktop via CSS) -->
     <header class="admin-topbar">
@@ -48,6 +49,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { store } from './store.js'
 import Login from './views/Login.vue'
+import SetPassword from './views/SetPassword.vue'
 import Dashboard from './views/Dashboard.vue'
 import LocationsList from './views/LocationsList.vue'
 import LocationEditor from './views/LocationEditor.vue'

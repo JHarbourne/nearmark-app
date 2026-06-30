@@ -244,9 +244,12 @@ export const db = {
 export const auth = {
   signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
   signOut: () => supabase.auth.signOut(),
-  resetPassword: (email) => supabase.auth.resetPasswordForEmail(email),
+  // send the reset link back to the admin (not the public homepage) so the user
+  // can set a new password; the target must be in the project's Redirect URLs.
+  resetPassword: (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/admin' }),
+  updateUser: (attrs) => supabase.auth.updateUser(attrs),
   getUser: async () => (await supabase.auth.getUser()).data.user,
-  onChange: (cb) => supabase.auth.onAuthStateChange((_e, session) => cb(session?.user || null)),
+  onChange: (cb) => supabase.auth.onAuthStateChange((event, session) => cb(session?.user || null, event)),
   // ── MFA: TOTP authenticator app (Google Authenticator, 1Password, Authy…) ──
   mfaAAL: () => supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
   mfaList: () => supabase.auth.mfa.listFactors(),

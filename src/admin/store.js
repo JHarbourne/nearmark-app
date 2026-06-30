@@ -13,6 +13,7 @@ export const store = reactive({
   user: null,
   mfaPending: false,   // password accepted, awaiting authenticator code
   mfaFactorId: null,
+  recoveryMode: false, // arrived via a password-reset link; show "set new password"
 
   route: 'dashboard',
   params: {},
@@ -26,15 +27,21 @@ export const store = reactive({
   // ── session ──
   async init() {
     if (!supabaseConfigured) return
-    this.user = await auth.getUser().catch(() => null)
-    if (this.user) {
-      if (await this.mfaRequired()) { this.mfaPending = true; this.authed = false }
-      else { this.authed = true; await this.load() }
-    }
-    auth.onChange((user) => {
+    // Listen first so we catch the PASSWORD_RECOVERY event the Supabase client
+    // fires after parsing a reset link's URL hash.
+    auth.onChange((user, event) => {
+      if (event === 'PASSWORD_RECOVERY') { this.recoveryMode = true; this.user = user; this.authed = false; this.mfaPending = false; return }
       this.user = user
       if (!user) { this.authed = false; this.mfaPending = false; this.route = 'dashboard'; this.locations = []; this.tours = [] }
     })
+    // Also detect the recovery link directly, in case the hash is read before
+    // the listener fires; recovery takes precedence over auto-login.
+    if (typeof window !== 'undefined' && /(?:^|[#&])type=recovery/.test(window.location.hash)) this.recoveryMode = true
+    this.user = await auth.getUser().catch(() => null)
+    if (this.user && !this.recoveryMode) {
+      if (await this.mfaRequired()) { this.mfaPending = true; this.authed = false }
+      else { this.authed = true; await this.load() }
+    }
   },
   // True only when the account has a *verified* authenticator that this session
   // hasn't satisfied yet. Never throws – on any error we treat MFA as not
@@ -76,8 +83,23 @@ export const store = reactive({
     this.authed = false
     this.user = null
     this.mfaPending = false
+    this.recoveryMode = false
   },
   resetPassword(email) { return auth.resetPassword(email) },
+  // Called from the recovery "set new password" form: update the password on the
+  // recovery session, then drop straight into the dashboard.
+  async setNewPassword(password) {
+    const { error } = await auth.updateUser({ password })
+    if (error) return { ok: false, message: error.message || 'Could not set the password.' }
+    this.recoveryMode = false
+    // strip the recovery tokens from the URL so a refresh doesn't re-trigger it
+    if (typeof window !== 'undefined' && window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+    this.authed = true
+    await this.load()
+    return { ok: true }
+  },
 
   // ── MFA enrolment (Security card in User management) ──
   listMfaFactors: () => auth.mfaList(),
