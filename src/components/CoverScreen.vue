@@ -9,7 +9,12 @@
         </span>
         <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
       </span>
-      <ShareButton />
+      <span style="display: flex; align-items: center; gap: 7px;">
+        <button @click="$emit('settings')" :style="iconBtn" aria-label="Settings" title="Settings">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5 v3 M12 18.5 v3 M2.5 12 h3 M18.5 12 h3 M5 5 l2 2 M17 17 l2 2 M19 5 l-2 2 M7 17 l-2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <ShareButton />
+      </span>
     </div>
 
     <div style="margin-top: auto;"></div>
@@ -68,9 +73,14 @@ const props = defineProps({
   locationCount: { type: Number, default: 20 },
   tourCount: { type: Number, default: 1 },
 })
-defineEmits(['guided', 'discovery'])
+defineEmits(['guided', 'discovery', 'settings'])
 const bars = theme.brandBars
 const orgName = theme.orgName
+const iconBtn = {
+  width: '38px', height: '38px', flexShrink: 0, borderRadius: '50%', border: '1px solid var(--line)',
+  background: 'var(--raised)', color: 'var(--ink)', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
 const headline = computed(() => withCity(config.coverHeadline, props.cityName))
 const intro = computed(() => withCity(config.coverIntro, props.cityName))
 const modeBtn = {

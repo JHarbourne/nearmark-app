@@ -72,7 +72,7 @@ function onKeydown(e) {
   if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
-onMounted(() => { lastFocused = document.activeElement; closeRef.value?.focus() })
+onMounted(() => { lastFocused = document.activeElement; closeRef.value?.focus({ preventScroll: true }) })
 onBeforeUnmount(() => { lastFocused?.focus?.() })
 
 const scrim = { position: 'absolute', inset: 0, background: 'rgba(10,7,14,0.6)', border: 'none', cursor: 'pointer' }

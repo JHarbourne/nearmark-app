@@ -26,6 +26,7 @@
           :tour-count="tours.length"
           @guided="track('mode_selected', { mode: 'guided' }); screen='tourList'"
           @discovery="startDiscovery"
+          @settings="settingsOpen=true"
         />
 
         <TourListScreen

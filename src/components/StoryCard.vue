@@ -139,7 +139,9 @@ let lastFocused = null
 function onKeydown(e) { if (e.key === 'Escape') emit('close') }
 onMounted(() => {
   lastFocused = document.activeElement           // remember what opened the sheet
-  nextTick(() => closeRef.value?.focus?.())       // move focus into the dialog
+  // preventScroll: Safari otherwise scrolls the still-animating sheet to reveal
+  // the focused button, making the card jump up then settle.
+  nextTick(() => closeRef.value?.focus?.({ preventScroll: true }))
   document.addEventListener('keydown', onKeydown) // Escape closes
 })
 onUnmounted(() => {

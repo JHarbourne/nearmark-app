@@ -165,7 +165,7 @@ const listToggle = ref(null)
 const listCloseRef = ref(null)
 function toggleList() {
   showList.value = !showList.value
-  if (showList.value) nextTick(() => listCloseRef.value?.focus?.())
+  if (showList.value) nextTick(() => listCloseRef.value?.focus?.({ preventScroll: true }))
 }
 function closeList() {
   showList.value = false
