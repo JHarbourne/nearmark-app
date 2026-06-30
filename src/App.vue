@@ -199,10 +199,13 @@ onMounted(async () => {
 // ── derived: tour stops in order ──
 const tourStops = computed(() => {
   if (!activeTour.value) return []
+  const ov = activeTour.value.stopOverrides || {}
   return activeTour.value.stopIds
     .map((id, i) => {
       const l = byId.value[id]
-      return l ? { ...l, tourNum: i + 1 } : null
+      if (!l) return null
+      const o = ov[id] // per-tour title/blurb; fall back to the location's own
+      return { ...l, tourNum: i + 1, title: o?.title || l.title, summary: o?.blurb || l.summary }
     })
     .filter(Boolean)
 })
@@ -252,7 +255,14 @@ const nextStopDistance = computed(() => {
 })
 
 // ── story ──
-const openLoc = computed(() => (openId.value ? byId.value[openId.value] : null))
+const openLoc = computed(() => {
+  if (!openId.value) return null
+  const l = byId.value[openId.value]
+  if (!l) return null
+  // within a guided tour, apply that tour's per-stop title/blurb override
+  const o = mapMode.value === 'guided' && activeTour.value && activeTour.value.stopOverrides?.[l.id]
+  return o ? { ...l, title: o.title || l.title, summary: o.blurb || l.summary } : l
+})
 const showContinue = computed(
   () =>
     !!openLoc.value &&

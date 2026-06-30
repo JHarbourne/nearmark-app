@@ -112,6 +112,7 @@ function rowToTour(r) {
     coverAlt: r.cover_alt || '',
     status: r.status || 'draft',
     stopIds: r.stop_ids || [],
+    stopOverrides: r.stop_overrides || {}, // { slug: { title, blurb } } – per-tour title/blurb
     durationOverrideMins: r.duration_override_mins || null,
     sortOrder: r.sort_order ?? 0,
   }
@@ -130,6 +131,7 @@ function tourToRow(t) {
     cover_alt: t.coverAlt || null,
     status: t.status || 'draft',
     stop_ids: t.stopIds || [],
+    stop_overrides: t.stopOverrides && Object.keys(t.stopOverrides).length ? t.stopOverrides : null,
     duration_override_mins: t.durationOverrideMins || null,
     sort_order: t.sortOrder ?? 0,
   }

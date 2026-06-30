@@ -62,21 +62,29 @@
         <hr style="border:none; border-top:1px solid var(--line); margin:22px 0;" />
 
         <span class="field-label" style="margin-top:0;">Stops <span class="hint">drag, or use the ▲ ▼ buttons, to reorder</span></span>
-        <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- drag is a pointer enhancement; the ▲/▼ buttons below provide the keyboard-accessible reorder (WCAG 2.5.7) -->
-        <div
-          v-for="(id, i) in form.stopIds" :key="id"
-          class="drag-item" :class="{ dragging: dragIdx === i }"
-          draggable="true"
-          @dragstart="dragIdx = i"
-          @dragover.prevent
-          @drop="drop(i)"
-          @dragend="dragIdx = null"
-        >
-          <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: byId[id]?.hue || '#ccc' }">{{ i + 1 }}</span>
-          <span style="flex:1;">{{ byId[id]?.title || id }}</span>
-          <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="moveStop(i, -1)" :aria-label="`Move ${byId[id]?.title || id} up`">▲</button>
-          <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
-          <button type="button" class="btn btn-ghost btn-sm" @click="removeStop(i)" :aria-label="`Remove ${byId[id]?.title || id}`">Remove</button>
+        <div v-for="(id, i) in form.stopIds" :key="id">
+          <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- drag is a pointer enhancement; the ▲/▼ buttons provide the keyboard-accessible reorder (WCAG 2.5.7) -->
+          <div
+            class="drag-item" :class="{ dragging: dragIdx === i }"
+            draggable="true"
+            @dragstart="dragIdx = i"
+            @dragover.prevent
+            @drop="drop(i)"
+            @dragend="dragIdx = null"
+          >
+            <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: byId[id]?.hue || '#ccc' }">{{ i + 1 }}</span>
+            <span style="flex:1;">{{ byId[id]?.title || id }}<span v-if="ov(id).title || ov(id).blurb" class="hint" style="margin-left:6px;">· custom text</span></span>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="moveStop(i, -1)" :aria-label="`Move ${byId[id]?.title || id} up`">▲</button>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="overrideOpen[id] = !overrideOpen[id]" :aria-expanded="String(!!overrideOpen[id])" :aria-label="`Tour-specific text for ${byId[id]?.title || id}`">Tour text</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="removeStop(i)" :aria-label="`Remove ${byId[id]?.title || id}`">Remove</button>
+          </div>
+          <div v-if="overrideOpen[id]" style="margin:-2px 0 10px; padding:12px 14px; border:1px solid var(--line); border-radius:10px;">
+            <label :for="`ov-title-${id}`">Title for this tour <span class="hint">optional · defaults to the location's title</span></label>
+            <input :id="`ov-title-${id}`" type="text" :value="ov(id).title || ''" @input="setOv(id, 'title', $event.target.value)" :placeholder="byId[id]?.title" />
+            <label :for="`ov-blurb-${id}`">Blurb for this tour <span class="hint">optional · replaces the location's summary on the story card</span></label>
+            <textarea :id="`ov-blurb-${id}`" rows="3" :value="ov(id).blurb || ''" @input="setOv(id, 'blurb', $event.target.value)" :placeholder="(byId[id]?.summary || '').slice(0, 90)"></textarea>
+          </div>
         </div>
         <p v-if="!form.stopIds.length" class="muted" style="font-size:13px;">No stops yet – add published locations below.</p>
 
@@ -118,10 +126,20 @@ const isNew = !existing
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   id: 'tour-' + Math.random().toString(36).slice(2, 8), recordId: undefined,
   title: '', city: config.cities[0], theme: '', description: '', coverImageUrl: '',
-  status: 'draft', stopIds: [], durationOverrideMins: null,
+  status: 'draft', stopIds: [], stopOverrides: {}, durationOverrideMins: null,
   coverPosition: '50% 50%', coverCredit: '', coverCreditUrl: '', coverAlt: '',
 })
 if (!form.coverPosition) form.coverPosition = '50% 50%'
+if (!form.stopOverrides) form.stopOverrides = {} // older tours predate this column
+
+// per-stop title/blurb overrides (keyed by location slug); empties aren't stored
+const overrideOpen = reactive({})
+function ov(id) { return form.stopOverrides[id] || {} }
+function setOv(id, field, value) {
+  const o = { ...(form.stopOverrides[id] || {}), [field]: value }
+  if (!o.title && !o.blurb) delete form.stopOverrides[id]
+  else form.stopOverrides[id] = o
+}
 
 const dragIdx = ref(null)
 function drop(i) {
@@ -131,7 +149,7 @@ function drop(i) {
   arr.splice(i, 0, moved)
   dragIdx.value = null
 }
-function removeStop(i) { form.stopIds.splice(i, 1) }
+function removeStop(i) { const id = form.stopIds[i]; form.stopIds.splice(i, 1); delete form.stopOverrides[id] }
 // keyboard-accessible reorder (alternative to drag): move a stop up/down one place
 function moveStop(i, dir) {
   const j = i + dir
