@@ -36,7 +36,7 @@ export const store = reactive({
     })
     // Also detect the recovery link directly, in case the hash is read before
     // the listener fires; recovery takes precedence over auto-login.
-    if (typeof window !== 'undefined' && /(?:^|[#&])type=recovery/.test(window.location.hash)) this.recoveryMode = true
+    if (typeof window !== 'undefined' && /(?:^|[#&])type=(recovery|invite)/.test(window.location.hash)) this.recoveryMode = true
     this.user = await auth.getUser().catch(() => null)
     if (this.user && !this.recoveryMode) {
       if (await this.mfaRequired()) { this.mfaPending = true; this.authed = false }

@@ -4,7 +4,7 @@ import vuejsA11y from 'eslint-plugin-vuejs-accessibility'
 import globals from 'globals'
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**', '.vite/**'] },
+  { ignores: ['dist/**', 'node_modules/**', '.vite/**', 'supabase/functions/**'] },
   js.configs.recommended,
   ...vue.configs['flat/essential'],
   ...vuejsA11y.configs['flat/recommended'],

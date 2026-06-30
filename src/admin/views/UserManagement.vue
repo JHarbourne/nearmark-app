@@ -9,18 +9,39 @@
 
     <div class="card" style="padding:22px; max-width:640px;">
       <p style="margin:0 0 14px;">You're signed in as <strong>{{ store.user?.email }}</strong>.</p>
-      <p class="muted" style="font-size:14px; line-height:1.6; margin:0 0 18px;">
-        Admin accounts are managed securely in Supabase (the operations that create,
-        invite or deactivate users need privileges that should never be exposed in the
-        browser). To add a new editor, deactivate someone, or trigger a password reset,
-        use the Supabase dashboard:
+      <h2 style="margin:0 0 6px; font-size:16px;">Editors</h2>
+      <p class="muted" style="font-size:13px; line-height:1.6; margin:0 0 16px;">
+        Invite editors by email – they set their own password via the link. Self-signup
+        stays disabled, so only invited people can reach the backoffice.
       </p>
-      <ol style="font-size:14px; line-height:1.8; margin:0 0 18px; padding-left:20px;">
-        <li><strong>Authentication → Users → Add user</strong> – create an editor with their email and a temporary password.</li>
-        <li>Keep <strong>“Allow new users to sign up” turned off</strong> so only invited admins can access the backoffice.</li>
-        <li>To remove access, delete or ban the user under the same screen.</li>
-      </ol>
-      <a class="btn btn-primary" :href="usersUrl" target="_blank" rel="noopener" style="text-decoration:none;">Open Supabase → Users ↗</a>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:0 0 14px;">
+        <div style="flex:1; min-width:200px;">
+          <label for="invite-email">Invite by email</label>
+          <input id="invite-email" type="email" v-model="inviteEmail" placeholder="editor@example.org" autocomplete="off" @keyup.enter="invite" />
+        </div>
+        <button class="btn btn-primary" @click="invite" :disabled="inviting || !inviteEmail">{{ inviting ? 'Sending…' : 'Send invite' }}</button>
+      </div>
+      <p v-if="userMsg" role="status" :style="{ fontSize:'13px', margin:'0 0 14px', color: userErr ? 'var(--red)' : 'var(--green)' }">{{ userMsg }}</p>
+
+      <p v-if="loadingUsers" class="muted" style="font-size:14px;">Loading editors…</p>
+      <p v-else-if="loadError" style="font-size:13px; color:var(--red); line-height:1.6;">
+        Couldn't load editors: {{ loadError }}<br>
+        <span class="muted" style="font-size:12px;">Has the <code>admin-users</code> Edge Function been deployed?</span>
+      </p>
+      <table v-else-if="users.length">
+        <thead><tr><th>Email</th><th>Last sign-in</th><th class="right">Access</th></tr></thead>
+        <tbody>
+          <tr v-for="u in users" :key="u.id">
+            <td style="font-weight:600;">{{ u.email }}<span v-if="!u.confirmed" class="muted" style="font-weight:400; margin-left:6px;">· invited</span></td>
+            <td class="muted">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '—' }}</td>
+            <td class="right">
+              <button v-if="u.email !== store.user?.email" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
+              <span v-else class="muted" style="font-size:13px;">you</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Two-factor authentication (TOTP authenticator app) -->
@@ -86,6 +107,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { store } from '../store.js'
 import { config } from '../../config.js'
+import { adminUsers } from '../../lib/supabase.js'
 
 // ── two-factor (TOTP) enrolment ──
 const mfaLoading = ref(true)
@@ -131,10 +153,41 @@ async function turnOff() {
 }
 onMounted(loadFactors)
 
-// Link to this project's Authentication → Users page.
+// ── editors (via the admin-users Edge Function) ──
+const users = ref([])
+const loadingUsers = ref(true)
+const loadError = ref('')
+const inviteEmail = ref('')
+const inviting = ref(false)
+const userMsg = ref('')
+const userErr = ref(false)
+
+async function loadUsers() {
+  loadingUsers.value = true; loadError.value = ''
+  try { const r = await adminUsers.list(); users.value = r.users || [] }
+  catch (e) { loadError.value = e.message } finally { loadingUsers.value = false }
+}
+async function invite() {
+  const addr = inviteEmail.value.trim()
+  if (!addr) return
+  inviting.value = true; userMsg.value = ''
+  try {
+    await adminUsers.invite(addr, window.location.origin + '/admin')
+    userErr.value = false; userMsg.value = `Invite sent to ${addr}.`; inviteEmail.value = ''
+    await loadUsers()
+  } catch (e) { userErr.value = true; userMsg.value = e.message } finally { inviting.value = false }
+}
+async function remove(u) {
+  if (!confirm(`Remove ${u.email}? They’ll lose access immediately.`)) return
+  userMsg.value = ''
+  try { await adminUsers.remove(u.id); userErr.value = false; userMsg.value = `Removed ${u.email}.`; await loadUsers() }
+  catch (e) { userErr.value = true; userMsg.value = e.message }
+}
+onMounted(loadUsers)
+
+// Supabase dashboard link for the services list below.
 const projectRef = (config.supabaseUrl || '').match(/https:\/\/([^.]+)\.supabase\.co/)?.[1]
 const supabaseProject = projectRef ? `https://supabase.com/dashboard/project/${projectRef}` : 'https://supabase.com/dashboard'
-const usersUrl = `${supabaseProject}/auth/users`
 
 // Every third-party service the app depends on, for quick access. Entries with no
 // URL (e.g. the source repo when VITE_REPO_URL isn't set) are dropped.

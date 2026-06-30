@@ -308,6 +308,23 @@ export const auth = {
   mfaUnenroll: (factorId) => supabase.auth.mfa.unenroll({ factorId }),
 }
 
+// ── admin user management (via the admin-users Edge Function; service-role key
+//    stays server-side). functions.invoke sends the caller's session token. ──
+async function invokeAdminFn(action, payload = {}) {
+  const { data, error } = await supabase.functions.invoke('admin-users', { body: { action, ...payload } })
+  if (error) {
+    let msg = error.message
+    try { msg = (await error.context.json()).error || msg } catch { /* keep the generic message */ }
+    throw new Error(msg)
+  }
+  return data
+}
+export const adminUsers = {
+  list: () => invokeAdminFn('list'),
+  invite: (email, redirectTo) => invokeAdminFn('invite', { email, redirectTo }),
+  remove: (id) => invokeAdminFn('remove', { id }),
+}
+
 // ── storage: upload a photo/audio file, return its public URL ──
 export async function uploadMedia(file, kind = 'image') {
   const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')

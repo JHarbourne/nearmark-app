@@ -50,9 +50,11 @@ export default defineConfig(({ mode }) => {
           background_color: '#ffffff',
           theme_color: themeColor,
           icons: iconUrl
+            // client logo: purpose 'any' (not maskable) so Android shows it whole
+            // rather than cropping a circle out of it
             ? [
-                { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-                { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+                { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any' },
               ]
             : [
                 { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
