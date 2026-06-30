@@ -15,6 +15,11 @@ const DEFAULT_BRAND_BARS = '#B79BFF,#A98AFF,#9B6DFF,#8A5CF0,#7A4BE0,#6B3FD6'
 // "\n" in an env value is a literal backslash-n; turn it into a real newline so
 // copy can carry intentional line breaks (rendered with white-space: pre-line).
 const nl = (val, fallback) => String(pick(val, fallback)).replaceAll('\\n', '\n')
+// Active city + the list a location/tour can belong to. A single-city deployment
+// just sets VITE_CITY_NAME; VITE_CITIES (comma-separated) is only needed for a
+// multi-city site. Both feed the admin city selects and the public city source.
+const cityNameVal = pick(env.VITE_CITY_NAME, '')
+const cityList = pick(env.VITE_CITIES, '').split(',').map((s) => s.trim()).filter(Boolean)
 
 export const config = {
   // ── identity ──
@@ -52,8 +57,9 @@ export const config = {
 
   // ── active city (single-city deployments; multi-city still uses the bundled
   //    SEED_CITIES + city picker). Blank cityName → fall back to the seed. ──
-  cityName: pick(env.VITE_CITY_NAME, ''),   // active city label (e.g. 'Tollesbury')
+  cityName: cityNameVal,                    // active city label (e.g. 'Tollesbury')
   cityArea: pick(env.VITE_CITY_AREA, ''),   // sub-label (e.g. 'Essex')
+  cities: cityList.length ? cityList : (cityNameVal ? [cityNameVal] : ['London']), // admin city options + picker source
 
   // ── map defaults ──
   mapCenter: {

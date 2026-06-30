@@ -14,7 +14,7 @@
         <div class="field-row">
           <div>
             <label for="tour-city">City</label>
-            <select id="tour-city" v-model="form.city"><option>London</option><option>Manchester</option><option>Brighton</option></select>
+            <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
           </div>
           <div>
             <label for="tour-status">Status</label>
@@ -107,15 +107,17 @@
 import { reactive, ref, computed } from 'vue'
 import { store } from '../store.js'
 import { routeLength } from '../../lib/geo.js'
+import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 
+const cities = config.cities
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
 const existing = store.params.id ? store.tours.find((t) => t.id === store.params.id) : null
 const isNew = !existing
 
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   id: 'tour-' + Math.random().toString(36).slice(2, 8), recordId: undefined,
-  title: '', city: 'London', theme: '', description: '', coverImageUrl: '',
+  title: '', city: config.cities[0], theme: '', description: '', coverImageUrl: '',
   status: 'draft', stopIds: [], durationOverrideMins: null,
   coverPosition: '50% 50%', coverCredit: '', coverCreditUrl: '', coverAlt: '',
 })

@@ -168,6 +168,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_POSTHOG_HOST` | PostHog host (default EU cloud) |
 | `VITE_CITY_NAME` | Active city label, e.g. `Tollesbury` (blank = bundled seed city) |
 | `VITE_CITY_AREA` | City sub-label, e.g. `Essex` |
+| `VITE_CITIES` | Admin city options, comma-separated (e.g. `London,Brighton`); blank = just `VITE_CITY_NAME` (single-city sites skip the public city picker) |
 | `VITE_MAP_CENTER_LAT` / `VITE_MAP_CENTER_LNG` | Initial map centre |
 | `VITE_MAP_ZOOM` | Initial map zoom level |
 

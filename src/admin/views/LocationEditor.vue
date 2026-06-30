@@ -16,7 +16,7 @@
         <div class="field-row">
           <div>
             <label for="loc-city">City</label>
-            <select id="loc-city" v-model="form.city"><option>London</option><option>Manchester</option><option>Brighton</option></select>
+            <select id="loc-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
           </div>
           <div>
             <label for="loc-period">Period / date <span class="hint">free text</span></label>
@@ -236,6 +236,7 @@ import { config, wikiDomain } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
+const cities = config.cities
 
 const hues = HUE_OPTIONS
 const mapCenter = { lat: 51.5137, lng: -0.1341 }
@@ -245,7 +246,7 @@ const isNew = !existing
 
 const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
-  recordId: undefined, title: '', city: 'London', period: '', significance: '', summary: '',
+  recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, lat: null, lng: null, triggerRadius: 80,
   heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
