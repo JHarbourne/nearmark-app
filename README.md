@@ -144,6 +144,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_ORG_NAME` | Wordmark shown top-left in the app |
 | `VITE_BRAND_BARS` | Logo-mark bar colours, comma-separated hex (blank = neutral default) |
 | `VITE_LOGO_URL` | Optional in-app logo image URL; blank shows the wordmark + bar mark (never another org's logo) |
+| `VITE_ICON_URL` | Optional install icon (square ~512px PNG URL) → PWA manifest + favicon + apple-touch; blank = bundled neutral placeholder |
 | `VITE_APP_DESCRIPTION` | Meta description (search/share preview) |
 | `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex) |
 | `VITE_THEME` | Named palette in [`src/themes`](src/themes) (e.g. `tollesbury`); blank = default dark |
@@ -173,10 +174,17 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 **App icons & logo (white-label).** The icons shipped in `public/`
 (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-48.png`) are
 **neutral Nearmark placeholders** – a fresh deployment never displays another
-organisation's logo. Each deployment should replace these four files with its own
-icons (same names/sizes: 192, 512, 180 and 48 px square). For the in-app logo,
-set `VITE_LOGO_URL` to your logo image; left blank, the app shows the `VITE_ORG_NAME`
-wordmark beside the neutral bar mark (`VITE_BRAND_BARS`).
+organisation's logo. A deployment supplies its own branding entirely through env,
+without touching the shared codebase:
+
+- **`VITE_ICON_URL`** – the install/home-screen icon (a square ~512px PNG URL,
+  e.g. on the client's Supabase Storage/CDN). At build time it's wired into the
+  PWA manifest, favicon and apple-touch link. Blank → the neutral placeholders.
+- **`VITE_LOGO_URL`** – the in-app logo image. Blank → the `VITE_ORG_NAME`
+  wordmark beside the neutral bar mark (`VITE_BRAND_BARS`).
+
+(Forked/standalone deployments can instead just replace the four files in
+`public/`.)
 
 To rebrand further, adjust the colour/font tokens via `VITE_THEME` /
 [`src/themes`](src/themes). Starter content for testing lives in `src/data/seed.js`.

@@ -11,6 +11,10 @@ export default defineConfig(({ mode }) => {
   const pick = (v, d) => (v === undefined || v === '' ? d : v)
   const appName = pick(env.VITE_APP_NAME, 'Nearmark')
   const themeColor = pick(env.VITE_THEME_COLOR, '#17111f')
+  // Optional per-deployment install icon (square PNG, ~512px, ideally maskable-
+  // safe). Drives the PWA manifest + favicon + apple-touch icon. Blank = the
+  // bundled neutral Nearmark placeholders, so no deployment ships another's logo.
+  const iconUrl = pick(env.VITE_ICON_URL, '')
 
   return {
     plugins: [
@@ -18,6 +22,16 @@ export default defineConfig(({ mode }) => {
         // <img-comparison-slider> is a web component, not a Vue component
         template: { compilerOptions: { isCustomElement: (tag) => tag === 'img-comparison-slider' } },
       }),
+      // Per-deployment install icon: point the favicon + apple-touch links at
+      // VITE_ICON_URL when set, else leave the bundled neutral icons in place.
+      {
+        name: 'nearmark-env-icons',
+        transformIndexHtml(html) {
+          return iconUrl
+            ? html.split('/favicon-48.png').join(iconUrl).split('/apple-touch-icon.png').join(iconUrl)
+            : html
+        },
+      },
       // PWA service worker + web manifest. The manifest is generated from env so
       // the codebase carries no organisation-specific branding; a deployment sets
       // its identity in .env. The SW makes the app installable and work offline.
@@ -35,10 +49,15 @@ export default defineConfig(({ mode }) => {
           orientation: 'portrait',
           background_color: '#ffffff',
           theme_color: themeColor,
-          icons: [
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-          ],
+          icons: iconUrl
+            ? [
+                { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+              ]
+            : [
+                { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+              ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
