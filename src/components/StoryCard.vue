@@ -221,7 +221,10 @@ const creditSliderR = { ...creditBase, bottom: '34px', right: '12px', maxWidth: 
 const heroMedia = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }
 const scrim = { position: 'absolute', inset: 0, background: 'rgba(10,7,14,0.6)', border: 'none', cursor: 'pointer', backdropFilter: 'blur(2px)' }
 const sheet = {
-  position: 'absolute', bottom: 0, left: 0, right: 0, maxHeight: '90%', display: 'flex', flexDirection: 'column',
+  // minHeight keeps sparse stories from opening only part-way (looking half-open);
+  // rich content still grows to maxHeight and scrolls.
+  position: 'absolute', bottom: 0, left: 0, right: 0, minHeight: '58%', maxHeight: '90%',
+  display: 'flex', flexDirection: 'column',
   background: 'var(--card)', borderRadius: '26px 26px 0 0', overflow: 'hidden',
   boxShadow: '0 -10px 50px rgba(0,0,0,0.6)', animation: 'sheetUp .3s ease',
 }
