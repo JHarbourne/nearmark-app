@@ -61,7 +61,7 @@
         <label for="loc-summary">Summary text <span class="hint">~80–100 words</span></label>
         <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
 
-        <label for="loc-wiki">Wiki article URL</label>
+        <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
         <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
         <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
 
@@ -234,8 +234,10 @@
       <!-- right: map + preview -->
       <div style="display:flex; flex-direction:column; gap:20px;">
         <div class="card" style="padding:18px;">
-          <span class="field-label" style="margin-top:0;">Location <span class="hint">click map to place pin</span></span>
+          <span class="field-label" style="margin-top:0;">Location <span class="hint">click the map, or paste coordinates below</span></span>
           <PlaceMap v-model="coords" :hue="form.hue" :center="mapCenter" />
+          <label for="loc-coords" style="margin-top:10px;">Paste coordinates <span class="hint">lat, lng – e.g. copied from Google Maps</span></label>
+          <input id="loc-coords" type="text" :value="coordsText" @change="pasteCoords($event.target.value)" placeholder="51.7607, 0.8369" />
         </div>
 
         <div class="card" style="padding:18px;">
@@ -270,7 +272,7 @@ const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https
 const cities = config.cities
 
 const hues = HUE_OPTIONS
-const mapCenter = { lat: 51.5137, lng: -0.1341 }
+const mapCenter = config.mapCenter // start on the deployment's city, not a hardcoded London
 
 const existing = store.params.id ? store.locations.find((l) => l.id === store.params.id) : null
 const isNew = !existing
@@ -312,6 +314,12 @@ function undoReplace(field) { if (field in undoBuf) { form[field] = undoBuf[fiel
 function canUndo(field) { return field in undoBuf }
 const coords = ref(form.lat != null ? { lat: form.lat, lng: form.lng } : null)
 watch(coords, (c) => { if (c) { form.lat = c.lat; form.lng = c.lng } })
+const coordsText = computed(() => (coords.value ? `${coords.value.lat.toFixed(6)}, ${coords.value.lng.toFixed(6)}` : ''))
+function pasteCoords(v) {
+  const m = (v || '').trim().match(/^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/)
+  if (!m) { if ((v || '').trim()) alert('Paste coordinates as “lat, lng”, e.g. 51.7607, 0.8369'); return }
+  coords.value = { lat: parseFloat(m[1]), lng: parseFloat(m[2]) } // moves the pin + recentres the map
+}
 
 const showPreview = ref(false)
 const others = computed(() => store.locations.filter((l) => l.id !== form.id))

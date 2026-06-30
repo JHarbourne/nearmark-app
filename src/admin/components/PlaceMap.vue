@@ -74,4 +74,13 @@ onMounted(() => {
 onUnmounted(() => { if (map) map.remove() })
 
 watch(() => props.routePoints, () => { if (props.routeOnly && map) drawRoute() }, { deep: true })
+
+// react to coordinates set from outside (e.g. pasting lat/lng): drop/move the
+// pin and recentre. Guarded so it ignores our own click/drag emits.
+watch(() => props.modelValue, (v) => {
+  if (props.routeOnly || !map || !v) return
+  if (model.value && v.lat === model.value.lat && v.lng === model.value.lng) return
+  placeMarker(v)
+  map.setView([v.lat, v.lng], 16)
+})
 </script>
