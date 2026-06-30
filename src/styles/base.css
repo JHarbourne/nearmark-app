@@ -1,12 +1,49 @@
-/* Global base — keyframes and resets copied from the prototype (BRD §6.3). */
+/* Global base — keyframes, resets, and the theme palette.
+   Colours are CSS variables so a deployment can be light or dark without touching
+   components. Defaults below are the platform's default dark theme; the active
+   palette is chosen per-deployment by VITE_THEME (see src/themes) and applied at
+   runtime by theme.js → applyTheme(). */
+:root {
+  --bg: #17111f;        /* app surface */
+  --bg-deep: #0e0a14;   /* body / outer gradient */
+  --bg-glow: #1a1326;   /* app-stage inner glow */
+  --card: #1c1526;      /* sheets / cards */
+  --raised: #241a2e;    /* elevated buttons / rows */
+  --ink: #F6EFE6;       /* primary text */
+  --ink-soft: #D9CFE0;  /* secondary text */
+  --ink-muted: #A99BB8; /* muted text */
+  --ink-faint: #968ba8; /* faint text / footnotes */
+  --line: rgba(246, 239, 230, 0.1); /* hairline borders */
+  --accent: #9B6DFF;    /* primary accent */
+  --gps: #2E7CF6;       /* you-are-here marker */
+  --grad-warm: linear-gradient(100deg, #FFC53D, #FF8C42); /* primary CTA */
+  --map-paper: #E7E4DD; /* leaflet map background */
+  /* overlay chrome — floating UI that sits over the map / photos. A light
+     deployment overrides these so the map controls follow the theme too. */
+  --overlay-glass: rgba(23, 17, 31, 0.72);  /* translucent pills / controls over the map */
+  --overlay-panel: rgba(36, 26, 46, 0.95);  /* banners, next-stop card, list panel, sheets over the map */
+  --overlay-nav: rgba(20, 14, 27, 0.92);    /* bottom tab bar */
+  --nav-inactive: #8a7d97;                  /* inactive tab icon/label */
+  --accent-warm: #FFC53D;                   /* warm highlight: active tab, "open" / "location off", save icon */
+  --grabber: rgba(255, 255, 255, 0.25);     /* sheet drag handle */
+  --toggle-off: #3a2e49;                    /* off state of toggles / inactive track */
+  --grad-brand: linear-gradient(150deg, #9B6DFF 0%, #FF4D5E 55%, #FF8C42 100%); /* decorative tour-cover gradient */
+  --grad-icon: linear-gradient(135deg, #9B6DFF, #FF4D5E);     /* splash / location pin badge */
+  --grad-guided: linear-gradient(135deg, #9B6DFF, #3D9BFF);   /* "Guided Tour" mode icon */
+  --grad-discovery: linear-gradient(135deg, #FF4D5E, #FF8C42); /* "Discovery Mode" icon */
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Newsreader', serif;
+  --font-ui: 'Hanken Grotesk', sans-serif;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body { margin: 0; padding: 0; }
 
 body {
-  background: #0e0a14;
-  color: #F6EFE6;
-  font-family: 'Hanken Grotesk', sans-serif;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-family: var(--font-ui);
   overscroll-behavior: none;
 }
 
@@ -24,9 +61,9 @@ body {
   max-height: 100dvh; /* never overflow a short desktop viewport */
   position: relative;
   overflow: hidden;
-  background: #17111f;
-  color: #F6EFE6;
-  font-family: 'Hanken Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
   margin: 0 auto;
   box-shadow: 0 30px 90px rgba(0,0,0,0.55);
 }
@@ -39,18 +76,18 @@ body {
     max-height: none;
     box-shadow: none;
   }
-  .app-stage { background: #17111f; }
+  .app-stage { background: var(--bg); }
 }
 .app-stage {
   min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(120% 80% at 50% 0%, #1a1326 0%, #0e0a14 70%);
+  background: radial-gradient(120% 80% at 50% 0%, var(--bg-glow) 0%, var(--bg-deep) 70%);
 }
 
 /* Leaflet overrides so the live map matches the prototype's flat parchment look */
-.leaflet-container { background: #E7E4DD; font-family: 'Hanken Grotesk', sans-serif; }
+.leaflet-container { background: var(--map-paper); font-family: var(--font-ui); }
 .leaflet-control-attribution {
   font-size: 9px;
   background: rgba(255,255,255,0.7);

@@ -11,7 +11,7 @@
         <span style="display:flex;gap:3px;">
           <span v-for="c in bars" :key="c" :style="{ width:'5px', height:'22px', borderRadius:'2px', background:c, animation:'barflow 1.1s ease-in-out infinite' }"></span>
         </span>
-        <p style="font-family:'Newsreader';color:#A99BB8;margin-top:18px;">Loading…</p>
+        <p style="font-family:var(--font-body);color:var(--ink-muted);margin-top:18px;">Loading {{ cityName }}…</p>
       </div>
 
       <template v-else>
@@ -135,13 +135,14 @@ import SettingsSheet from './components/SettingsSheet.vue'
 
 import { fetchLocations, fetchTours } from './lib/supabase.js'
 import { config } from './config.js'
+import { theme } from './theme.js'
 import { track } from './lib/analytics.js'
 import { distanceMeters, formatDistance, routeLength } from './lib/geo.js'
 import { useGeolocation } from './composables/useGeolocation.js'
 import { settings } from './composables/useSettings.js'
 import { SEED_CITIES } from './data/seed.js'
 
-const bars = ['#FF4D5E', '#FF8C42', '#FFC53D', '#2FBF71', '#3D9BFF', '#9B6DFF']
+const bars = theme.brandBars
 
 // ── data ──
 const loading = ref(true)
@@ -149,7 +150,13 @@ const locations = ref([])
 const tours = ref([])
 const byId = computed(() => Object.fromEntries(locations.value.map((l) => [l.id, l])))
 
-const cities = SEED_CITIES
+// Single-city deployments set the active city via env (VITE_CITY_NAME + map
+// centre); this fully overrides the bundled generic SEED_CITIES. With no
+// cityName configured we fall back to the seed (and its multi-city picker).
+const configCity = config.cityName
+  ? { id: 'primary', name: config.cityName, area: config.cityArea, lat: config.mapCenter.lat, lng: config.mapCenter.lng, live: true }
+  : null
+const cities = configCity ? [configCity] : SEED_CITIES
 const activeCity = ref(cities[0])
 const cityName = computed(() => activeCity.value?.name || 'London')
 

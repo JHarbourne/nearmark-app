@@ -1,6 +1,10 @@
-// Design tokens — copied verbatim from the Claude Design prototype (BRD §6.3).
-// DO NOT CHANGE these values. The handoff instruction (BRD §6.4) requires the
-// production build to preserve every hex value, font choice and radius.
+// Design tokens — the visual contract. COLORS/FONTS feed the CSS variables (via
+// theme.js → applyTheme) that every component reads, so a deployment can be light
+// or dark without touching components. The active palette is the theme named by
+// VITE_THEME (see themes/index.js); HUE below is the theme-independent accent set.
+
+import { THEMES, DEFAULT_THEME } from '../themes/index.js'
+import { config } from '../config.js'
 
 export const HUE = {
   red: '#FF4D5E',
@@ -23,17 +27,9 @@ export const HUE_OPTIONS = [
   { name: 'magenta', value: HUE.magenta },
 ]
 
-export const COLORS = {
-  bgPrimary: '#17111f',
-  bgCard: '#1c1526',
-  bgElevated: '#241a2e',
-  textPrimary: '#F6EFE6',
-  textMuted: '#A99BB8',
-  gpsDot: '#2E7CF6',
-}
-
-export const FONTS = {
-  heading: "'Bricolage Grotesque', sans-serif",
-  body: "'Newsreader', serif",
-  ui: "'Hanken Grotesk', sans-serif",
-}
+// Active palette + fonts → CSS variables (see styles/base.css :root for the var
+// names). These are the selected theme's, re-exported so theme.js and every
+// importer keep working unchanged; switch the whole palette with VITE_THEME.
+const active = THEMES[config.themeName] || THEMES[DEFAULT_THEME]
+export const COLORS = active.colors
+export const FONTS = active.fonts

@@ -9,7 +9,7 @@
     </span>
 
     <span style="flex: 1; min-width: 0;">
-      <span style="display: block; font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 15px;">Install this app</span>
+      <span style="display: block; font-family: var(--font-heading); font-weight: 700; font-size: 15px;">Install this app</span>
       <span v-if="iosInstall" style="display: block; font-size: 12.5px; color: #C9BFD4; margin-top: 2px;">
         Tap <span :style="shareChip">Share <svg width="11" height="13" viewBox="0 0 14 18" fill="none" aria-hidden="true" style="vertical-align:-2px;"><path d="M7 1 L7 11 M3.5 4.5 L7 1 L10.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8 H1.5 V16.5 H12.5 V8 H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span> then “Add to Home Screen”.
       </span>
@@ -46,18 +46,18 @@ function dismiss() {
 
 const wrap = {
   display: 'flex', alignItems: 'center', gap: '12px', margin: '16px 0 0', padding: '12px 14px', borderRadius: '16px',
-  background: '#241a2e', border: '1px solid rgba(246,239,230,0.12)', color: '#F6EFE6',
+  background: 'var(--raised)', border: '1px solid var(--line)', color: 'var(--ink)',
 }
 const iconWrap = { flexShrink: 0, display: 'block' }
-const shareChip = { whiteSpace: 'nowrap', fontWeight: 600, color: '#F6EFE6' }
+const shareChip = { whiteSpace: 'nowrap', fontWeight: 600, color: 'var(--ink)' }
 const cta = {
   flexShrink: 0, height: '38px', padding: '0 16px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-  fontFamily: "'Bricolage Grotesque'", fontWeight: 700, fontSize: '14px', color: '#17111f',
-  background: 'linear-gradient(100deg, #FFC53D, #FF8C42)',
+  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '14px', color: 'var(--bg)',
+  background: 'var(--grad-warm)',
 }
 const closeBtn = {
   flexShrink: 0, width: '28px', height: '28px', borderRadius: '50%', border: 'none',
-  background: 'rgba(246,239,230,0.1)', color: '#F6EFE6', cursor: 'pointer',
+  background: 'var(--line)', color: 'var(--ink)', cursor: 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 }
 </script>

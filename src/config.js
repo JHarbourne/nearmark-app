@@ -23,6 +23,7 @@ export const config = {
   orgName: pick(env.VITE_ORG_NAME, 'Nearmark'),            // wordmark shown in-app
   brandBars: pick(env.VITE_BRAND_BARS, DEFAULT_BRAND_BARS).split(',').map((s) => s.trim()).filter(Boolean), // logo mark colours
   description: pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your city’s streets.'),
+  themeName: pick(env.VITE_THEME, 'default'),               // named palette in src/themes (e.g. 'tollesbury')
 
   // ── copy ({city} is substituted with the active city; \n becomes a line break) ──
   coverHeadline: nl(env.VITE_COVER_HEADLINE, 'Hidden {city}'),
@@ -45,6 +46,11 @@ export const config = {
   supabaseAnonKey: pick(env.VITE_SUPABASE_ANON_KEY, ''),
   posthogKey: pick(env.VITE_POSTHOG_KEY, ''),
   posthogHost: pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com'),
+
+  // ── active city (single-city deployments; multi-city still uses the bundled
+  //    SEED_CITIES + city picker). Blank cityName → fall back to the seed. ──
+  cityName: pick(env.VITE_CITY_NAME, ''),   // active city label (e.g. 'Tollesbury')
+  cityArea: pick(env.VITE_CITY_AREA, ''),   // sub-label (e.g. 'Essex')
 
   // ── map defaults ──
   mapCenter: {

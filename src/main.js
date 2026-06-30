@@ -12,7 +12,7 @@ import { initAnalytics } from './lib/analytics.js'
 applyTheme()
 document.title = config.appName
 document.querySelector('meta[name="description"]')?.setAttribute('content', config.description)
-document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors.bgPrimary)
+document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors.bg)
 
 initAnalytics()
 createApp(App).mount('#app')

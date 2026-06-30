@@ -59,7 +59,7 @@ export function useGeolocation() {
   }
 
   // Manual override used by the "Simulate" affordances so the experience can be
-  // demonstrated at a desk where the device isn't physically on location.
+  // demonstrated at a desk where the device isn't physically in Soho.
   function setSimulated(lat, lng) {
     position.value = { lat, lng, accuracy: 5, simulated: true }
   }
