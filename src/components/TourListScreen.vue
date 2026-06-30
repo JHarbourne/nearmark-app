@@ -1,4 +1,4 @@
-<!-- Tour list (BRD §9.1 screen 4) — browse available guided tours for the city.
+<!-- Tour list (BRD §9.1 screen 4) – browse available guided tours for the city.
      New screen; visual system matches the prototype's tour detail header card. -->
 <template>
   <div style="position: absolute; inset: 0; overflow-y: auto; padding: 64px 24px 40px;">

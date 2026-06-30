@@ -31,7 +31,7 @@ const KEY = 'nearmark-install-dismissed'
 const { deferred, isIOS, isSafari, isStandalone, promptInstall } = useInstall()
 const dismissed = ref(localStorage.getItem(KEY) === '1')
 
-// iOS Safari has no programmatic install — guide the user to the Share menu.
+// iOS Safari has no programmatic install – guide the user to the Share menu.
 const iosInstall = computed(() => isIOS && isSafari && !isStandalone)
 const show = computed(() => !isStandalone && !dismissed.value && (!!deferred.value || iosInstall.value))
 

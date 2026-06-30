@@ -1,4 +1,4 @@
-<!-- A1 Login (BRD §11.1) — Supabase email/password. No self-registration;
+<!-- A1 Login (BRD §11.1) – Supabase email/password. No self-registration;
      admin accounts are created in the Supabase dashboard by a Super Admin. -->
 <template>
   <div class="login-stage">
@@ -72,7 +72,7 @@ async function forgot() {
   error.value = ''; notice.value = ''
   if (!email.value) { error.value = 'Enter your email above first, then tap “Forgot password?”.'; return }
   const { error: e } = await store.resetPassword(email.value)
-  notice.value = e ? '' : 'Password reset email sent — check your inbox.'
+  notice.value = e ? '' : 'Password reset email sent – check your inbox.'
   if (e) error.value = e.message
 }
 </script>

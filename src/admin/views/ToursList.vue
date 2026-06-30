@@ -6,7 +6,7 @@
       <button class="btn btn-primary" @click="store.go('tourEditor', { id: null })">+ Add new tour</button>
     </div>
 
-    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle to reorder — this sets the order tours appear in the app.</p>
+    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle to reorder – this sets the order tours appear in the app.</p>
     <div class="card">
       <table>
         <thead>

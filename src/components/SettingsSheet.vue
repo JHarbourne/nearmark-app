@@ -1,10 +1,13 @@
-<!-- Settings sheet (BRD §9.1 screen 10, §10 "Settings") — verbatim from the
+<!-- Settings sheet (BRD §9.1 screen 10, §10 "Settings") – verbatim from the
      prototype, now wired to real permission status + persisted localStorage. -->
 <template>
   <div style="position: absolute; inset: 0; z-index: 70;">
     <button @click="$emit('close')" :style="scrim" aria-label="Close settings" tabindex="-1"></button>
     <div :style="sheet">
       <span style="display: block; width: 38px; height: 4px; border-radius: 2px; background: var(--grabber); margin: 0 auto 18px;"></span>
+      <button @click="$emit('close')" :style="closeBtn" aria-label="Close settings">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
       <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 24px; margin: 0 0 18px;">Settings</h2>
 
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--line);">
@@ -26,6 +29,8 @@
         <span style="font-size: 14px; font-weight: 700; color: var(--accent-warm);">{{ unitsLabel }}</span>
       </button>
 
+      <ShareButton variant="row" />
+
       <button @click="toggleAnalytics" :style="row" style="border-bottom: none; padding-bottom: 4px;">
         <span style="padding-right: 14px;">
           <span style="display: block; font-size: 15px; font-weight: 600;">Usage analytics</span>
@@ -44,6 +49,7 @@
 import { computed, ref } from 'vue'
 import { isOptedOut, setAnalyticsOptOut } from '../lib/analytics.js'
 import { config } from '../config.js'
+import ShareButton from './ShareButton.vue'
 const sourcingNote = config.contentSourceNote
 const props = defineProps({
   audioOn: { type: Boolean, default: true },
@@ -70,7 +76,7 @@ const analyticsKnob = computed(() => ({
 const unitsLabel = computed(() => (props.units === 'mi' ? 'Miles' : 'Kilometres'))
 const permLabel = computed(() => ({
   granted: 'Permission granted',
-  denied: 'Permission denied — enable in OS settings',
+  denied: 'Permission denied – enable in OS settings',
   prompt: 'Not yet enabled',
   unsupported: 'Not available on this device',
 }[props.permission] || 'Not yet enabled'))
@@ -95,6 +101,11 @@ const scrim = { position: 'absolute', inset: 0, background: 'rgba(10,7,14,0.6)',
 const sheet = {
   position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--card)', borderRadius: '26px 26px 0 0',
   padding: '14px 22px 34px', boxShadow: '0 -10px 50px rgba(0,0,0,0.6)', animation: 'sheetUp .28s ease',
+}
+const closeBtn = {
+  position: 'absolute', top: '14px', right: '16px', width: '30px', height: '30px', borderRadius: '50%',
+  border: 'none', background: 'var(--line)', color: 'var(--ink)', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 }
 const row = {
   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0',

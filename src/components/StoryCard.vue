@@ -1,4 +1,4 @@
-<!-- Story card sheet (BRD §9.1 screen 7, §10 "Story Card") — verbatim styling
+<!-- Story card sheet (BRD §9.1 screen 7, §10 "Story Card") – verbatim styling
      from the prototype. Audio is a real HTML5 Audio element; hero supports image
      or muted looping background video; "Read full article" opens wiki_url. -->
 <template>
@@ -12,11 +12,11 @@
           <!-- before/after reveal slider: only when BOTH a contemporary and a historic image exist -->
           <img-comparison-slider v-else-if="showSlider" class="story-slider" value="50">
             <figure slot="first" class="ics-fig">
-              <img :src="loc.historicImageUrl" :alt="loc.caption ? '' : (loc.historicAlt || (loc.title + ' — historic image, ' + loc.period))" :style="{ objectPosition: loc.historicPosition || '50% 50%' }" />
+              <img :src="loc.historicImageUrl" :alt="loc.caption ? '' : (loc.historicAlt || (loc.title + ' – historic image, ' + loc.period))" :style="{ objectPosition: loc.historicPosition || '50% 50%' }" />
               <figcaption v-if="loc.historicLabel || loc.period" class="ics-label ics-left">{{ loc.historicLabel || loc.period }}</figcaption>
             </figure>
             <figure slot="second" class="ics-fig">
-              <img :src="loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' — today'))" :style="{ objectPosition: loc.heroPosition || '50% 50%' }" />
+              <img :src="loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' – today'))" :style="{ objectPosition: loc.heroPosition || '50% 50%' }" />
               <figcaption v-if="loc.imageLabel" class="ics-label ics-right">{{ loc.imageLabel }}</figcaption>
             </figure>
           </img-comparison-slider>

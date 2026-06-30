@@ -1,4 +1,4 @@
-// Design tokens — the visual contract. COLORS/FONTS feed the CSS variables (via
+// Design tokens – the visual contract. COLORS/FONTS feed the CSS variables (via
 // theme.js → applyTheme) that every component reads, so a deployment can be light
 // or dark without touching components. The active palette is the theme named by
 // VITE_THEME (see themes/index.js); HUE below is the theme-independent accent set.

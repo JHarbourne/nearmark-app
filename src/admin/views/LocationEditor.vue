@@ -1,4 +1,4 @@
-<!-- A4 Location editor (BRD §11.4) — the most important backoffice screen.
+<!-- A4 Location editor (BRD §11.4) – the most important backoffice screen.
      Full form + click-to-place map + accent picker + preview + draft/publish. -->
 <template>
   <div>
@@ -53,7 +53,7 @@
           <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
-        <p class="muted" style="font-size:12.5px; margin:0 0 8px;">These two images form the before/after slider — the columns are in the same order they appear on the story card.</p>
+        <p class="muted" style="font-size:12.5px; margin:0 0 8px;">These two images form the before/after slider – the columns are in the same order they appear on the story card.</p>
 
         <!-- image source + upload -->
         <div class="field-row">
@@ -324,7 +324,7 @@ async function save(status) {
   saving.value = true
   try {
     await store.saveLocation({ ...form })
-    // a newly created record now exists — adopt its id so the next save updates
+    // a newly created record now exists – adopt its id so the next save updates
     // (rather than creating a duplicate) and we can stay on the page
     if (!form.recordId) {
       const saved = store.locations.find((l) => l.id === form.id)

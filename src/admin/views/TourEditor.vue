@@ -78,7 +78,7 @@
           <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
           <button type="button" class="btn btn-ghost btn-sm" @click="removeStop(i)" :aria-label="`Remove ${byId[id]?.title || id}`">Remove</button>
         </div>
-        <p v-if="!form.stopIds.length" class="muted" style="font-size:13px;">No stops yet — add published locations below.</p>
+        <p v-if="!form.stopIds.length" class="muted" style="font-size:13px;">No stops yet – add published locations below.</p>
 
         <label for="tour-addstop">Add stop</label>
         <select id="tour-addstop" @change="addStop($event)">
@@ -216,7 +216,7 @@ async function save(status) {
   saving.value = true
   try {
     await store.saveTour({ ...form })
-    // a newly created tour now exists — adopt its id so the next save updates it
+    // a newly created tour now exists – adopt its id so the next save updates it
     if (!form.recordId) {
       const saved = store.tours.find((t) => t.id === form.id)
       if (saved) form.recordId = saved.recordId

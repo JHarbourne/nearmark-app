@@ -1,6 +1,6 @@
 // User settings persisted to localStorage (BRD §10 "Settings").
-//   audioOn  — audio narration on/off toggle
-//   units    — 'mi' | 'km' distance units
+//   audioOn  – audio narration on/off toggle
+//   units    – 'mi' | 'km' distance units
 
 import { reactive, watch } from 'vue'
 

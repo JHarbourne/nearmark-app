@@ -1,4 +1,4 @@
-// Tollesbury Arts Trail — light cream/red palette.
+// Tollesbury Arts Trail – light cream/red palette.
 // A Nearmark theme: full semantic palette + fonts. Selected per-deployment via
 // VITE_THEME (see lib/tokens.js). Add a new client by copying this file.
 export default {

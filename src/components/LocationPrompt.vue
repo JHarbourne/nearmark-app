@@ -1,4 +1,4 @@
-<!-- Location re-prompt — shown when the user starts a Guided tour or Discovery
+<!-- Location re-prompt – shown when the user starts a Guided tour or Discovery
      Mode without having granted location yet (they skipped it on the splash, or
      it's blocked). Lets them enable it at the moment it matters, or continue. -->
 <template>

@@ -1,12 +1,15 @@
-<!-- Cover / Home — mode select (BRD §9.1 screen 3). Verbatim from the prototype;
+<!-- Cover / Home – mode select (BRD §9.1 screen 3). Verbatim from the prototype;
      location/tour counts now come from the database (BRD §10 "Cover / Home"). -->
 <template>
   <div style="position: absolute; inset: 0; padding: 64px 26px 30px; display: flex; flex-direction: column;">
-    <div style="display: flex; align-items: center; gap: 9px;">
-      <span style="display: flex; gap: 2px;">
-        <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 9px;">
+      <span style="display: flex; align-items: center; gap: 9px;">
+        <span style="display: flex; gap: 2px;">
+          <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
+        </span>
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
       </span>
-      <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
+      <ShareButton />
     </div>
 
     <div style="margin-top: auto;"></div>
@@ -42,7 +45,7 @@
       </span>
       <span style="flex: 1;">
         <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 18px;">Discovery Mode</span>
-        <span style="display: block; font-size: 13px; color: var(--ink-muted); margin-top: 2px;">Wander freely — we’ll alert you near a site</span>
+        <span style="display: block; font-size: 13px; color: var(--ink-muted); margin-top: 2px;">Wander freely – we’ll alert you near a site</span>
       </span>
       <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M1 1 L7.5 7.5 L1 14" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -57,6 +60,7 @@
 import { computed } from 'vue'
 import InstallPrompt from './InstallPrompt.vue'
 import AppFooter from './AppFooter.vue'
+import ShareButton from './ShareButton.vue'
 import { theme } from '../theme.js'
 import { config, withCity } from '../config.js'
 const props = defineProps({

@@ -1,4 +1,4 @@
-/* Global base — keyframes, resets, and the theme palette.
+/* Global base – keyframes, resets, and the theme palette.
    Colours are CSS variables so a deployment can be light or dark without touching
    components. Defaults below are the platform's default dark theme; the active
    palette is chosen per-deployment by VITE_THEME (see src/themes) and applied at
@@ -18,7 +18,7 @@
   --gps: #2E7CF6;       /* you-are-here marker */
   --grad-warm: linear-gradient(100deg, #FFC53D, #FF8C42); /* primary CTA */
   --map-paper: #E7E4DD; /* leaflet map background */
-  /* overlay chrome — floating UI that sits over the map / photos. A light
+  /* overlay chrome – floating UI that sits over the map / photos. A light
      deployment overrides these so the map controls follow the theme too. */
   --overlay-glass: rgba(23, 17, 31, 0.72);  /* translucent pills / controls over the map */
   --overlay-panel: rgba(36, 26, 46, 0.95);  /* banners, next-stop card, list panel, sheets over the map */
@@ -68,7 +68,7 @@ body {
   box-shadow: 0 30px 90px rgba(0,0,0,0.55);
 }
 /* Real phones (incl. large ones) and the installed PWA: fill the screen edge to
-   edge — no mock phone frame, no surrounding gradient. */
+   edge – no mock phone frame, no surrounding gradient. */
 @media (max-width: 480px), (display-mode: standalone) {
   .phone-frame {
     width: 100vw;

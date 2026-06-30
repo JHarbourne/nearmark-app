@@ -1,4 +1,4 @@
-// Supabase data layer — full backend (BRD §12 model, §13 auth).
+// Supabase data layer – full backend (BRD §12 model, §13 auth).
 // Replaces the Airtable client. Public reads use the publishable (anon) key;
 // Row Level Security returns only published rows to anonymous visitors and full
 // access to authenticated admins. Admin writes, auth and file uploads all go
@@ -192,7 +192,7 @@ const MEDIA_MARKER = '/storage/v1/object/public/media/'
 export async function removeMedia(url) {
   if (!supabaseConfigured || !url) return
   const i = url.indexOf(MEDIA_MARKER)
-  if (i === -1) return // external URL — not ours to delete
+  if (i === -1) return // external URL – not ours to delete
   const path = decodeURIComponent(url.slice(i + MEDIA_MARKER.length))
   await supabase.storage.from('media').remove([path])
 }

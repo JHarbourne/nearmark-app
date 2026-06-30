@@ -1,5 +1,5 @@
 <!--
-  Public mobile app root — single state-driven component (one component with
+  Public mobile app root – single state-driven component (one component with
   screen state). Orchestrates every screen; data comes from Supabase (seed
   fallback), GPS from the real Web Geolocation API, audio from real HTML5 Audio.
 -->
@@ -310,7 +310,7 @@ function openTour(t) { activeTour.value = tours.value.find((x) => x.id === t.id)
 
 // Both modes lean on GPS (Discovery requires it; Guided uses it to track the
 // route). If location hasn't been granted, ask at the moment it matters rather
-// than dead-ending — the splash "Not now" no longer leaves the user stuck.
+// than dead-ending – the splash "Not now" no longer leaves the user stuck.
 const pendingMode = ref(null) // 'guided' | 'discovery' while the prompt is open
 function startTour() { gateStart('guided') }
 function startDiscovery() { gateStart('discovery') }
@@ -376,7 +376,7 @@ function continueStop() {
 }
 function openFromBanner() { if (proximityId.value) openStory(proximityId.value) }
 
-// Simulate affordances (kept from prototype) — drive a fake GPS fix so the
+// Simulate affordances (kept from prototype) – drive a fake GPS fix so the
 // experience is demonstrable at a desk. With real GPS these become "Open this
 // stop" / "Scan for nearby history".
 function simulate() {

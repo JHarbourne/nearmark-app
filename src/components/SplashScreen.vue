@@ -1,5 +1,5 @@
 <!--
-  Splash / location-permission primer (BRD §9.1 screen 1) — a new screen not in
+  Splash / location-permission primer (BRD §9.1 screen 1) – a new screen not in
   the prototype, styled to match its visual system. Shown on first run to explain
   why location is needed before the OS prompt fires.
 -->
@@ -26,7 +26,7 @@
       Enable location
     </button>
     <button @click="$emit('skip')" :style="ghost">
-      Not now — browse the map
+      Not now – browse the map
     </button>
     <AppFooter style="margin-top: 16px;" />
   </div>

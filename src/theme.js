@@ -1,7 +1,7 @@
-// Branding layer — the visual identity (name, logo mark, colours, fonts).
+// Branding layer – the visual identity (name, logo mark, colours, fonts).
 //
 // Rebrand a deployment by editing this file (or the colour/font tokens it imports
-// in lib/tokens.js) — no component code needs to change. The name strings come
+// in lib/tokens.js) – no component code needs to change. The name strings come
 // from config (env-driven); the palette and fonts are the platform's default
 // theme, here in one place so they can be overridden centrally.
 

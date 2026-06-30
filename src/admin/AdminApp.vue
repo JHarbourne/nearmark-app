@@ -37,7 +37,7 @@
 
     <main class="main">
       <div v-if="!store.liveBackend" class="demo-banner">
-        Supabase is not configured — set <code>VITE_SUPABASE_URL</code> / <code>VITE_SUPABASE_ANON_KEY</code> to enable login and editing.
+        Supabase is not configured – set <code>VITE_SUPABASE_URL</code> / <code>VITE_SUPABASE_ANON_KEY</code> to enable login and editing.
       </div>
       <component :is="view" />
     </main>

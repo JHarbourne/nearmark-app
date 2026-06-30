@@ -153,7 +153,7 @@ const showLocNote = computed(() =>
   !dismissedLocNote.value && !props.proximity && !showList.value
 )
 const locNoteText = computed(() => {
-  if (props.permission === 'denied') return 'Blocked for this site — turn it back on in your browser or device settings.'
+  if (props.permission === 'denied') return 'Blocked for this site – turn it back on in your browser or device settings.'
   return props.guided
     ? 'Turn it on to see your position along the route.'
     : 'Turn it on to get alerts as you reach each site.'
@@ -297,7 +297,7 @@ onUnmounted(() => {
 watch(() => [props.locations, props.guided, props.nextStop, props.visitedIds], renderMarkers, { deep: true })
 watch(() => props.userPosition, renderUser, { deep: true })
 
-// styles (overlay chrome — verbatim from prototype)
+// styles (overlay chrome – verbatim from prototype)
 const topBar = { position: 'absolute', top: '52px', left: '16px', right: '16px', zIndex: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }
 const pill = { display: 'flex', alignItems: 'center', gap: '7px', height: '38px', padding: '0 15px 0 12px', borderRadius: '19px', background: 'var(--overlay-glass)', backdropFilter: 'blur(10px)', border: '1px solid var(--line)', cursor: 'pointer', color: 'var(--ink)', fontSize: '13px', fontWeight: 600 }
 const statusPill = { height: '38px', padding: '0 16px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '19px', background: 'var(--overlay-glass)', backdropFilter: 'blur(10px)', border: '1px solid var(--line)', fontSize: '12.5px', fontWeight: 700, letterSpacing: '0.3px' }

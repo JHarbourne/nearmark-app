@@ -1,4 +1,4 @@
-<!-- Tour detail (pre-start) — verbatim from the prototype (BRD §9.1 screen 5).
+<!-- Tour detail (pre-start) – verbatim from the prototype (BRD §9.1 screen 5).
      Stats and stop list now driven by the database. -->
 <template>
   <div style="position: absolute; inset: 0;">
@@ -99,7 +99,7 @@ const cta = {
 }
 function thumb(s) {
   // thumbnail = the "first" image (slider's left/first slot = historic), falling
-  // back to the hero when there's only one — kept consistent with the slider order
+  // back to the hero when there's only one – kept consistent with the slider order
   const img = s.historicImageUrl || s.heroImageUrl
   const pos = (s.historicImageUrl ? s.historicPosition : s.heroPosition) || '50% 50%'
   const base = { width: '56px', height: '56px', display: 'block', borderRadius: '13px' }

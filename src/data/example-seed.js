@@ -22,7 +22,7 @@ export const SEED_LOCATIONS = [
     significance: 'A short one-line subtitle describing why this place matters.',
     ...blankMedia,
     summary:
-      'Placeholder summary for Example Location 1. Write 80–100 words here describing the history of this site — what happened, who was involved, and why it is worth a visit.\n\nThis is example content shipped with the Nearmark platform so you can test your instance. Replace it with your own stories in the admin backoffice.',
+      'Placeholder summary for Example Location 1. Write 80–100 words here describing the history of this site – what happened, who was involved, and why it is worth a visit.\n\nThis is example content shipped with the Nearmark platform so you can test your instance. Replace it with your own stories in the admin backoffice.',
     wikiUrl: '', relatedIds: ['example-2'], status: 'published',
   },
   {
@@ -31,7 +31,7 @@ export const SEED_LOCATIONS = [
     significance: 'Another placeholder subtitle for the second example stop.',
     ...blankMedia,
     summary:
-      'Placeholder summary for Example Location 2. Each location can carry a before/after photo slider, an audio narration, a caption and further-reading links — all optional and editable in the admin.\n\nGeneric coordinates place this near Covent Garden so the three examples form a short walkable route on the map.',
+      'Placeholder summary for Example Location 2. Each location can carry a before/after photo slider, an audio narration, a caption and further-reading links – all optional and editable in the admin.\n\nGeneric coordinates place this near Covent Garden so the three examples form a short walkable route on the map.',
     wikiUrl: '', relatedIds: ['example-1', 'example-3'], status: 'published',
   },
   {
@@ -40,7 +40,7 @@ export const SEED_LOCATIONS = [
     significance: 'A third placeholder subtitle to complete the example tour.',
     ...blankMedia,
     summary:
-      'Placeholder summary for Example Location 3. When you are ready, delete these three examples and add your own locations — anything from an arts trail to a pub crawl to an architecture guide.\n\nUntil then, this fictional content lets you confirm the map, the story cards and the guided/discovery modes all work in your deployment.',
+      'Placeholder summary for Example Location 3. When you are ready, delete these three examples and add your own locations – anything from an arts trail to a pub crawl to an architecture guide.\n\nUntil then, this fictional content lets you confirm the map, the story cards and the guided/discovery modes all work in your deployment.',
     wikiUrl: '', relatedIds: ['example-2'], status: 'published',
   },
 ]

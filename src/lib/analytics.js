@@ -48,7 +48,7 @@ export function track(event, props) {
   else queue.push([event, props]) // buffer until the chunk loads
 }
 
-// opt-out toggle for the Settings screen — persists the choice and applies it live
+// opt-out toggle for the Settings screen – persists the choice and applies it live
 export function setAnalyticsOptOut(optedOut) {
   try { localStorage.setItem(OPTOUT_KEY, optedOut ? '1' : '0') } catch { /* ignore */ }
   if (!posthog) return

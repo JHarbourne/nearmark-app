@@ -1,4 +1,4 @@
-// Admin backoffice store — Supabase backend (auth + database + storage).
+// Admin backoffice store – Supabase backend (auth + database + storage).
 // Login is real email/password via Supabase Auth (session persisted by the
 // client; no tokens to paste). All writes go through the authenticated session
 // and are enforced by Row Level Security.
@@ -37,7 +37,7 @@ export const store = reactive({
     })
   },
   // True only when the account has a *verified* authenticator that this session
-  // hasn't satisfied yet. Never throws — on any error we treat MFA as not
+  // hasn't satisfied yet. Never throws – on any error we treat MFA as not
   // required, so a problem here can never lock anyone out of signing in.
   async mfaRequired() {
     try {
@@ -65,7 +65,7 @@ export const store = reactive({
   async verifyMfa(code) {
     if (!this.mfaFactorId) return { ok: false, message: 'No authenticator is set up.' }
     const { error } = await auth.mfaVerify(this.mfaFactorId, code)
-    if (error) return { ok: false, message: error.message || 'Invalid code — try again.' }
+    if (error) return { ok: false, message: error.message || 'Invalid code – try again.' }
     this.mfaPending = false
     this.authed = true
     await this.load()

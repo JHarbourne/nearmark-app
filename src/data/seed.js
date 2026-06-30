@@ -1,4 +1,4 @@
-// Example seed data — a small, generic "old town" heritage walk used as an
+// Example seed data – a small, generic "old town" heritage walk used as an
 // offline fallback so the app runs with no backend configured, and as starter
 // content you can replace with your own. None of it is real history; it exists
 // only to demonstrate the map, tours and discovery features. Coordinates sit in

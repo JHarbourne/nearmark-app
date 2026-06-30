@@ -145,6 +145,8 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_BRAND_BARS` | Logo-mark bar colours, comma-separated hex (blank = neutral default) |
 | `VITE_APP_DESCRIPTION` | Meta description (search/share preview) |
 | `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex) |
+| `VITE_THEME` | Named palette in [`src/themes`](src/themes) (e.g. `tollesbury`); blank = default dark |
+| `VITE_PUBLIC_URL` | Canonical URL for the "Share this app" feature (blank = current site origin) |
 | `VITE_COVER_HEADLINE` | Big cover headline; `{city}` is replaced with the city name |
 | `VITE_COVER_INTRO` | Cover intro line; supports `{city}` |
 | `VITE_SPLASH_TITLE` | Title on the first (location-permission) screen |
@@ -161,6 +163,8 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_SUPABASE_ANON_KEY` | Supabase publishable/anon key (safe in the client) |
 | `VITE_POSTHOG_KEY` | PostHog project token for analytics (blank disables) |
 | `VITE_POSTHOG_HOST` | PostHog host (default EU cloud) |
+| `VITE_CITY_NAME` | Active city label, e.g. `Tollesbury` (blank = bundled seed city) |
+| `VITE_CITY_AREA` | City sub-label, e.g. `Essex` |
 | `VITE_MAP_CENTER_LAT` / `VITE_MAP_CENTER_LNG` | Initial map centre |
 | `VITE_MAP_ZOOM` | Initial map zoom level |
 

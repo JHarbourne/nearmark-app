@@ -1,7 +1,7 @@
 // Single source of truth for deployment-specific configuration.
 //
 // Every value is overridable via a VITE_* environment variable (set in .env),
-// and every default here is generic to the Nearmark platform — the open-source
+// and every default here is generic to the Nearmark platform – the open-source
 // codebase contains no organisation-specific values. A deployment supplies its
 // own identity, copy, content source and integrations through .env.
 //
@@ -24,22 +24,23 @@ export const config = {
   brandBars: pick(env.VITE_BRAND_BARS, DEFAULT_BRAND_BARS).split(',').map((s) => s.trim()).filter(Boolean), // logo mark colours
   description: pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your city’s streets.'),
   themeName: pick(env.VITE_THEME, 'default'),               // named palette in src/themes (e.g. 'tollesbury')
+  publicUrl: pick(env.VITE_PUBLIC_URL, ''),                 // canonical URL for the "Share" feature; blank → window.location.origin
 
   // ── copy ({city} is substituted with the active city; \n becomes a line break) ──
   coverHeadline: nl(env.VITE_COVER_HEADLINE, 'Hidden {city}'),
   coverIntro: nl(env.VITE_COVER_INTRO, 'Centuries of hidden history, in the streets of {city}.'),
   splashTitle: nl(env.VITE_SPLASH_TITLE, 'History, where it actually happened'),
-  splashBody: nl(env.VITE_SPLASH_BODY, 'We use your location only to surface history near you. Nothing is stored or shared — it never leaves your device.'),
-  discoveryPrompt: nl(env.VITE_DISCOVERY_PROMPT, 'Discovery Mode alerts you when you’re near a site. Enable location to unlock stories as you walk — it never leaves your device.'),
-  completionMessage: nl(env.VITE_COMPLETION_MESSAGE, 'You’ve walked the route. The stories don’t end here — keep exploring in Discovery Mode any time.'),
+  splashBody: nl(env.VITE_SPLASH_BODY, 'We use your location only to surface history near you. Nothing is stored or shared – it never leaves your device.'),
+  discoveryPrompt: nl(env.VITE_DISCOVERY_PROMPT, 'Discovery Mode alerts you when you’re near a site. Enable location to unlock stories as you walk – it never leaves your device.'),
+  completionMessage: nl(env.VITE_COMPLETION_MESSAGE, 'You’ve walked the route. The stories don’t end here – keep exploring in Discovery Mode any time.'),
 
   // ── content source / attribution ──
-  contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' — blank hides the credit line
+  contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' – blank hides the credit line
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
   platformUrl: pick(env.VITE_PLATFORM_URL, ''),                 // link for the platform name (blank = plain text)
-  contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph — blank hides it
+  contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph – blank hides it
   wikiBaseUrl: pick(env.VITE_WIKI_BASE_URL, ''),               // base for article links + admin URL validation
-  repoUrl: pick(env.VITE_REPO_URL, ''),                        // admin "source code" link — blank hides it
+  repoUrl: pick(env.VITE_REPO_URL, ''),                        // admin "source code" link – blank hides it
 
   // ── integrations ──
   supabaseUrl: pick(env.VITE_SUPABASE_URL, ''),

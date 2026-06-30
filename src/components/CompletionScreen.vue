@@ -1,4 +1,4 @@
-<!-- Tour completion (BRD §9.1 screen 8) — verbatim from the prototype. -->
+<!-- Tour completion (BRD §9.1 screen 8) – verbatim from the prototype. -->
 <template>
   <div :style="wrap">
     <div :style="badgeRing">
