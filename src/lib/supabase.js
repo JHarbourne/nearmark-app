@@ -55,6 +55,16 @@ function rowToLocation(r) {
     tourNum: r.tour_num,
     status: r.status || 'draft',
     notesInternal: r.notes_internal || '',
+    // privacy / publication (migration 011)
+    visibility: r.visibility || 'public',
+    publishFrom: r.publish_from || null,
+    publishUntil: r.publish_until || null,
+    consentGiven: !!r.consent_given,
+    consentRecordedAt: r.consent_recorded_at || null,
+    consentRecordedBy: r.consent_recorded_by || '',
+    consentNoticeVersion: r.consent_notice_version || '',
+    consentContact: r.consent_contact || '',
+    coarsePin: !!r.coarse_pin,
   }
 }
 function locationToRow(l) {
@@ -95,6 +105,16 @@ function locationToRow(l) {
     tour_num: l.tourNum || null,
     status: l.status || 'draft',
     notes_internal: l.notesInternal || null,
+    // privacy / publication (migration 011)
+    visibility: l.visibility || 'public',
+    publish_from: l.publishFrom || null,
+    publish_until: l.publishUntil || null,
+    consent_given: !!l.consentGiven,
+    consent_recorded_at: l.consentRecordedAt || null,
+    consent_recorded_by: l.consentRecordedBy || null,
+    consent_notice_version: l.consentNoticeVersion || null,
+    consent_contact: l.consentContact || null,
+    coarse_pin: !!l.coarsePin,
   }
 }
 function rowToTour(r) {
@@ -115,6 +135,10 @@ function rowToTour(r) {
     stopOverrides: r.stop_overrides || {}, // { slug: { title, blurb } } – per-tour title/blurb
     durationOverrideMins: r.duration_override_mins || null,
     sortOrder: r.sort_order ?? 0,
+    // event window (migration 011)
+    eventStart: r.event_start || null,
+    eventEnd: r.event_end || null,
+    takedownAt: r.takedown_at || null,
   }
 }
 function tourToRow(t) {
@@ -134,6 +158,10 @@ function tourToRow(t) {
     stop_overrides: t.stopOverrides && Object.keys(t.stopOverrides).length ? t.stopOverrides : null,
     duration_override_mins: t.durationOverrideMins || null,
     sort_order: t.sortOrder ?? 0,
+    // event window (migration 011)
+    event_start: t.eventStart || null,
+    event_end: t.eventEnd || null,
+    takedown_at: t.takedownAt || null,
   }
 }
 
@@ -206,22 +234,42 @@ export async function removeMedia(url) {
 }
 
 // ── public reads (RLS: anon → published only, authed admin → all) ──
-export async function fetchLocations() {
+// a privacy/window column doesn't exist yet (migration 011 not run) → fall back
+const isUndefinedColumn = (e) => e && (e.code === '42703' || /does not exist/i.test(e.message || ''))
+
+// publicView=true applies the privacy/publication window filter (used by the
+// public app); the admin calls it without the flag and sees every record. RLS
+// is the real boundary for the anon role — this is defence in depth.
+export async function fetchLocations(publicView = false) {
   if (!supabaseConfigured) return SEED_LOCATIONS.filter((l) => l.status === 'published')
-  const { data, error } = await supabase
-    .from('locations')
-    .select('*')
-    .order('tour_num', { ascending: true, nullsFirst: false })
-    .order('title')
+  const ordered = (q) => q.order('tour_num', { ascending: true, nullsFirst: false }).order('title')
+  if (publicView) {
+    const now = new Date().toISOString()
+    const r = await ordered(
+      supabase.from('locations').select('*').eq('status', 'published')
+        .or(`publish_from.is.null,publish_from.lte.${now}`)
+        .or(`publish_until.is.null,publish_until.gte.${now}`)
+        .or('visibility.eq.public,consent_given.eq.true')
+    )
+    if (!r.error) return r.data.map(rowToLocation)
+    if (!isUndefinedColumn(r.error)) throw r.error // pre-migration → published-only below
+  }
+  const { data, error } = await ordered(supabase.from('locations').select('*'))
   if (error) throw error
   return data.map(rowToLocation)
 }
-export async function fetchTours() {
+export async function fetchTours(publicView = false) {
   if (!supabaseConfigured) return SEED_TOURS.filter((t) => t.status === 'published')
+  const sorted = (rows) => rows.map(rowToTour).sort((a, b) => (a.sortOrder - b.sortOrder) || a.title.localeCompare(b.title))
+  if (publicView) {
+    const now = new Date().toISOString()
+    const r = await supabase.from('tours').select('*').eq('status', 'published').or(`takedown_at.is.null,takedown_at.gte.${now}`)
+    if (!r.error) return sorted(r.data)
+    if (!isUndefinedColumn(r.error)) throw r.error
+  }
   const { data, error } = await supabase.from('tours').select('*')
   if (error) throw error
-  // sort client-side so a pre-migration DB (no sort_order column) still works
-  return data.map(rowToTour).sort((a, b) => (a.sortOrder - b.sortOrder) || a.title.localeCompare(b.title))
+  return sorted(data)
 }
 
 // ── admin CRUD (requires an authenticated session; RLS enforces it) ──

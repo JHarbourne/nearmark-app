@@ -24,6 +24,37 @@
           </div>
         </div>
 
+        <!-- privacy / publication (migration 011) -->
+        <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
+          <span class="field-label" style="margin-top:0;">Visibility</span>
+          <div style="display:flex; gap:18px; margin:6px 0 0;">
+            <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="public" v-model="form.visibility" /> Public</label>
+            <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="private" v-model="form.visibility" /> Private</label>
+          </div>
+          <p class="muted" style="font-size:12.5px; margin:8px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
+
+          <div v-if="form.visibility === 'private'" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
+            <div class="field-row">
+              <div>
+                <label for="loc-pub-from">Publish from <span class="hint">visible on/after</span></label>
+                <input id="loc-pub-from" type="date" :value="dateIn(form.publishFrom)" @input="setPublishFrom($event.target.value)" />
+              </div>
+              <div>
+                <label for="loc-pub-until">Publish until <span class="hint">hidden after</span></label>
+                <input id="loc-pub-until" type="date" :value="dateIn(form.publishUntil)" @input="setPublishUntil($event.target.value)" />
+              </div>
+            </div>
+            <label for="loc-consent-contact">Resident <span class="hint">name/email of who consented · for the record, never shown in the app</span></label>
+            <input id="loc-consent-contact" type="text" v-model="form.consentContact" placeholder="Jane Smith · jane@example.com" />
+            <label style="display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-weight:500; cursor:pointer;">
+              <input type="checkbox" :checked="form.consentGiven" @change="onConsent" style="margin-top:3px;" />
+              <span>I confirm the resident has given written consent to publish this address in the app for the event window. <span class="hint">(notice v{{ config.consentNoticeVersion }})</span></span>
+            </label>
+            <p v-if="form.consentGiven" style="font-size:12px; margin:8px 0 0; color:var(--green);">Consent recorded{{ form.consentRecordedBy ? ' by ' + form.consentRecordedBy : '' }}{{ form.consentRecordedAt ? ' · ' + new Date(form.consentRecordedAt).toLocaleDateString() : '' }}.</p>
+            <p v-else style="font-size:12.5px; margin:8px 0 0; color:var(--amber);">A private address can’t be published until consent is recorded.</p>
+          </div>
+        </div>
+
         <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
         <input id="loc-significance" type="text" v-model="form.significance" />
 
@@ -251,8 +282,27 @@ const blank = {
   heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
+  visibility: 'public', publishFrom: null, publishUntil: null,
+  consentGiven: false, consentContact: '', consentRecordedAt: null, consentRecordedBy: '', consentNoticeVersion: '',
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
+if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
+
+// ── privacy / publication helpers ──
+const dateIn = (iso) => (iso ? new Date(iso).toLocaleDateString('en-CA') : '') // YYYY-MM-DD (local)
+function setPublishFrom(v) { form.publishFrom = v ? new Date(v + 'T00:00:00').toISOString() : null }
+function setPublishUntil(v) { form.publishUntil = v ? new Date(v + 'T23:59:59').toISOString() : null }
+// ticking the consent box records who/when/which-notice; unticking withdraws it
+function onConsent(e) {
+  if (e.target.checked) {
+    form.consentGiven = true
+    form.consentRecordedAt = new Date().toISOString()
+    form.consentRecordedBy = store.user?.email || ''
+    form.consentNoticeVersion = config.consentNoticeVersion
+  } else {
+    form.consentGiven = false
+  }
+}
 
 // ── replace-undo + orphan cleanup (so old uploads don't pile up in storage) ──
 const undoBuf = reactive({})                                   // field -> value before the last replace
@@ -340,6 +390,10 @@ let flashTimer
 async function save(status) {
   if (!form.title) { alert('Title is required.'); return }
   if (form.lat == null) { alert('Drop a pin on the map to set the location.'); return }
+  if (status === 'published' && form.visibility === 'private' && !form.consentGiven) {
+    alert('This is a private address. Record the resident’s consent (tick the box) before publishing.')
+    return
+  }
   form.status = status
   saving.value = true
   try {

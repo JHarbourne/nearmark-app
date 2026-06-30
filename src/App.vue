@@ -185,7 +185,7 @@ const mapZoom = ref(config.mapZoom)
 onMounted(async () => {
   geo.refreshPermission()
   try {
-    const [locs, trs] = await Promise.all([fetchLocations(), fetchTours()])
+    const [locs, trs] = await Promise.all([fetchLocations(true), fetchTours(true)])
     locations.value = locs
     tours.value = trs
     activeTour.value = trs[0] || null
