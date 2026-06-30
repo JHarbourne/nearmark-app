@@ -4,10 +4,13 @@
   <div style="position: absolute; inset: 0; padding: 64px 26px 30px; display: flex; flex-direction: column;">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 9px;">
       <span style="display: flex; align-items: center; gap: 9px;">
-        <span style="display: flex; gap: 2px;">
-          <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
-        </span>
-        <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
+        <img v-if="logoUrl" :src="logoUrl" :alt="orgName" style="height: 24px; width: auto; display: block;" />
+        <template v-else>
+          <span style="display: flex; gap: 2px;">
+            <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
+          </span>
+          <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
+        </template>
       </span>
       <span style="display: flex; align-items: center; gap: 7px;">
         <button @click="$emit('settings')" :style="iconBtn" aria-label="Settings" title="Settings">
@@ -76,6 +79,7 @@ const props = defineProps({
 defineEmits(['guided', 'discovery', 'settings'])
 const bars = theme.brandBars
 const orgName = theme.orgName
+const logoUrl = theme.logoUrl
 const iconBtn = {
   width: '38px', height: '38px', flexShrink: 0, borderRadius: '50%', border: '1px solid var(--line)',
   background: 'var(--raised)', color: 'var(--ink)', cursor: 'pointer',

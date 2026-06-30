@@ -22,6 +22,7 @@ export const config = {
   shortName: pick(env.VITE_APP_SHORT_NAME, 'Nearmark'),    // home-screen / manifest short name
   orgName: pick(env.VITE_ORG_NAME, 'Nearmark'),            // wordmark shown in-app
   brandBars: pick(env.VITE_BRAND_BARS, DEFAULT_BRAND_BARS).split(',').map((s) => s.trim()).filter(Boolean), // logo mark colours
+  logoUrl: pick(env.VITE_LOGO_URL, ''),                    // optional in-app logo image; blank = wordmark + the bar mark
   description: pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your city’s streets.'),
   themeName: pick(env.VITE_THEME, 'default'),               // named palette in src/themes (e.g. 'tollesbury')
   publicUrl: pick(env.VITE_PUBLIC_URL, ''),                 // canonical URL for the "Share" feature; blank → window.location.origin

@@ -17,6 +17,9 @@ export const theme = {
   // logo mark: a row of accent bars shown next to the wordmark in-app
   // (override the colours via VITE_BRAND_BARS, or replace the mark entirely)
   brandBars: config.brandBars,
+  // optional logo image (VITE_LOGO_URL); when blank the app shows the bar mark
+  // + the orgName wordmark, so a fresh deployment never ships another org's logo
+  logoUrl: config.logoUrl,
 
   // palette + type (see lib/tokens.js)
   colors: COLORS,       // bgPrimary, bgCard, bgElevated, textPrimary, textMuted, gpsDot

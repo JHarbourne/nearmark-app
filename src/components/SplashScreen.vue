@@ -6,10 +6,13 @@
 <template>
   <div :style="wrap">
     <div style="display: flex; align-items: center; gap: 9px;">
-      <span style="display: flex; gap: 2px;">
-        <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
-      </span>
-      <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
+      <img v-if="logoUrl" :src="logoUrl" :alt="orgName" style="height: 24px; width: auto; display: block;" />
+      <template v-else>
+        <span style="display: flex; gap: 2px;">
+          <span v-for="c in bars" :key="c" :style="{ width: '4px', height: '17px', borderRadius: '2px', background: c }"></span>
+        </span>
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 2.4px; color: var(--ink-muted); text-transform: uppercase;">{{ orgName }}</span>
+      </template>
     </div>
 
     <div style="margin: auto 0; text-align: center;">
@@ -39,6 +42,7 @@ import AppFooter from './AppFooter.vue'
 defineEmits(['grant', 'skip'])
 const bars = theme.brandBars
 const orgName = theme.orgName
+const logoUrl = theme.logoUrl
 const title = config.splashTitle
 const body = config.splashBody
 const wrap = { position: 'absolute', inset: 0, padding: '64px 26px 30px', display: 'flex', flexDirection: 'column' }
