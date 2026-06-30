@@ -5,13 +5,13 @@
     <div style="position: absolute; inset: 0; overflow-y: auto;">
     <div :style="heroStyle" :role="tour.coverImageUrl ? 'img' : null" :aria-label="tour.coverImageUrl ? (tour.coverAlt || tour.title) : null">
       <div v-if="!tour.coverImageUrl" style="position: absolute; inset: 0; opacity: 0.22; background-image: radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1.4px); background-size: 13px 13px;"></div>
-      <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 2%, transparent 55%);"></div>
+      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.22) 48%, rgba(0,0,0,0) 76%);"></div>
       <button @click="$emit('back')" :style="backBtn" aria-label="Back to tours">
-        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" aria-hidden="true"><path d="M8.5 1 L2 8 L8.5 15" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" aria-hidden="true"><path d="M8.5 1 L2 8 L8.5 15" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div style="position: absolute; left: 24px; bottom: 22px; right: 24px;">
-        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: rgba(255,255,255,0.9); text-transform: uppercase;">Walking Tour</div>
-        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -1px; margin: 8px 0 0;">{{ tour.title }}</h1>
+        <span :style="eyebrowPill">Walking Tour</span>
+        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -1px; margin: 10px 0 0; color: #fff;">{{ tour.title }}</h1>
         <a v-if="tour.coverCredit && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
         <span v-else-if="tour.coverCredit" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
       </div>
@@ -68,6 +68,11 @@ const heroStyle = computed(() => {
   }
   return { ...base, background: 'var(--grad-brand)' }
 })
+const eyebrowPill = {
+  display: 'inline-block', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.9px',
+  textTransform: 'uppercase', color: '#fff', background: 'rgba(0,0,0,0.5)',
+  backdropFilter: 'blur(4px)', padding: '4px 11px', borderRadius: '999px',
+}
 const creditLine = {
   display: 'inline-block', marginTop: '10px', fontSize: '11px', fontWeight: 600,
   color: 'rgba(255,255,255,0.85)', textDecoration: 'none', background: 'rgba(23,17,31,0.42)',

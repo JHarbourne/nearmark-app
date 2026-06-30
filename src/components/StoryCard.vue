@@ -24,7 +24,7 @@
           <div v-if="!showSlider" style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(28,21,38,0.94) 1%, rgba(28,21,38,0) 42%);"></div>
           <span style="position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 38px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.6); pointer-events: none; z-index: 3;"></span>
           <button ref="closeRef" @click="$emit('close')" :style="closeBtn" aria-label="Close story">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
           </button>
           <span v-if="!showSlider" :style="period">{{ loc.period }}</span>
           <!-- photographer / source credit(s) -->
@@ -235,10 +235,14 @@ const closeBtn = {
   background: 'rgba(23,17,31,0.55)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
 }
+// Category tag as a readable pill (was a large overlay word that fought busy
+// photos). Mirrors the before/after slider's .ics-label styling.
 const period = {
-  position: 'absolute', bottom: '12px', left: '20px', fontFamily: "var(--font-heading)", fontWeight: 800,
-  fontSize: '40px', lineHeight: 0.8, color: 'rgba(255,255,255,0.96)', letterSpacing: '-1.5px',
-  textShadow: '0 2px 14px rgba(0,0,0,0.55)', pointerEvents: 'none',
+  position: 'absolute', bottom: '12px', left: '16px', fontFamily: 'var(--font-ui), sans-serif',
+  fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase',
+  color: '#fff', background: 'rgba(23,17,31,0.62)', backdropFilter: 'blur(4px)',
+  padding: '4px 11px', borderRadius: '999px', pointerEvents: 'none',
+  maxWidth: 'calc(100% - 32px)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 const furtherLink = {
   display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', marginBottom: '8px',
