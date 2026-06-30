@@ -27,7 +27,7 @@
     <div class="card">
       <table>
         <thead>
-          <tr><th>Title</th><th>City</th><th>Period</th><th>Status</th><th>Tour stop</th><th class="right">Actions</th></tr>
+          <tr style="white-space:nowrap;"><th>Title</th><th>City</th><th>Period</th><th>Status</th><th>Tour stop</th><th class="right">Actions</th></tr>
         </thead>
         <tbody v-for="g in groups" :key="g.key">
           <tr v-if="g.title" class="group-head">
@@ -51,7 +51,7 @@
               <td class="muted">{{ l.period }}</td>
               <td><span class="badge" :class="l.status">{{ l.status }}</span></td>
               <td>{{ l.tourNum ? '#' + l.tourNum : '—' }}</td>
-              <td class="right">
+              <td class="right" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>
                 <button class="btn btn-danger btn-sm" @click.stop="remove(l)">Delete</button>
