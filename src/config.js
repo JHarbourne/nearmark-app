@@ -33,6 +33,7 @@ export const config = {
   splashBody: nl(env.VITE_SPLASH_BODY, 'We use your location only to surface history near you. Nothing is stored or shared – it never leaves your device.'),
   discoveryPrompt: nl(env.VITE_DISCOVERY_PROMPT, 'Discovery Mode alerts you when you’re near a site. Enable location to unlock stories as you walk – it never leaves your device.'),
   completionMessage: nl(env.VITE_COMPLETION_MESSAGE, 'You’ve walked the route. The stories don’t end here – keep exploring in Discovery Mode any time.'),
+  storyLinkLabel: pick(env.VITE_STORY_LINK_LABEL, 'Read the full article'), // label for a location's external link (e.g. "Visit the artist’s website")
 
   // ── content source / attribution ──
   contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' – blank hides the credit line

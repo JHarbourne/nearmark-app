@@ -146,6 +146,25 @@
           </div>
         </div>
 
+        <!-- in-body portrait image (e.g. a photo of the artist), shown within the story text -->
+        <label for="loc-portrait-url">Artist portrait <span class="hint">in-body photo, separate from the hero</span></label>
+        <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="https://… or upload ↓" />
+        <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
+          {{ uploading.portrait ? 'Uploading…' : '⬆ Upload image' }}
+          <input type="file" accept="image/*" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
+        </label>
+        <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
+        <div class="field-row" v-if="form.portraitUrl">
+          <div>
+            <label for="loc-portrait-alt">Portrait alt text <span class="hint">screen readers</span></label>
+            <input id="loc-portrait-alt" type="text" v-model="form.portraitAlt" placeholder="e.g. Portrait of the artist in her studio" />
+          </div>
+          <div>
+            <label for="loc-portrait-cap">Portrait caption <span class="hint">shown under the photo</span></label>
+            <input id="loc-portrait-cap" type="text" v-model="form.portraitCaption" placeholder="e.g. Jane Smith in her studio" />
+          </div>
+        </div>
+
         <label for="loc-audio">Audio narration <span class="hint">mp3/m4a</span></label>
         <input id="loc-audio" type="url" v-model="form.audioUrl" placeholder="https://… or upload ↓" />
         <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
@@ -228,7 +247,7 @@ const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: 'London', period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, lat: null, lng: null, triggerRadius: 80,
-  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
+  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
 }
@@ -290,7 +309,7 @@ function nudgeFocal(e, field) {
 }
 
 // ── file uploads to Supabase Storage ──
-const uploading = reactive({ hero: false, historic: false, audio: false })
+const uploading = reactive({ hero: false, historic: false, portrait: false, audio: false })
 async function up(e, field, kind, key) {
   const file = e.target.files[0]
   if (!file) return

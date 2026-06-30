@@ -40,6 +40,9 @@ function rowToLocation(r) {
     historicAlt: r.historic_alt || '',
     imageLabel: r.image_label || '',
     historicLabel: r.historic_label || '',
+    portraitUrl: r.portrait_url || null,   // in-body portrait (e.g. the artist)
+    portraitAlt: r.portrait_alt || '',
+    portraitCaption: r.portrait_caption || '',
     caption: r.caption || '',
     links: r.links || '',              // raw "Label | URL" lines (edited as-is)
     linkList: parseLinks(r.links),     // parsed [{ label, url }] for display
@@ -78,6 +81,9 @@ function locationToRow(l) {
     historic_alt: l.historicAlt || null,
     image_label: l.imageLabel || null,
     historic_label: l.historicLabel || null,
+    portrait_url: l.portraitUrl || null,
+    portrait_alt: l.portraitAlt || null,
+    portrait_caption: l.portraitCaption || null,
     caption: l.caption || null,
     links: l.links || null,
     video_url: l.videoUrl || null,

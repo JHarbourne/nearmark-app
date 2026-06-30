@@ -73,10 +73,16 @@
 
           <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0; white-space: pre-line;">{{ loc.summary }}</p>
 
-          <a :href="loc.wikiUrl" target="_blank" rel="noopener" :style="wikiLink" @click="track('wiki_clicked', { location_id: loc.id, title: loc.title })">
+          <!-- in-body portrait (e.g. a photo of the artist) – not full-bleed -->
+          <figure v-if="loc.portraitUrl" :style="portraitFig">
+            <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – portrait')" :style="portraitImg" />
+            <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ loc.portraitCaption }}</figcaption>
+          </figure>
+
+          <a v-if="loc.wikiUrl" :href="loc.wikiUrl" target="_blank" rel="noopener" :style="wikiLink" @click="track('wiki_clicked', { location_id: loc.id, title: loc.title })">
             <span style="display: flex; align-items: center; gap: 11px;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 4 h9 a2 2 0 0 1 2 2 v13 a1 1 0 0 1-1.5 0.85 L12 18 l-2.5 1.85 A1 1 0 0 1 8 19 V6 a2 2 0 0 1 2-2 Z" stroke="var(--accent-warm)" stroke-width="1.7" stroke-linejoin="round"/></svg>
-              <span style="font-size: 14.5px; font-weight: 600;">Read the full article</span>
+              <span style="font-size: 14.5px; font-weight: 600;">{{ storyLinkLabel }}</span>
             </span>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11 L11 3 M5 3 H11 V9" stroke="var(--ink-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
@@ -114,6 +120,9 @@
 import { computed, watch, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { useAudio } from '../composables/useAudio.js'
 import { track } from '../lib/analytics.js'
+import { config } from '../config.js'
+
+const storyLinkLabel = config.storyLinkLabel
 
 const props = defineProps({
   loc: { type: Object, required: true },
@@ -231,6 +240,9 @@ const furtherLink = {
   borderRadius: '12px', background: 'var(--raised)', border: '1px solid var(--line)',
   textDecoration: 'none', color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500,
 }
+const portraitFig = { margin: '22px 0 0' }
+const portraitImg = { display: 'block', width: '100%', borderRadius: '16px' }
+const portraitCap = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--ink-muted)', margin: '8px 2px 0', textAlign: 'center' }
 const wikiLink = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '22px', padding: '15px 16px',
   borderRadius: '14px', background: 'var(--raised)', border: '1px solid var(--line)',
