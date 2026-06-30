@@ -17,7 +17,7 @@
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 21 C 8 16, 5 12.5 5 9 a7 7 0 0 1 14 0 C 19 12.5 16 16 12 21 Z" fill="#fff"/><circle cx="12" cy="9" r="2.6" fill="var(--bg)"/></svg>
       </span>
       <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 32px; line-height: 1.05; letter-spacing: -1px; margin: 0 0 14px; white-space: pre-line;">{{ title }}</h1>
-      <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.55; color: var(--ink-soft); margin: 0 auto; max-width: 290px;">
+      <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.55; color: var(--ink-soft); margin: 0 auto; max-width: 290px; text-wrap: pretty;">
         {{ body }}
       </p>
     </div>

@@ -21,7 +21,7 @@
 
     <div style="font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--accent); text-transform: uppercase;">{{ cityName }}</div>
     <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 58px; line-height: 0.92; letter-spacing: -2px; margin: 12px 0 0; white-space: pre-line;">{{ headline }}</h1>
-    <p style="font-family: var(--font-body); font-size: 18px; line-height: 1.5; color: var(--ink-soft); margin: 20px 0 0; max-width: 300px;">{{ intro }}</p>
+    <p style="font-family: var(--font-body); font-size: 18px; line-height: 1.5; color: var(--ink-soft); margin: 20px 0 0; max-width: 300px; text-wrap: pretty;">{{ intro }}</p>
 
     <div style="display: flex; gap: 18px; margin: 22px 0 26px; font-size: 12.5px; color: var(--ink-muted); font-weight: 600;">
       <span>{{ locationCount }} locations</span>
