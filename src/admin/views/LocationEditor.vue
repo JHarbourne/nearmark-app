@@ -34,7 +34,21 @@
           <p class="muted" style="font-size:12.5px; margin:8px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
 
           <div v-if="form.visibility === 'private'" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
-            <div class="field-row">
+            <!-- consent is per resident -->
+            <label for="loc-consent-contact">Resident <span class="hint">name/email of who consented · for the record, never shown in the app</span></label>
+            <input id="loc-consent-contact" type="text" v-model="form.consentContact" placeholder="Jane Smith · jane@example.com" />
+            <label style="display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-weight:500; cursor:pointer;">
+              <input type="checkbox" :checked="form.consentGiven" @change="onConsent" style="margin-top:3px;" />
+              <span>I confirm the resident has given written consent to publish this address in the app for the event window. <span class="hint">(notice v{{ config.consentNoticeVersion }})</span></span>
+            </label>
+            <p v-if="form.consentGiven" style="font-size:12px; margin:8px 0 0; color:var(--green);">Consent recorded{{ form.consentRecordedBy ? ' by ' + form.consentRecordedBy : '' }}{{ form.consentRecordedAt ? ' · ' + new Date(form.consentRecordedAt).toLocaleDateString() : '' }}.</p>
+            <p v-else style="font-size:12.5px; margin:8px 0 0; color:var(--amber);">A private address can’t be published until consent is recorded.</p>
+
+            <!-- dates come from the event the location is a stop in -->
+            <p class="muted" style="font-size:12.5px; margin:14px 0 0;">When it’s shown is set by the <strong>event</strong> – this address appears only while a tour it’s a stop in is live, then hides automatically.</p>
+            <p v-if="!inAnyTour" style="font-size:12.5px; margin:6px 0 0; color:var(--amber);">It isn’t a stop in any tour yet, so it won’t appear publicly until you add it to one (or set an override below).</p>
+            <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px;" @click="overrideDates = !overrideDates">{{ overrideDates ? 'Hide override' : 'Override event dates' }}</button>
+            <div v-if="overrideDates" class="field-row" style="margin-top:8px;">
               <div>
                 <label for="loc-pub-from">Publish from <span class="hint">visible on/after</span></label>
                 <input id="loc-pub-from" type="date" :value="dateIn(form.publishFrom)" @input="setPublishFrom($event.target.value)" />
@@ -44,14 +58,6 @@
                 <input id="loc-pub-until" type="date" :value="dateIn(form.publishUntil)" @input="setPublishUntil($event.target.value)" />
               </div>
             </div>
-            <label for="loc-consent-contact">Resident <span class="hint">name/email of who consented · for the record, never shown in the app</span></label>
-            <input id="loc-consent-contact" type="text" v-model="form.consentContact" placeholder="Jane Smith · jane@example.com" />
-            <label style="display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-weight:500; cursor:pointer;">
-              <input type="checkbox" :checked="form.consentGiven" @change="onConsent" style="margin-top:3px;" />
-              <span>I confirm the resident has given written consent to publish this address in the app for the event window. <span class="hint">(notice v{{ config.consentNoticeVersion }})</span></span>
-            </label>
-            <p v-if="form.consentGiven" style="font-size:12px; margin:8px 0 0; color:var(--green);">Consent recorded{{ form.consentRecordedBy ? ' by ' + form.consentRecordedBy : '' }}{{ form.consentRecordedAt ? ' · ' + new Date(form.consentRecordedAt).toLocaleDateString() : '' }}.</p>
-            <p v-else style="font-size:12.5px; margin:8px 0 0; color:var(--amber);">A private address can’t be published until consent is recorded.</p>
           </div>
         </div>
 
@@ -291,6 +297,8 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...bla
 if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
 
 // ── privacy / publication helpers ──
+const overrideDates = ref(!!(form.publishFrom || form.publishUntil)) // open the override if one's already set
+const inAnyTour = computed(() => store.tours.some((t) => t.stopIds.includes(form.id)))
 const dateIn = (iso) => (iso ? new Date(iso).toLocaleDateString('en-CA') : '') // YYYY-MM-DD (local)
 function setPublishFrom(v) { form.publishFrom = v ? new Date(v + 'T00:00:00').toISOString() : null }
 function setPublishUntil(v) { form.publishUntil = v ? new Date(v + 'T23:59:59').toISOString() : null }

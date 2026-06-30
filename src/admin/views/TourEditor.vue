@@ -59,6 +59,24 @@
         <label for="tour-duration">Estimated duration <span class="hint">mins · blank = auto</span></label>
         <input id="tour-duration" type="number" v-model.number="form.durationOverrideMins" :placeholder="`auto: ${autoMins} min`" min="0" />
 
+        <!-- event window (migrations 011/012): private stops inherit these dates -->
+        <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
+          <span class="field-label" style="margin-top:0;">Event window <span class="hint">optional</span></span>
+          <p class="muted" style="font-size:12.5px; margin:6px 0 12px;">Private addresses in this event are shown only during this window, then automatically hidden – you set the dates here, once, and every private stop follows them.</p>
+          <div class="field-row">
+            <div>
+              <label for="tour-event-start">Event start</label>
+              <input id="tour-event-start" type="date" :value="dateIn(form.eventStart)" @input="setEventStart($event.target.value)" />
+            </div>
+            <div>
+              <label for="tour-event-end">Event end</label>
+              <input id="tour-event-end" type="date" :value="dateIn(form.eventEnd)" @input="setEventEnd($event.target.value)" />
+            </div>
+          </div>
+          <label for="tour-takedown">Auto take-down <span class="hint">private addresses hidden after this · defaults to event end + 7 days</span></label>
+          <input id="tour-takedown" type="date" :value="dateIn(form.takedownAt)" @input="setTakedown($event.target.value)" />
+        </div>
+
         <hr style="border:none; border-top:1px solid var(--line); margin:22px 0;" />
 
         <span class="field-label" style="margin-top:0;">Stops <span class="hint">drag, or use the ▲ ▼ buttons, to reorder</span></span>
@@ -128,11 +146,23 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   title: '', city: config.cities[0], theme: '', description: '', coverImageUrl: '',
   status: 'draft', stopIds: [], stopOverrides: {}, durationOverrideMins: null,
   coverPosition: '50% 50%', coverCredit: '', coverCreditUrl: '', coverAlt: '',
+  eventStart: null, eventEnd: null, takedownAt: null,
 })
 if (!form.coverPosition) form.coverPosition = '50% 50%'
 if (!form.stopOverrides) form.stopOverrides = {} // older tours predate this column
 
 // per-stop title/blurb overrides (keyed by location slug); empties aren't stored
+// ── event window (private stops inherit these dates) ──
+const dateIn = (iso) => (iso ? new Date(iso).toLocaleDateString('en-CA') : '') // YYYY-MM-DD (local)
+function setEventStart(v) { form.eventStart = v ? new Date(v + 'T00:00:00').toISOString() : null }
+function setEventEnd(v) {
+  form.eventEnd = v ? new Date(v + 'T23:59:59').toISOString() : null
+  if (form.eventEnd && !form.takedownAt) { // default take-down to event end + 7 days
+    const d = new Date(v + 'T23:59:59'); d.setDate(d.getDate() + 7); form.takedownAt = d.toISOString()
+  }
+}
+function setTakedown(v) { form.takedownAt = v ? new Date(v + 'T23:59:59').toISOString() : null }
+
 const overrideOpen = reactive({})
 function ov(id) { return form.stopOverrides[id] || {} }
 function setOv(id, field, value) {
