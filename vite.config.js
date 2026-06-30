@@ -9,7 +9,7 @@ import { resolve } from 'path'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   const pick = (v, d) => (v === undefined || v === '' ? d : v)
-  const appName = pick(env.VITE_APP_NAME, 'Nearmark')
+  const appName = pick(env.VITE_APP_NAME, pick(env.VITE_CITY_NAME, 'Nearmark'))
   const themeColor = pick(env.VITE_THEME_COLOR, '#17111f')
   // Optional per-deployment install icon (square PNG, ~512px, ideally maskable-
   // safe). Drives the PWA manifest + favicon + apple-touch icon. Blank = the
@@ -22,14 +22,20 @@ export default defineConfig(({ mode }) => {
         // <img-comparison-slider> is a web component, not a Vue component
         template: { compilerOptions: { isCustomElement: (tag) => tag === 'img-comparison-slider' } },
       }),
-      // Per-deployment install icon: point the favicon + apple-touch links at
-      // VITE_ICON_URL when set, else leave the bundled neutral icons in place.
+      // Per-deployment HTML branding: the page <title> follows the app name, and
+      // the favicon + apple-touch links point at VITE_ICON_URL when set (else the
+      // bundled neutral icons stay in place). Applies to both index.html (public)
+      // and admin.html (backoffice), so no deployment ships another's branding.
       {
-        name: 'nearmark-env-icons',
+        name: 'nearmark-env-html',
         transformIndexHtml(html) {
-          return iconUrl
-            ? html.split('/favicon-48.png').join(iconUrl).split('/apple-touch-icon.png').join(iconUrl)
-            : html
+          let out = html
+            .split('<title>Nearmark</title>').join(`<title>${appName}</title>`)
+            .split('<title>Admin · Nearmark</title>').join(`<title>Admin · ${appName}</title>`)
+          if (iconUrl) {
+            out = out.split('/favicon-48.png').join(iconUrl).split('/apple-touch-icon.png').join(iconUrl)
+          }
+          return out
         },
       },
       // PWA service worker + web manifest. The manifest is generated from env so
