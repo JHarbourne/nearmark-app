@@ -29,7 +29,7 @@
           <span v-if="!showSlider" :style="period">{{ loc.period }}</span>
           <!-- photographer / source credit(s) -->
           <template v-if="!showSlider">
-            <component v-if="loc.photoCredit" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
+            <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
           </template>
           <template v-else>
             <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">Photo: {{ loc.historicCredit }}</component>

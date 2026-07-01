@@ -34,6 +34,8 @@ function rowToLocation(r) {
     historicPosition: r.historic_position || '50% 50%',
     photoCredit: r.photo_credit || '',
     photoCreditUrl: r.photo_credit_url || '',
+    showPhotoCredit: r.show_photo_credit !== false, // undefined (pre-migration) or true → show
+
     historicCredit: r.historic_credit || '',
     historicCreditUrl: r.historic_credit_url || '',
     imageAlt: r.image_alt || '',
@@ -85,6 +87,7 @@ function locationToRow(l) {
     historic_position: l.historicPosition || '50% 50%',
     photo_credit: l.photoCredit || null,
     photo_credit_url: l.photoCreditUrl || null,
+    show_photo_credit: l.showPhotoCredit !== false,
     historic_credit: l.historicCredit || null,
     historic_credit_url: l.historicCreditUrl || null,
     image_alt: l.imageAlt || null,

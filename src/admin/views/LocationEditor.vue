@@ -179,6 +179,10 @@
               <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
               <label for="loc-hero-credit-link">Credit link <span class="hint">optional</span></label>
               <input id="loc-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
+              <label style="display:flex; align-items:center; gap:9px; margin-top:10px; font-weight:500; cursor:pointer;">
+                <input type="checkbox" v-model="form.showPhotoCredit" />
+                <span>Show this credit on the photo <span class="hint">off = kept on record, hidden in the app</span></span>
+              </label>
             </template>
           </div>
         </div>
@@ -287,7 +291,7 @@ const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, lat: null, lng: null, triggerRadius: 80,
-  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
+  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
   visibility: 'public', publishFrom: null, publishUntil: null,
@@ -295,6 +299,7 @@ const blank = {
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
 if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
+if (form.showPhotoCredit === undefined) form.showPhotoCredit = true // pre-credit-toggle records
 
 // ── privacy / publication helpers ──
 const overrideDates = ref(!!(form.publishFrom || form.publishUntil)) // open the override if one's already set
