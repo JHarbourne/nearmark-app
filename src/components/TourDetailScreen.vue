@@ -12,8 +12,8 @@
       <div style="position: absolute; left: 24px; bottom: 22px; right: 24px;">
         <span :style="eyebrowPill">Walking Tour</span>
         <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -1px; margin: 10px 0 0; color: #fff;">{{ tour.title }}</h1>
-        <a v-if="tour.coverCredit && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
-        <span v-else-if="tour.coverCredit" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
+        <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
+        <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
       </div>
     </div>
 

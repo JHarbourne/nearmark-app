@@ -132,6 +132,8 @@ function rowToTour(r) {
     coverPosition: r.cover_position || '50% 50%',
     coverCredit: r.cover_credit || '',
     coverCreditUrl: r.cover_credit_url || '',
+    showCoverCredit: r.show_cover_credit !== false, // undefined (pre-migration) or true → show
+
     coverAlt: r.cover_alt || '',
     status: r.status || 'draft',
     stopIds: r.stop_ids || [],
@@ -155,6 +157,7 @@ function tourToRow(t) {
     cover_position: t.coverPosition || '50% 50%',
     cover_credit: t.coverCredit || null,
     cover_credit_url: t.coverCreditUrl || null,
+    show_cover_credit: t.showCoverCredit !== false,
     cover_alt: t.coverAlt || null,
     status: t.status || 'draft',
     stop_ids: t.stopIds || [],

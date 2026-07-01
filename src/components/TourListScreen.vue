@@ -13,7 +13,7 @@
       <div :style="cover(t)">
         <div v-if="!t.coverImageUrl" style="position: absolute; inset: 0; opacity: 0.22; background-image: radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1.4px); background-size: 13px 13px;"></div>
         <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 46%, rgba(0,0,0,0) 74%);"></div>
-        <span v-if="t.coverCredit" :style="creditPill">Photo: {{ t.coverCredit }}</span>
+        <span v-if="t.coverCredit && t.showCoverCredit !== false" :style="creditPill">Photo: {{ t.coverCredit }}</span>
         <div style="position: absolute; left: 16px; bottom: 14px; right: 16px;">
           <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: rgba(255,255,255,0.92); text-transform: uppercase;">{{ t.theme }}</div>
           <div style="font-family: var(--font-heading); font-weight: 700; font-size: 24px; line-height: 1.02; margin-top: 6px; color: #fff;">{{ t.title }}</div>
