@@ -1,0 +1,5 @@
+# Never upload local env files in a CLI deploy — each deployment gets its config
+# from the Vercel project's own environment variables. (Git deploys never include
+# these anyway; this guards `vercel deploy` from the local .env leaking in.)
+.env
+.env.*
