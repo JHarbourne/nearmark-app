@@ -32,6 +32,7 @@
         <div style="font-weight:600; word-break:break-all;">{{ store.user?.email }}</div>
         <div class="muted" style="font-size:12px;">Admin</div>
         <a href="/" target="_blank" class="navlink" style="margin-top:10px; padding-left:0;">↗ View live app</a>
+        <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="padding-left:0;">↗ Suggest an improvement</a>
         <button class="navlink" style="padding-left:0;" @click="store.signOut()">Sign out</button>
       </div>
     </aside>
@@ -48,6 +49,8 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { store } from './store.js'
+import { config } from '../config.js'
+const feedbackUrl = config.feedbackUrl
 import Login from './views/Login.vue'
 import SetPassword from './views/SetPassword.vue'
 import Dashboard from './views/Dashboard.vue'

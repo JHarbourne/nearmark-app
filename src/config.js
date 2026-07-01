@@ -45,6 +45,7 @@ export const config = {
   // ── content source / attribution ──
   contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' – blank hides the credit line
   contentSourceUrl: pick(env.VITE_CONTENT_SOURCE_URL, ''),     // optional link on the content-source label
+  feedbackUrl: pick(env.VITE_FEEDBACK_URL, ''),                // admin "Suggest an improvement" link (e.g. https://nearmark.co.uk/feedback)
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
   platformUrl: pick(env.VITE_PLATFORM_URL, ''),                 // link for the platform name (blank = plain text)
   contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph – blank hides it
