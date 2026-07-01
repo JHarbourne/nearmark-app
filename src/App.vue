@@ -5,13 +5,13 @@
 -->
 <template>
   <div class="app-stage">
-    <div class="phone-frame">
+    <main class="phone-frame">
       <!-- loading -->
       <div v-if="loading" :style="loadingWrap">
         <span style="display:flex;gap:3px;">
           <span v-for="c in bars" :key="c" :style="{ width:'5px', height:'22px', borderRadius:'2px', background:c, animation:'barflow 1.1s ease-in-out infinite' }"></span>
         </span>
-        <p style="font-family:var(--font-body);color:var(--ink-muted);margin-top:18px;">Loading {{ cityName }}…</p>
+        <h1 style="font-family:var(--font-body);font-size:16px;font-weight:400;color:var(--ink-muted);margin-top:18px;">Loading {{ cityName }}…</h1>
       </div>
 
       <template v-else>
@@ -117,7 +117,7 @@
           @close="pendingMode=null"
         />
       </template>
-    </div>
+    </main>
   </div>
 </template>
 
