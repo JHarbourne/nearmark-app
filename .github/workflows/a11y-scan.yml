@@ -1,0 +1,40 @@
+# GitHub Accessibility Scanner (axe-core via Playwright, WCAG).
+# Scans the LIVE public app URLs and files GitHub issues for what it finds
+# (optionally handing them to Copilot for fixes). Public preview action.
+#
+# ── One-time setup before this will run ─────────────────────────────────────
+# 1. Create a fine-grained Personal Access Token (github.com → Settings →
+#    Developer settings → Fine-grained tokens) scoped to THIS repo with:
+#      Contents: Read and write · Issues: Read and write ·
+#      Pull requests: Read and write · Actions: Read and write · Metadata: Read
+# 2. Add it as a repo secret named A11Y_SCAN_TOKEN
+#    (repo → Settings → Secrets and variables → Actions → New secret).
+# 3. Run it: Actions tab → "Accessibility scan" → Run workflow.
+#    Tip: leave `dry_run: true` on the first run to preview without creating issues.
+#
+# Note: it scans DEPLOYED URLs, not this PR's build — so manual / scheduled runs
+# make more sense than on-PR. For a quick local check, use the axe DevTools
+# browser extension against the running app.
+
+name: Accessibility scan
+
+on:
+  workflow_dispatch:        # run manually from the Actions tab
+  # schedule:
+  #   - cron: '0 6 * * 1'   # optional: weekly, Mondays 06:00 UTC
+
+jobs:
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: github/accessibility-scanner@v3
+        with:
+          # Public app URLs (the admin is login-gated, so it's omitted).
+          urls: |
+            https://nearmark.app
+            https://tollesbury.app
+          repository: JHarbourne/nearmark-app   # where issues are filed
+          token: ${{ secrets.A11Y_SCAN_TOKEN }}
+          cache_key: a11y-nearmark-main.json
+          # dry_run: true                 # first trial: report, don't open issues
+          # skip_copilot_assignment: true # if Copilot isn't enabled on the repo
