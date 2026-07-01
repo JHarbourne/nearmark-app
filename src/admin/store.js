@@ -4,7 +4,7 @@
 // and are enforced by Row Level Security.
 
 import { reactive } from 'vue'
-import { supabaseConfigured, db, auth, uploadMedia, removeMedia, listStorageMedia, listMediaMeta, saveMediaMeta, deleteMediaAsset } from '../lib/supabase.js'
+import { supabaseConfigured, db, auth, uploadMedia, replaceMediaFile, removeMedia, listStorageMedia, listMediaMeta, saveMediaMeta, deleteMediaAsset } from '../lib/supabase.js'
 import { compressImage } from '../lib/image.js'
 
 export const store = reactive({
@@ -175,6 +175,15 @@ export const store = reactive({
   async upload(file, kind) {
     const f = kind === 'image' ? await compressImage(file) : file
     return uploadMedia(f, kind)
+  },
+  // Swap an existing asset's bytes in place (same path/URL) so it updates on
+  // every page that uses it. Images are optimised first, like uploads.
+  async replaceMedia(asset, file) {
+    const isImage = asset.type === 'image' || (file.type || '').startsWith('image')
+    const f = isImage ? await compressImage(file) : file
+    const url = await replaceMediaFile(asset.path, f)
+    this.logActivity('Replaced media', asset.filename || asset.defaultName)
+    return url
   },
   removeMedia(url) { return removeMedia(url) },
 

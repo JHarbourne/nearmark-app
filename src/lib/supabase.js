@@ -363,3 +363,16 @@ export async function uploadMedia(file, kind = 'image') {
   if (error) throw new Error(error.message)
   return supabase.storage.from('media').getPublicUrl(path).data.publicUrl
 }
+
+// Overwrite the bytes at an EXISTING storage path (upsert). The public URL is
+// unchanged, so every location/tour that references it shows the new image with
+// no database changes. Short cacheControl so the swap propagates within a minute.
+export async function replaceMediaFile(path, file) {
+  const { error } = await supabase.storage.from('media').upload(path, file, {
+    contentType: file.type,
+    upsert: true,
+    cacheControl: '60',
+  })
+  if (error) throw new Error(error.message)
+  return supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+}

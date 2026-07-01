@@ -46,6 +46,10 @@
         </div>
         <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" @click="save(m)">Save</button>
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer;">
+            {{ replacing === m.url ? 'Replacing…' : 'Replace' }}
+            <input type="file" :accept="acceptFor(m)" style="display:none;" @change="doReplace(m, $event)" />
+          </label>
           <button class="btn btn-ghost btn-sm" @click="copy(m)">{{ copied === m.url ? 'Copied ✓' : 'Copy URL' }}</button>
           <button class="btn btn-danger btn-sm" @click="remove(m)">Delete</button>
           <span class="muted" style="font-size:12px;">{{ m.type }} · {{ sizeLabel(m) }} · Used by: {{ usedBy(m) }}</span>
@@ -64,6 +68,8 @@ const typeFilter = ref('')
 const q = ref('')
 const loading = ref(true)
 const uploadingFile = ref(false)
+const replacing = ref('')
+const busted = ref({})   // path -> timestamp, to refresh the preview after a replace
 const copied = ref('')
 
 async function copy(m) {
@@ -106,6 +112,28 @@ async function upload(e) {
   }
 }
 
+function acceptFor(m) {
+  return m.type === 'audio' ? 'audio/*' : m.type === 'video' ? 'video/*' : 'image/*'
+}
+async function doReplace(m, e) {
+  const f = e.target.files[0]
+  if (!f) return
+  const used = usedBy(m)
+  const where = used !== '—' ? `\n\nIt will update everywhere it's used: ${used}.` : ''
+  if (!confirm(`Replace “${m.filename}” with this new file?${where}`)) { e.target.value = ''; return }
+  replacing.value = m.url
+  try {
+    await store.replaceMedia(m, f)
+    busted.value = { ...busted.value, [m.path]: Date.now() } // force the preview to refetch
+    await store.loadMedia()
+  } catch (err) {
+    alert('Replace failed: ' + err.message)
+  } finally {
+    replacing.value = ''
+    e.target.value = ''
+  }
+}
+
 async function save(m) {
   try { await store.saveMediaMeta(m) } catch (e) { alert('Save failed: ' + e.message) }
 }
@@ -127,9 +155,10 @@ function sizeLabel(m) {
   return m.sizeBytes < 1024 * 1024 ? `${Math.round(m.sizeBytes / 1024)} KB` : `${(m.sizeBytes / 1024 / 1024).toFixed(1)} MB`
 }
 function thumb(m) {
+  const bust = busted.value[m.path] ? `?t=${busted.value[m.path]}` : ''
   return {
     width: '90px', height: '90px', flexShrink: 0, borderRadius: '10px', border: '1px solid var(--line)',
-    background: m.type === 'image' ? `center/cover no-repeat url(${m.url})` : 'linear-gradient(135deg,#efeafd,#e7e3ef)',
+    background: m.type === 'image' ? `center/cover no-repeat url(${m.url}${bust})` : 'linear-gradient(135deg,#efeafd,#e7e3ef)',
     display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b46e5', fontWeight: 700, fontSize: '11px',
   }
 }
