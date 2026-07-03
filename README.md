@@ -31,6 +31,9 @@ the public app (`index.html`) and the admin (`admin.html`, served at `/admin`).
 This repository is the platform. The branding, copy, content and integrations all come
 from configuration – so you can stand up your own instance without editing component code.
 
+> **Deeper reference:** [`docs/FSD.md`](docs/FSD.md) is the functional specification –
+> features, data model, and architecture in one place.
+
 ---
 
 ## Prerequisites
@@ -70,18 +73,17 @@ npm install
 
 ### 3. Run the schema + migrations
 
-In the Supabase dashboard, open the **SQL Editor**, then paste-and-run each file from the
-`supabase/` folder **in order**:
+In the Supabase dashboard, open the **SQL Editor**, then paste-and-run, in order:
 
 1. `schema.sql` – tables, security policies, the `media` storage bucket
 2. `seed.sql` – *(optional)* example rows; skip it if you'll add your own content
-3. `migration-002-positions-and-order.sql`
-4. `migration-003-tour-cover.sql`
-5. `migration-004-historic-credit.sql`
-6. `migration-005-alt-text.sql`
-7. `migration-006-caption-links.sql`
-8. `migration-007-slider-labels.sql`
-9. `migration-008-media-metadata.sql`
+3. **Every `migration-*.sql` file in numerical order** – `migration-002-…` through
+   `migration-017-…`. Each one is small, additive and idempotent (`add column if not
+   exists`), so run them all to bring the schema up to date; re-running is harmless.
+
+> Running a client on the shared core? Any time you `git pull` new features, check for new
+> `migration-*.sql` files and run them in each Supabase project – a missing column shows up
+> as a "Save failed" in the admin.
 
 Then create your first admin user: **Authentication → Users → Add user → Create new
 user**, set an email + password, and tick **Auto Confirm User**. Keep **"Allow new users
@@ -127,6 +129,44 @@ Day-to-day content – locations, tours, photos, audio – is all managed in the
 backoffice at **`/admin`**, no code required. Sign in with a Supabase user, then add
 locations (drop a pin on the map, write the story, upload images), group them into tours,
 and publish. Drafts stay hidden from the public app until published.
+
+The editor also supports: a **media-library picker** (reuse an uploaded photo across
+locations without re-uploading), in-place **image replace**, **before/after photo
+sliders**, per-photo and per-cover **credit toggles**, a per-location **link-button label**,
+a **"guided tour only"** flag (hide a stop from Discovery mode), **Preview** (open a
+location or tour in the live app in a new tab; also shareable via `?story=<slug>` /
+`?tour=<slug>`), road-following **walking routes** (below), and an **unsaved-changes
+guard**. Admin login supports optional **two-factor (TOTP)**. Every screen is keyboard-
+and screen-reader-navigable (WCAG 2.1 AA).
+
+---
+
+## Optional features (Supabase Edge Functions)
+
+Two admin features are powered by [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
+in `supabase/functions/`. They're optional – the app degrades gracefully without them –
+but deploy them (with the [Supabase CLI](https://supabase.com/docs/guides/cli)) to enable:
+
+**User management** – `admin-users` powers the screen for inviting/listing/removing admins:
+
+```bash
+supabase functions deploy admin-users --project-ref YOUR_PROJECT_REF
+```
+
+**Road-following walking routes** – `compute-route` snaps a tour's route to real
+footpaths and roads (via [OpenRouteService](https://openrouteservice.org)) instead of
+straight "crow-flies" lines:
+
+1. Create a free API key at [openrouteservice.org/dev](https://openrouteservice.org/dev).
+2. Store it as a secret, then deploy the function:
+   ```bash
+   supabase secrets set ORS_KEY='YOUR_FULL_ORS_KEY' --project-ref YOUR_PROJECT_REF
+   supabase functions deploy compute-route --project-ref YOUR_PROJECT_REF
+   ```
+3. In the admin, open a tour → **Calculate walking route** → **Save**. The path is
+   computed once and stored on the tour (`route_geometry`), so the app draws it **offline**
+   with no per-visit API calls. A tour with no calculated route just falls back to straight
+   lines, and the stored route auto-clears when you change the tour's stops.
 
 ---
 
