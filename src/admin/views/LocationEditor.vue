@@ -85,6 +85,10 @@
         <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
         <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
         <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
+        <template v-if="form.wikiUrl">
+          <label for="loc-link-label">Link button text <span class="hint">optional · blank uses “{{ defaultLinkLabel }}”</span></label>
+          <input id="loc-link-label" type="text" v-model="form.linkLabel" :placeholder="defaultLinkLabel" maxlength="60" />
+        </template>
 
         <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
         <textarea id="loc-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
@@ -322,6 +326,7 @@ import PlaceMap from '../components/PlaceMap.vue'
 import MediaPicker from '../components/MediaPicker.vue'
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
+const defaultLinkLabel = config.storyLinkLabel
 const cities = config.cities
 
 const hues = HUE_OPTIONS
@@ -333,7 +338,7 @@ const isNew = !existing
 const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
-  wikiUrl: config.wikiBaseUrl, lat: null, lng: null, triggerRadius: 80,
+  wikiUrl: config.wikiBaseUrl, linkLabel: '', lat: null, lng: null, triggerRadius: 80,
   heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',

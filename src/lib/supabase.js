@@ -25,6 +25,7 @@ function rowToLocation(r) {
     significance: r.significance || '',
     summary: r.summary || '',
     wikiUrl: r.wiki_url || '',
+    linkLabel: r.link_label || '', // per-location text for the external link button; blank → app default
     lat: r.lat,
     lng: r.lng,
     triggerRadius: r.trigger_radius || 80,
@@ -79,6 +80,7 @@ function locationToRow(l) {
     significance: l.significance,
     summary: l.summary,
     wiki_url: l.wikiUrl,
+    link_label: l.linkLabel || null,
     lat: l.lat,
     lng: l.lng,
     trigger_radius: Number(l.triggerRadius) || 80,
