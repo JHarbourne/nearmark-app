@@ -114,9 +114,10 @@ function thumb(s) {
 }
 function badge(s) {
   return {
-    position: 'absolute', top: '-5px', left: '-5px', width: '23px', height: '23px', borderRadius: '8px',
+    position: 'absolute', top: '-6px', left: '-6px', width: '28px', height: '28px', borderRadius: '9px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 700, fontSize: '13px', color: readableInk(s.hue), background: s.hue, border: '2px solid var(--bg)',
+    fontWeight: 800, fontSize: '15px', color: readableInk(s.hue), background: s.hue,
+    border: '2px solid var(--bg)', boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
   }
 }
 </script>

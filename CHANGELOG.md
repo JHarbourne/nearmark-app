@@ -6,6 +6,13 @@ bug fixes bump the **patch** version; new features bump the **minor**.
 
 The [README](README.md) is documentation; this file is the release history.
 
+## [Unreleased]
+
+### Fixed
+- Tour-detail stop numbers are larger and bolder, with a subtle shadow, and use the
+  per-hue readable-ink colour (dark on light accents, white on dark) — so the small
+  badges over photo thumbnails are legible on every accent colour.
+
 ## [1.0.0] — 2026-07-03
 
 First feature-complete release — the build entering its testing phase. Two live clients run
