@@ -76,22 +76,28 @@
         <label for="tour-duration">Estimated duration <span class="hint">mins · blank = auto</span></label>
         <input id="tour-duration" type="number" v-model.number="form.durationOverrideMins" :placeholder="`auto: ${autoMins} min`" min="0" />
 
-        <!-- event window (migrations 011/012): private stops inherit these dates -->
+        <!-- event window (migrations 011/012): private stops inherit these dates.
+             Collapsed by default – only relevant to tours that include private addresses. -->
         <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
-          <span class="field-label" style="margin-top:0;">Event window <span class="hint">optional</span></span>
-          <p class="muted" style="font-size:12.5px; margin:6px 0 12px;">Private addresses in this event are shown only during this window, then automatically hidden – you set the dates here, once, and every private stop follows them.</p>
-          <div class="field-row">
-            <div>
-              <label for="tour-event-start">Event start</label>
-              <input id="tour-event-start" type="date" :value="dateIn(form.eventStart)" @input="setEventStart($event.target.value)" />
-            </div>
-            <div>
-              <label for="tour-event-end">Event end</label>
-              <input id="tour-event-end" type="date" :value="dateIn(form.eventEnd)" @input="setEventEnd($event.target.value)" />
-            </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <span class="field-label" style="margin-top:0;">Event window <span class="hint">optional · only for tours with private addresses</span></span>
+            <button type="button" class="btn btn-ghost btn-sm" @click="showEventWindow = !showEventWindow" :aria-expanded="String(showEventWindow)">{{ showEventWindow ? 'Hide' : 'Set dates' }}</button>
           </div>
-          <label for="tour-takedown">Auto take-down <span class="hint">private addresses hidden after this · defaults to event end + 7 days</span></label>
-          <input id="tour-takedown" type="date" :value="dateIn(form.takedownAt)" @input="setTakedown($event.target.value)" />
+          <template v-if="showEventWindow">
+            <p class="muted" style="font-size:12.5px; margin:10px 0 12px;">Private addresses in this event are shown only during this window, then automatically hidden – you set the dates here, once, and every private stop follows them.</p>
+            <div class="field-row">
+              <div>
+                <label for="tour-event-start">Event start</label>
+                <input id="tour-event-start" type="date" :value="dateIn(form.eventStart)" @input="setEventStart($event.target.value)" />
+              </div>
+              <div>
+                <label for="tour-event-end">Event end</label>
+                <input id="tour-event-end" type="date" :value="dateIn(form.eventEnd)" @input="setEventEnd($event.target.value)" />
+              </div>
+            </div>
+            <label for="tour-takedown">Auto take-down <span class="hint">private addresses hidden after this · defaults to event end + 7 days</span></label>
+            <input id="tour-takedown" type="date" :value="dateIn(form.takedownAt)" @input="setTakedown($event.target.value)" />
+          </template>
         </div>
 
         <hr style="border:none; border-top:1px solid var(--line); margin:22px 0;" />
@@ -194,6 +200,8 @@ function setEventEnd(v) {
   }
 }
 function setTakedown(v) { form.takedownAt = v ? new Date(v + 'T23:59:59').toISOString() : null }
+// keep the event window collapsed unless this tour already uses one
+const showEventWindow = ref(!!(form.eventStart || form.eventEnd || form.takedownAt))
 
 const overrideOpen = reactive({})
 function ov(id) { return form.stopOverrides[id] || {} }
