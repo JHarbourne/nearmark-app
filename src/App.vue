@@ -194,6 +194,11 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  // Deep link: /?story=<id> opens that story directly – powers the admin's
+  // "Preview" button and makes individual stories shareable. Drafts resolve too
+  // when an admin is signed in in the same browser (shared session → RLS).
+  const storyId = new URLSearchParams(window.location.search).get('story')
+  if (storyId && byId.value[storyId]) { screen.value = 'cover'; openId.value = storyId }
 })
 
 // ── derived: tour stops in order ──

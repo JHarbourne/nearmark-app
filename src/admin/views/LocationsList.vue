@@ -54,6 +54,7 @@
               <td>{{ l.tourNum ? '#' + l.tourNum : '—' }}</td>
               <td class="right" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
+                <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview ↗</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>
                 <button class="btn btn-danger btn-sm" @click.stop="remove(l)">Delete</button>
               </td>
@@ -71,6 +72,14 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { store } from '../store.js'
+import { config } from '../../config.js'
+
+// Open the story in the public app (new tab). Same origin as the admin, so it
+// works even if VITE_PUBLIC_URL isn't set; drafts show when you're signed in.
+function preview(l) {
+  const base = config.publicUrl || window.location.origin
+  window.open(`${base}/?story=${encodeURIComponent(l.id)}`, '_blank', 'noopener')
+}
 
 const q = ref('')
 const cityFilter = ref('')
