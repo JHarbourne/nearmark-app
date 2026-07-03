@@ -292,7 +292,7 @@ const isUndefinedColumn = (e) => e && (e.code === '42703' || /does not exist/i.t
 // is the real boundary for the anon role — this is defence in depth.
 export async function fetchLocations(publicView = false) {
   if (!supabaseConfigured) return SEED_LOCATIONS.filter((l) => l.status === 'published')
-  const ordered = (q) => q.order('tour_num', { ascending: true, nullsFirst: false }).order('title')
+  const ordered = (q) => q.order('title')
   if (publicView) {
     const now = new Date().toISOString()
     const r = await ordered(

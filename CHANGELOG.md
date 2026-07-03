@@ -16,6 +16,12 @@ The [README](README.md) is documentation; this file is the release history.
   generic default is "Scan for nearby stories" instead of the hardcoded "…history" (which
   was wrong for non-history deployments).
 
+### Removed
+- The redundant per-location **"Tour stop #"** field (and its Locations-list column). Tour
+  stop numbers are derived from the order of stops within each tour, so this legacy field
+  was inert, couldn't represent a stop shared across multiple tours, and only caused
+  confusion. The `tour_num` column is left dormant in the database (no migration needed).
+
 ## [1.0.0] — 2026-07-03
 
 First feature-complete release — the build entering its testing phase. Two live clients run

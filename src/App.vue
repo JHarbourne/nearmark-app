@@ -406,7 +406,7 @@ function simulate() {
   if (mapMode.value === 'guided') {
     arriveNext()
   } else {
-    const pool = locations.value.filter((l) => !l.tourNum)
+    const pool = discoverableLocations.value
     const remaining = pool.filter((l) => !shownDiscovery.value.includes(l.id))
     const src = remaining.length ? remaining : pool
     const pick = src[Math.floor(Math.random() * src.length)]

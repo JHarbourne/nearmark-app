@@ -93,16 +93,8 @@
         <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
         <textarea id="loc-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
 
-        <div class="field-row">
-          <div>
-            <label for="loc-radius">Trigger radius <span class="hint">metres</span></label>
-            <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
-          </div>
-          <div>
-            <label for="loc-tournum">Tour stop #</label>
-            <input id="loc-tournum" type="number" v-model.number="form.tourNum" placeholder="—" min="1" />
-          </div>
-        </div>
+        <label for="loc-radius">Trigger radius <span class="hint">metres · how close before a story unlocks</span></label>
+        <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
 
         <span class="field-label" id="loc-hue-label">Accent colour</span>
         <div role="group" aria-labelledby="loc-hue-label" style="display:flex; gap:8px;">

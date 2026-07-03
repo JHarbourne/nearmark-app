@@ -27,11 +27,11 @@
     <div class="card">
       <table>
         <thead>
-          <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th>Tour stop</th><th class="right">Actions</th></tr>
+          <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th class="right">Actions</th></tr>
         </thead>
         <tbody v-for="g in groups" :key="g.key">
           <tr v-if="g.title" class="group-head">
-            <th colspan="7" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
+            <th colspan="6" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
               <button type="button" @click="toggle(g.key)" :aria-expanded="String(!collapsed[g.key])"
                 style="width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:10px 14px; font-size:14px; font-weight:700; color:inherit; display:flex; align-items:center; gap:8px;">
                 <span style="width:12px;">{{ collapsed[g.key] ? '▸' : '▾' }}</span>
@@ -55,7 +55,6 @@
               <td>{{ l.city }}</td>
               <td class="muted">{{ l.period }}</td>
               <td><span class="badge" :class="l.status">{{ l.status }}</span></td>
-              <td>{{ l.tourNum ? '#' + l.tourNum : '—' }}</td>
               <td class="right" style="white-space:nowrap;">
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
@@ -68,7 +67,7 @@
           </template>
         </tbody>
         <tbody v-if="!totalShown">
-          <tr><td colspan="7" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
+          <tr><td colspan="6" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
         </tbody>
       </table>
     </div>
