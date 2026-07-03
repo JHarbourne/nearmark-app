@@ -130,6 +130,7 @@ const props = defineProps({
   guided: { type: Boolean, default: true },
   locations: { type: Array, default: () => [] },   // markers to show in current mode
   tourStops: { type: Array, default: () => [] },    // ordered, for the route polyline
+  routeGeometry: { type: Array, default: () => [] }, // [[lat,lng],…] road-following path; empty → straight lines
   visitedIds: { type: Array, default: () => [] },
   nextStop: { type: Object, default: null },
   nextStopDistance: { type: String, default: '' },
@@ -239,7 +240,10 @@ function renderMarkers() {
   // guided route polyline first, so markers sit on top of it
   if (routeLine) { routeLine.remove(); routeLine = null }
   if (props.guided && props.tourStops.length > 1) {
-    const line = props.tourStops.filter((s) => s.lat != null).map((s) => [s.lat, s.lng])
+    // prefer the stored road-following geometry; fall back to straight lines
+    const line = (props.routeGeometry && props.routeGeometry.length > 1)
+      ? props.routeGeometry
+      : props.tourStops.filter((s) => s.lat != null).map((s) => [s.lat, s.lng])
     routeLine = L.layerGroup([
       L.polyline(line, { color: '#1f6fe0', weight: 8, opacity: 0.18 }),
       L.polyline(line, { color: '#2E7CF6', weight: 4.5, opacity: 0.9 }),

@@ -53,6 +53,7 @@
           :guided="mapMode==='guided'"
           :locations="mapMarkers"
           :tour-stops="tourStops"
+          :route-geometry="activeTour?.routeGeometry || []"
           :visited-ids="visited"
           :next-stop="nextStop"
           :next-stop-distance="nextStopDistance"

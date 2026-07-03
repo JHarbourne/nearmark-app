@@ -21,6 +21,7 @@ const props = defineProps({
   hue: { type: String, default: '#6b46e5' },
   routeOnly: { type: Boolean, default: false },
   routePoints: { type: Array, default: () => [] },  // [{lat,lng,hue,num}]
+  routeGeometry: { type: Array, default: () => [] }, // [[lat,lng],…] road-following path; empty → straight
   center: { type: Object, default: () => ({ lat: 51.5137, lng: -0.1341 }) },
 })
 const emit = defineEmits(['update:modelValue'])
@@ -55,7 +56,8 @@ function drawRoute() {
   if (!pts.length) return
   routeLayer = L.layerGroup().addTo(map)
   if (pts.length > 1) {
-    L.polyline(pts.map((p) => [p.lat, p.lng]), { color: '#2E7CF6', weight: 4, opacity: 0.85 }).addTo(routeLayer)
+    const linePts = (props.routeGeometry && props.routeGeometry.length > 1) ? props.routeGeometry : pts.map((p) => [p.lat, p.lng])
+    L.polyline(linePts, { color: '#2E7CF6', weight: 4, opacity: 0.85 }).addTo(routeLayer)
   }
   pts.forEach((p) => L.marker([p.lat, p.lng], { icon: dot(p.hue || '#6b46e5') }).addTo(routeLayer))
   map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng])).pad(0.4), { animate: false })
@@ -73,7 +75,7 @@ onMounted(() => {
 })
 onUnmounted(() => { if (map) map.remove() })
 
-watch(() => props.routePoints, () => { if (props.routeOnly && map) drawRoute() }, { deep: true })
+watch(() => [props.routePoints, props.routeGeometry], () => { if (props.routeOnly && map) drawRoute() }, { deep: true })
 
 // react to coordinates set from outside (e.g. pasting lat/lng): drop/move the
 // pin and recentre. Guarded so it ignores our own click/drag emits.

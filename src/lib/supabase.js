@@ -142,6 +142,7 @@ function rowToTour(r) {
     status: r.status || 'draft',
     stopIds: r.stop_ids || [],
     stopOverrides: r.stop_overrides || {}, // { slug: { title, blurb } } – per-tour title/blurb
+    routeGeometry: r.route_geometry || null, // [[lat,lng],…] road-following path, or null → straight lines
     durationOverrideMins: r.duration_override_mins || null,
     sortOrder: r.sort_order ?? 0,
     // event window (migration 011)
@@ -166,6 +167,7 @@ function tourToRow(t) {
     status: t.status || 'draft',
     stop_ids: t.stopIds || [],
     stop_overrides: t.stopOverrides && Object.keys(t.stopOverrides).length ? t.stopOverrides : null,
+    route_geometry: t.routeGeometry && t.routeGeometry.length ? t.routeGeometry : null,
     duration_override_mins: t.durationOverrideMins || null,
     sort_order: t.sortOrder ?? 0,
     // event window (migration 011)
@@ -173,6 +175,17 @@ function tourToRow(t) {
     event_end: t.eventEnd || null,
     takedown_at: t.takedownAt || null,
   }
+}
+
+// Ask the compute-route Edge Function for a road-following walking path through
+// the given ordered stops. `coordinates` is [[lng,lat],…] (ORS order); returns
+// [[lat,lng],…] (Leaflet order) to store on the tour. Requires a signed-in admin.
+export async function computeWalkingRoute(coordinates) {
+  const { data, error } = await supabase.functions.invoke('compute-route', { body: { coordinates } })
+  if (error) throw new Error(error.message || 'Route service unavailable.')
+  if (data?.error) throw new Error(data.error)
+  if (!Array.isArray(data?.geometry) || data.geometry.length < 2) throw new Error('No route returned.')
+  return data.geometry
 }
 
 // parse the "Label | https://url" per-line links field into [{ label, url }]

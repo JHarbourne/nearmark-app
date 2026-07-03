@@ -139,8 +139,17 @@
 
       <div class="card" style="padding:18px;">
         <span class="field-label" style="margin-top:0;">Route preview</span>
-        <PlaceMap route-only :route-points="routePoints" :key="routeKey" />
+        <PlaceMap route-only :route-points="routePoints" :route-geometry="form.routeGeometry || []" :key="routeKey" />
         <p class="muted" style="font-size:13px; margin-top:10px;">Stops: {{ form.stopIds.length }} · auto duration ≈ {{ autoMins }} min</p>
+
+        <div style="margin-top:12px; padding-top:14px; border-top:1px solid var(--line);">
+          <button class="btn btn-ghost btn-sm" :disabled="routing || form.stopIds.length < 2" @click="recalcRoute">
+            {{ routing ? 'Calculating…' : (form.routeGeometry ? '↻ Recalculate walking route' : '🗺 Calculate walking route') }}
+          </button>
+          <p v-if="routeMsg" style="font-size:12.5px; margin:8px 0 0; font-weight:600;" :style="{ color: routeErr ? 'var(--red)' : 'var(--green)' }">{{ routeMsg }}</p>
+          <p v-else-if="form.routeGeometry" class="muted" style="font-size:12px; margin:8px 0 0;">Route follows roads &amp; paths ({{ form.routeGeometry.length }} points). Save to keep it.</p>
+          <p v-else class="muted" style="font-size:12px; margin:8px 0 0;">Lines currently go straight between stops – calculate to snap them to roads and paths.</p>
+        </div>
       </div>
     </div>
 
@@ -167,8 +176,9 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   title: '', city: config.cities[0], theme: '', description: '', coverImageUrl: '',
   status: 'draft', stopIds: [], stopOverrides: {}, durationOverrideMins: null,
   coverPosition: '50% 50%', coverCredit: '', coverCreditUrl: '', coverAlt: '', showCoverCredit: true,
-  eventStart: null, eventEnd: null, takedownAt: null,
+  eventStart: null, eventEnd: null, takedownAt: null, routeGeometry: null,
 })
+if (form.routeGeometry === undefined) form.routeGeometry = null // tours predating the route column
 if (!form.coverPosition) form.coverPosition = '50% 50%'
 if (!form.stopOverrides) form.stopOverrides = {} // older tours predate this column
 if (form.showCoverCredit === undefined) form.showCoverCredit = true // pre-credit-toggle tours
@@ -193,6 +203,10 @@ function setOv(id, field, value) {
   else form.stopOverrides[id] = o
 }
 
+// a stored route is only valid for the current stop order; changing stops clears
+// it so the "straight lines" fallback shows until it's recalculated.
+function invalidateRoute() { if (form.routeGeometry) { form.routeGeometry = null; routeMsg.value = 'Stops changed – recalculate the walking route.'; routeErr.value = false } }
+
 const dragIdx = ref(null)
 function drop(i) {
   if (dragIdx.value == null || dragIdx.value === i) return
@@ -200,19 +214,41 @@ function drop(i) {
   const [moved] = arr.splice(dragIdx.value, 1)
   arr.splice(i, 0, moved)
   dragIdx.value = null
+  invalidateRoute()
 }
-function removeStop(i) { const id = form.stopIds[i]; form.stopIds.splice(i, 1); delete form.stopOverrides[id] }
+function removeStop(i) { const id = form.stopIds[i]; form.stopIds.splice(i, 1); delete form.stopOverrides[id]; invalidateRoute() }
 // keyboard-accessible reorder (alternative to drag): move a stop up/down one place
 function moveStop(i, dir) {
   const j = i + dir
   if (j < 0 || j >= form.stopIds.length) return
   const arr = form.stopIds
   ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  invalidateRoute()
 }
 function addStop(e) {
   const id = e.target.value
-  if (id && !form.stopIds.includes(id)) form.stopIds.push(id)
+  if (id && !form.stopIds.includes(id)) { form.stopIds.push(id); invalidateRoute() }
   e.target.value = ''
+}
+
+// ── road-following route via the compute-route Edge Function (OpenRouteService) ──
+const routing = ref(false)
+const routeMsg = ref('')
+const routeErr = ref(false)
+async function recalcRoute() {
+  const coords = form.stopIds
+    .map((id) => byId.value[id])
+    .filter((l) => l && l.lat != null && l.lng != null)
+    .map((l) => [l.lng, l.lat]) // OpenRouteService order
+  if (coords.length < 2) { routeErr.value = true; routeMsg.value = 'Add at least two stops that have a map pin.'; return }
+  routing.value = true; routeMsg.value = ''; routeErr.value = false
+  try {
+    form.routeGeometry = await store.computeRoute(coords)
+    routeMsg.value = `Walking route calculated (${form.routeGeometry.length} points) – Save to apply.`
+  } catch (e) {
+    routeErr.value = true
+    routeMsg.value = 'Route failed: ' + e.message
+  } finally { routing.value = false }
 }
 
 const addable = computed(() =>

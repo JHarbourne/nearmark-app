@@ -4,7 +4,7 @@
 // and are enforced by Row Level Security.
 
 import { reactive } from 'vue'
-import { supabaseConfigured, db, auth, uploadMedia, replaceMediaFile, removeMedia, listStorageMedia, listMediaMeta, saveMediaMeta, deleteMediaAsset } from '../lib/supabase.js'
+import { supabaseConfigured, db, auth, uploadMedia, replaceMediaFile, removeMedia, listStorageMedia, listMediaMeta, saveMediaMeta, deleteMediaAsset, computeWalkingRoute } from '../lib/supabase.js'
 import { compressImage } from '../lib/image.js'
 
 export const store = reactive({
@@ -206,6 +206,8 @@ export const store = reactive({
     return url
   },
   removeMedia(url) { return removeMedia(url) },
+  // road-following walking route via the compute-route Edge Function
+  computeRoute(coordinates) { return computeWalkingRoute(coordinates) },
 
   // ── media library ──
   media: [],
