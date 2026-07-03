@@ -26,11 +26,13 @@
             <td class="muted">{{ t.distanceLabel }}</td>
             <td class="muted">{{ t.durationLabel }}</td>
             <td><span class="badge" :class="t.status">{{ t.status }}</span></td>
-            <td class="right">
+            <td class="right" style="white-space:nowrap;">
               <button class="btn btn-ghost btn-sm" @click.stop="store.go('tourEditor', { id: t.id })">Edit</button>
-              <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview ↗</button>
+              <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview</button>
               <button class="btn btn-ghost btn-sm" @click.stop="duplicate(t)">Duplicate</button>
-              <button class="btn btn-danger btn-sm" @click.stop="remove(t)">Delete</button>
+              <button class="btn btn-danger btn-sm" @click.stop="remove(t)" aria-label="Delete tour" title="Delete">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
+              </button>
             </td>
           </tr>
           <tr v-if="!rows.length"><td colspan="8" class="muted" style="text-align:center; padding:30px;">No tours yet.</td></tr>
