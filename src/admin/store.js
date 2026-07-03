@@ -14,6 +14,7 @@ export const store = reactive({
   mfaPending: false,   // password accepted, awaiting authenticator code
   mfaFactorId: null,
   recoveryMode: false, // arrived via a password-reset link; show "set new password"
+  recoveryNeedsMfa: false, // that account has 2FA, so the reset needs an authenticator code first
 
   route: 'dashboard',
   params: {},
@@ -86,12 +87,31 @@ export const store = reactive({
     this.recoveryMode = false
   },
   resetPassword(email) { return auth.resetPassword(email) },
-  // Called from the recovery "set new password" form: update the password on the
-  // recovery session, then drop straight into the dashboard.
-  async setNewPassword(password) {
+  // After arriving on the recovery screen, work out whether the account has a
+  // verified authenticator. If so, Supabase requires an AAL2 session to change
+  // the password, so the form must collect a 2FA code first.
+  async checkRecoveryMfa() {
+    try {
+      const { data } = await auth.mfaList()
+      const totp = (data?.totp || []).find((x) => x.status === 'verified')
+      this.mfaFactorId = totp?.id || null
+      this.recoveryNeedsMfa = !!this.mfaFactorId
+    } catch { this.recoveryNeedsMfa = false }
+    return this.recoveryNeedsMfa
+  },
+  // Called from the recovery "set new password" form: elevate to AAL2 with the
+  // authenticator code if 2FA is on, update the password, then drop straight
+  // into the dashboard.
+  async setNewPassword(password, code) {
+    if (this.recoveryNeedsMfa) {
+      if (!code) return { ok: false, message: 'Enter your authenticator code.' }
+      const { error: mfaErr } = await auth.mfaVerify(this.mfaFactorId, code)
+      if (mfaErr) return { ok: false, message: mfaErr.message || 'Invalid authenticator code – try again.' }
+    }
     const { error } = await auth.updateUser({ password })
     if (error) return { ok: false, message: error.message || 'Could not set the password.' }
     this.recoveryMode = false
+    this.recoveryNeedsMfa = false
     // strip the recovery tokens from the URL so a refresh doesn't re-trigger it
     if (typeof window !== 'undefined' && window.location.hash) {
       history.replaceState(null, '', window.location.pathname + window.location.search)

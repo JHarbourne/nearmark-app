@@ -29,20 +29,10 @@ defineProps({ variant: { type: String, default: 'icon' } }) // 'icon' | 'row'
 const sheetOpen = ref(false)
 const shareUrl = computed(() => config.publicUrl || (typeof window !== 'undefined' ? window.location.origin : ''))
 
-// Touch devices (phones/tablets) get the native OS share sheet; desktop gets the
-// QR + copy-link card, where a scannable code is the point (macOS Safari also
-// supports navigator.share, so we gate on a coarse pointer, not just the API).
-const isTouch = typeof window !== 'undefined' &&
-  ((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints || 0) > 0)
-
-async function onShare() {
-  const data = { title: config.appName, text: config.description, url: shareUrl.value }
-  if (isTouch && typeof navigator !== 'undefined' && navigator.share) {
-    try { await navigator.share(data) } catch { /* user dismissed the share sheet – ignore */ }
-  } else {
-    sheetOpen.value = true
-  }
-}
+// Always open our own sheet. For a walking-tour app, the scannable QR code is the
+// whole point of sharing in person, so it must be reachable on phones too – the
+// sheet still offers a native "Share…" button for the digital route.
+function onShare() { sheetOpen.value = true }
 
 const iconBtn = {
   width: '38px', height: '38px', flexShrink: 0, borderRadius: '50%', border: '1px solid var(--line)',

@@ -2,6 +2,13 @@
      Full form + click-to-place map + accent picker + preview + draft/publish. -->
 <template>
   <div>
+    <!-- inline icon sprite, referenced by the compact media-field buttons below -->
+    <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4" /><path d="m6 10 6-6 6 6" /><path d="M4 20h16" /></symbol>
+      <symbol id="ic-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.6" /><path d="m21 15-5-5L5 21" /></symbol>
+      <symbol id="ic-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 0 10h-1" /></symbol>
+    </svg>
+
     <div class="pagehead">
       <h1>{{ isNew ? 'New location' : 'Edit location' }}</h1>
       <button class="btn btn-ghost" @click="back">← Back to list</button>
@@ -104,23 +111,35 @@
         <div class="field-row">
           <div>
             <label for="loc-historic-url">Historic image <span class="hint">“before” · slider LEFT</span></label>
-            <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="https://… or upload ↓" />
-            <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
-              {{ uploading.historic ? 'Uploading…' : '⬆ Upload image' }}
-              <input type="file" accept="image/*" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
-            </label>
-            <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('historicImageUrl')">🖼 Library</button>
-            <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
+            <div class="media-input">
+              <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="Paste a URL, or use the icons →" />
+              <div class="media-actions">
+                <label class="icon-btn" :class="{ busy: uploading.historic }" :title="uploading.historic ? 'Uploading…' : 'Upload an image from your device'">
+                  <svg class="ic"><use href="#ic-upload" /></svg>
+                  <input type="file" accept="image/*" aria-label="Upload a historic image from your device" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
+                </label>
+                <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a historic image from the media library" @click="openPicker('historicImageUrl')">
+                  <svg class="ic"><use href="#ic-image" /></svg>
+                </button>
+              </div>
+            </div>
+            <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
           </div>
           <div>
             <label for="loc-hero-url">Hero image <span class="hint">“today” · slider RIGHT</span></label>
-            <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="https://… or upload ↓" />
-            <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
-              {{ uploading.hero ? 'Uploading…' : '⬆ Upload image' }}
-              <input type="file" accept="image/*" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
-            </label>
-            <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('heroImageUrl')">🖼 Library</button>
-            <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
+            <div class="media-input">
+              <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="Paste a URL, or use the icons →" />
+              <div class="media-actions">
+                <label class="icon-btn" :class="{ busy: uploading.hero }" :title="uploading.hero ? 'Uploading…' : 'Upload an image from your device'">
+                  <svg class="ic"><use href="#ic-upload" /></svg>
+                  <input type="file" accept="image/*" aria-label="Upload a hero image from your device" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
+                </label>
+                <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a hero image from the media library" @click="openPicker('heroImageUrl')">
+                  <svg class="ic"><use href="#ic-image" /></svg>
+                </button>
+              </div>
+            </div>
+            <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
           </div>
         </div>
 
@@ -199,13 +218,19 @@
 
         <!-- second in-body image (a person, a detail, anything), shown within the story text, separate from the hero -->
         <label for="loc-portrait-url">Second photo <span class="hint">shown within the story text, separate from the hero</span></label>
-        <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="https://… or upload ↓" />
-        <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
-          {{ uploading.portrait ? 'Uploading…' : '⬆ Upload image' }}
-          <input type="file" accept="image/*" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
-        </label>
-        <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('portraitUrl')">🖼 Library</button>
-        <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
+        <div class="media-input">
+          <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="Paste a URL, or use the icons →" />
+          <div class="media-actions">
+            <label class="icon-btn" :class="{ busy: uploading.portrait }" :title="uploading.portrait ? 'Uploading…' : 'Upload an image from your device'">
+              <svg class="ic"><use href="#ic-upload" /></svg>
+              <input type="file" accept="image/*" aria-label="Upload a second photo from your device" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
+            </label>
+            <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a second photo from the media library" @click="openPicker('portraitUrl')">
+              <svg class="ic"><use href="#ic-image" /></svg>
+            </button>
+          </div>
+        </div>
+        <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
         <div class="field-row" v-if="form.portraitUrl">
           <div>
             <label for="loc-portrait-alt">Alt text <span class="hint">describe the photo for screen readers</span></label>
@@ -218,12 +243,16 @@
         </div>
 
         <label for="loc-audio">Audio narration <span class="hint">mp3/m4a</span></label>
-        <input id="loc-audio" type="url" v-model="form.audioUrl" placeholder="https://… or upload ↓" />
-        <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
-          {{ uploading.audio ? 'Uploading…' : '⬆ Upload audio' }}
-          <input type="file" accept="audio/*" style="display:none" @change="up($event,'audioUrl','audio','audio')" />
-        </label>
-        <button v-if="canUndo('audioUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('audioUrl')">↩ Undo</button>
+        <div class="media-input solo">
+          <input id="loc-audio" type="url" v-model="form.audioUrl" placeholder="Paste a URL, or upload →" />
+          <div class="media-actions">
+            <label class="icon-btn" :class="{ busy: uploading.audio }" :title="uploading.audio ? 'Uploading…' : 'Upload an audio file from your device'">
+              <svg class="ic"><use href="#ic-upload" /></svg>
+              <input type="file" accept="audio/*" aria-label="Upload an audio narration file from your device" style="display:none" @change="up($event,'audioUrl','audio','audio')" />
+            </label>
+          </div>
+        </div>
+        <button v-if="canUndo('audioUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('audioUrl')">↩ Undo</button>
         <div class="field-row">
           <div>
             <label for="loc-audio-dur">Audio duration <span class="hint">secs</span></label>
@@ -468,3 +497,21 @@ const previewHero = computed(() => ({
 }))
 const previewPeriod = { position: 'absolute', bottom: '8px', left: '14px', fontFamily: "'Bricolage Grotesque'", fontWeight: 800, fontSize: '28px', color: 'rgba(255,255,255,0.96)', letterSpacing: '-1px' }
 </script>
+
+<style scoped>
+/* compact media fields: the upload / library actions sit as icons inside the
+   field, keeping each image/audio row to a single clean line */
+.media-input { position: relative; }
+.media-input > input { padding-right: 78px; }
+.media-input.solo > input { padding-right: 46px; }
+.media-actions { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 2px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0; margin: 0; border: none; border-radius: 8px;
+  background: none; color: var(--muted); cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg); color: var(--ink); }
+.icon-btn:focus-visible { outline: 2px solid var(--violet); outline-offset: 1px; }
+.icon-btn.busy { opacity: 0.5; cursor: default; }
+.icon-btn .ic { width: 18px; height: 18px; display: block; }
+</style>

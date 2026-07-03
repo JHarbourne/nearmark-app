@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script>
+    // Canonical host: bounce www → apex in a normal browser tab, even if a cached
+    // service worker on the www origin served this shell before the server's 308.
+    // Installed PWAs (standalone) are left alone – reinstall those from the apex.
+    (function () {
+      try {
+        if (location.hostname.slice(0, 4) === 'www.' && !matchMedia('(display-mode: standalone)').matches) {
+          location.replace(location.protocol + '//' + location.hostname.slice(4) + location.pathname + location.search + location.hash)
+        }
+      } catch (e) { /* never block boot */ }
+    })()
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin · Nearmark</title>
   <link rel="icon" type="image/png" href="/favicon-48.png" />

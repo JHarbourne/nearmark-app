@@ -25,6 +25,11 @@
         <svg v-else width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5 L10 17.5 L19.5 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         {{ copied ? 'Copied' : 'Copy link' }}
       </button>
+
+      <button v-if="canShare" @click="shareNative" :style="shareBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="2.6" stroke="currentColor" stroke-width="1.9"/><circle cx="6" cy="12" r="2.6" stroke="currentColor" stroke-width="1.9"/><circle cx="18" cy="19" r="2.6" stroke="currentColor" stroke-width="1.9"/><path d="M8.4 10.7 L15.6 6.3 M8.4 13.3 L15.6 17.7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        Share…
+      </button>
     </div>
   </div>
 </template>
@@ -44,6 +49,14 @@ const appName = config.appName
 const qrFg = COLORS.accent
 const qrBg = '#ffffff'
 const displayUrl = computed(() => props.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))
+
+// Native "Share…" (digital route) when the browser supports it – the QR above
+// stays the primary, in-person option.
+const canShare = typeof navigator !== 'undefined' && !!navigator.share
+async function shareNative() {
+  try { await navigator.share({ title: appName, text: config.description, url: props.url }) }
+  catch { /* user dismissed the OS share sheet – ignore */ }
+}
 
 const copied = ref(false)
 async function copy() {
@@ -82,6 +95,7 @@ const qrTile = { width: 'fit-content', margin: '0 auto 16px', padding: '14px', b
 const urlRow = { display: 'flex', justifyContent: 'center', margin: '0 0 16px' }
 const urlText = { fontFamily: 'var(--font-ui)', fontSize: '13px', color: 'var(--ink-muted)', background: 'var(--raised)', borderRadius: '9px', padding: '8px 12px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const copyBtn = { width: '100%', height: '50px', border: 'none', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '15px', color: 'var(--bg)', background: 'var(--grad-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
+const shareBtn = { width: '100%', height: '48px', marginTop: '10px', border: '1px solid var(--line)', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '15px', color: 'var(--ink)', background: 'var(--raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
 </script>
 
 <style scoped>
