@@ -12,6 +12,9 @@ The [README](README.md) is documentation; this file is the release history.
 - Tour-detail stop numbers are larger and bolder, with a subtle shadow, and use the
   per-hue readable-ink colour (dark on light accents, white on dark) — so the small
   badges over photo thumbnails are legible on every accent colour.
+- The Discovery "scan" button copy is now themeable via `VITE_DISCOVERY_SCAN_LABEL`; the
+  generic default is "Scan for nearby stories" instead of the hardcoded "…history" (which
+  was wrong for non-history deployments).
 
 ## [1.0.0] — 2026-07-03
 

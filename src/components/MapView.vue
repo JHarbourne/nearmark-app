@@ -96,7 +96,7 @@
     <!-- DISCOVERY simulate button -->
     <button v-if="showDiscoverySim" @click="$emit('simulate')" :style="simBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.4" fill="var(--accent-warm)"/><path d="M7.5 7.5 a6 6 0 0 0 0 9 M16.5 7.5 a6 6 0 0 1 0 9" stroke="var(--accent-warm)" stroke-width="2" stroke-linecap="round"/></svg>
-      {{ gpsLive ? 'Scan for nearby history' : 'Simulate walking' }}
+      {{ gpsLive ? scanLabel : 'Simulate walking' }}
     </button>
 
     <!-- bottom nav -->
@@ -125,6 +125,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import L from 'leaflet'
 import { readableInk } from '../lib/tokens.js'
+import { config } from '../config.js'
 
 const props = defineProps({
   guided: { type: Boolean, default: true },
@@ -144,6 +145,8 @@ const props = defineProps({
   zoom: { type: Number, default: 15 },
 })
 const emit = defineEmits(['exit', 'open-story', 'arrive', 'simulate', 'open-banner', 'home', 'tours', 'settings', 'enable-location'])
+
+const scanLabel = config.discoveryScanLabel // themeable Discovery "scan" button copy
 
 const mapEl = ref(null)
 

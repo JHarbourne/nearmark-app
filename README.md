@@ -194,6 +194,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_SPLASH_TITLE` | Title on the first (location-permission) screen |
 | `VITE_SPLASH_BODY` | Body text on the first screen |
 | `VITE_DISCOVERY_PROMPT` | Text shown when prompting to enable location for Discovery |
+| `VITE_DISCOVERY_SCAN_LABEL` | Discovery "scan" button label (default `Scan for nearby stories`; e.g. `…history`, `…places of interest`) |
 | `VITE_COMPLETION_MESSAGE` | Message on the "tour complete" screen |
 | `VITE_STORY_LINK_LABEL` | Label for a location's external link, e.g. `Visit the artist’s website` (the link hides when a location has no URL) |
 | `VITE_CONTENT_SOURCE_LABEL` | Attribution credit, e.g. `example.org` (blank hides it) |

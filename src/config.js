@@ -38,6 +38,7 @@ export const config = {
   splashTitle: nl(env.VITE_SPLASH_TITLE, 'History, where it actually happened'),
   splashBody: nl(env.VITE_SPLASH_BODY, 'We use your location only to surface history near you. Nothing is stored or shared – it never leaves your device.'),
   discoveryPrompt: nl(env.VITE_DISCOVERY_PROMPT, 'Discovery Mode alerts you when you’re near a site. Enable location to unlock stories as you walk – it never leaves your device.'),
+  discoveryScanLabel: pick(env.VITE_DISCOVERY_SCAN_LABEL, 'Scan for nearby stories'), // Discovery "scan" button (e.g. "…nearby history" / "…places of interest")
   completionMessage: nl(env.VITE_COMPLETION_MESSAGE, 'You’ve walked the route. The stories don’t end here – keep exploring in Discovery Mode any time.'),
   storyLinkLabel: pick(env.VITE_STORY_LINK_LABEL, 'Read the full article'), // label for a location's external link (e.g. "Visit the artist’s website")
   consentNoticeVersion: pick(env.VITE_CONSENT_NOTICE_VERSION, '1.0'), // privacy-notice version recorded when an admin logs a resident's consent
