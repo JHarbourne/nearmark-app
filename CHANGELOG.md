@@ -6,7 +6,7 @@ bug fixes bump the **patch** version; new features bump the **minor**.
 
 The [README](README.md) is documentation; this file is the release history.
 
-## [Unreleased]
+## [1.1.0] — 2026-07-03
 
 ### Added
 - Persistent **activity log** (migration 018): the Dashboard "Recent activity" feed now
@@ -70,4 +70,5 @@ on this core, themed by configuration only: **Tollesbury Arts Trail** and **LGBT
 - Accessibility to **WCAG 2.1 AA**, including per-hue readable number contrast; axe-core CI.
 - **Docs**: [README](README.md) (setup) and [FSD](docs/FSD.md) (functional spec).
 
+[1.1.0]: https://github.com/JHarbourne/nearmark-app/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JHarbourne/nearmark-app/releases/tag/v1.0.0
