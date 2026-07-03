@@ -76,16 +76,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 
 <style scoped>
 .mp-overlay { position: fixed; inset: 0; background: rgba(27, 21, 48, 0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
-.mp-panel { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; width: min(880px, 100%); max-height: 86vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 24px 70px rgba(27, 21, 48, 0.35); }
+.mp-panel { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; width: min(960px, 100%); max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 24px 70px rgba(27, 21, 48, 0.35); }
 .mp-head { display: flex; align-items: center; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
 .mp-title { margin: 0; font-size: 16px; white-space: nowrap; }
 .mp-search { flex: 1; width: auto; }
 .mp-msg { padding: 56px 24px; text-align: center; color: var(--muted); }
-.mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; padding: 18px; overflow-y: auto; }
-.mp-item { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; cursor: pointer; padding: 0; display: flex; flex-direction: column; text-align: left; transition: border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
+.mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; padding: 20px; overflow-y: auto; }
+.mp-item { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; cursor: pointer; padding: 0; display: flex; flex-direction: column; text-align: left; transition: border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
 .mp-item:hover, .mp-item:focus-visible { border-color: var(--violet); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(107, 70, 229, 0.18); outline: none; }
 .mp-item.sel { border-color: var(--violet); box-shadow: 0 0 0 2px var(--violet); }
-.mp-item img { width: 100%; height: 104px; object-fit: cover; display: block; background: var(--bg); }
-.mp-name { font-size: 11px; padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+/* contain (not cover) so the WHOLE photo is visible, on a neutral tile */
+.mp-item img { width: 100%; height: 150px; object-fit: contain; display: block; background: var(--bg); }
+.mp-name { font-size: 12.5px; padding: 9px 10px; color: var(--ink); line-height: 1.35; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .mp-foot { padding: 10px 18px; border-top: 1px solid var(--line); }
 </style>

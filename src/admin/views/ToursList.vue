@@ -28,6 +28,7 @@
             <td><span class="badge" :class="t.status">{{ t.status }}</span></td>
             <td class="right">
               <button class="btn btn-ghost btn-sm" @click.stop="store.go('tourEditor', { id: t.id })">Edit</button>
+              <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview ↗</button>
               <button class="btn btn-ghost btn-sm" @click.stop="duplicate(t)">Duplicate</button>
               <button class="btn btn-danger btn-sm" @click.stop="remove(t)">Delete</button>
             </td>
@@ -42,7 +43,15 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { store } from '../store.js'
+import { config } from '../../config.js'
 import { routeLength, formatDistance } from '../../lib/geo.js'
+
+// Open the tour's detail screen in the public app (new tab). Same origin as the
+// admin, so it works even if VITE_PUBLIC_URL isn't set; drafts show when signed in.
+function preview(t) {
+  const base = config.publicUrl || window.location.origin
+  window.open(`${base}/?tour=${encodeURIComponent(t.id)}`, '_blank', 'noopener')
+}
 
 const dragIdx = ref(null)
 function drop(i) {

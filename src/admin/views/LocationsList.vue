@@ -27,11 +27,11 @@
     <div class="card">
       <table>
         <thead>
-          <tr style="white-space:nowrap;"><th>Title</th><th>City</th><th>Period</th><th>Status</th><th>Tour stop</th><th class="right">Actions</th></tr>
+          <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th>Tour stop</th><th class="right">Actions</th></tr>
         </thead>
         <tbody v-for="g in groups" :key="g.key">
           <tr v-if="g.title" class="group-head">
-            <th colspan="6" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
+            <th colspan="7" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
               <button type="button" @click="toggle(g.key)" :aria-expanded="String(!collapsed[g.key])"
                 style="width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:10px 14px; font-size:14px; font-weight:700; color:inherit; display:flex; align-items:center; gap:8px;">
                 <span style="width:12px;">{{ collapsed[g.key] ? '▸' : '▾' }}</span>
@@ -43,6 +43,10 @@
           <template v-if="!collapsed[g.key]">
             <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
             <tr v-for="l in g.locations" :key="g.key + '|' + l.id" class="row-clickable" @click="store.go('locationEditor', { id: l.id })">
+              <td style="width:56px;">
+                <img v-if="l.heroImageUrl" :src="l.heroImageUrl" alt="" loading="lazy" style="width:48px; height:34px; object-fit:cover; border-radius:5px; display:block; background:var(--bg);" />
+                <span v-else title="No photo yet" style="display:flex; align-items:center; justify-content:center; width:48px; height:34px; border-radius:5px; background:var(--bg); border:1px dashed var(--line); color:var(--muted); font-size:15px;">📷</span>
+              </td>
               <td style="font-weight:600;">
                 <span class="swatch" :style="{ background: l.hue, display:'inline-block', width:'14px', height:'14px', verticalAlign:'middle', marginRight:'8px' }"></span>
                 {{ l.title }}
@@ -62,7 +66,7 @@
           </template>
         </tbody>
         <tbody v-if="!totalShown">
-          <tr><td colspan="6" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
+          <tr><td colspan="7" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
         </tbody>
       </table>
     </div>
