@@ -182,7 +182,13 @@ function tourToRow(t) {
 // [[lat,lng],…] (Leaflet order) to store on the tour. Requires a signed-in admin.
 export async function computeWalkingRoute(coordinates) {
   const { data, error } = await supabase.functions.invoke('compute-route', { body: { coordinates } })
-  if (error) throw new Error(error.message || 'Route service unavailable.')
+  if (error) {
+    // invoke only gives a generic "non-2xx" message; dig out the function's own
+    // error text (e.g. missing key, or an OpenRouteService routing failure).
+    let detail = error.message || 'Route service unavailable.'
+    try { const body = await error.context?.json?.(); if (body?.error) detail = body.error } catch { /* non-JSON body */ }
+    throw new Error(detail)
+  }
   if (data?.error) throw new Error(data.error)
   if (!Array.isArray(data?.geometry) || data.geometry.length < 2) throw new Error('No route returned.')
   return data.geometry
