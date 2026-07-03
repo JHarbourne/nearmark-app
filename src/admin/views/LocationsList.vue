@@ -46,6 +46,7 @@
               <td style="font-weight:600;">
                 <span class="swatch" :style="{ background: l.hue, display:'inline-block', width:'14px', height:'14px', verticalAlign:'middle', marginRight:'8px' }"></span>
                 {{ l.title }}
+                <span v-if="l.guidedTourOnly" class="badge" style="margin-left:8px; font-weight:600; font-size:10px; letter-spacing:.3px; background:#efe9fb; color:#5b3ea8;" title="Guided tour only – hidden from Discover mode, shown only inside a guided tour">🔒 Tour only</span>
               </td>
               <td>{{ l.city }}</td>
               <td class="muted">{{ l.period }}</td>

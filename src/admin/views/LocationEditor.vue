@@ -61,6 +61,14 @@
           </div>
         </div>
 
+        <!-- Guided-tour-only: hide from Discover mode; only shown inside a guided tour -->
+        <label style="display:flex; align-items:flex-start; gap:9px; margin:18px 0; padding:12px 16px; border:1px solid var(--line); border-radius:12px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="form.guidedTourOnly" style="margin-top:3px;" />
+          <span>Guided tour only – hide from Discover mode
+            <br><span class="muted" style="font-weight:400; font-size:12.5px;">The stop only appears while someone is following a guided tour that includes it – never in proximity-based Discover browsing. Use for stops that only make sense in a narrated sequence.</span>
+          </span>
+        </label>
+
         <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
         <input id="loc-significance" type="text" v-model="form.significance" />
 
@@ -294,12 +302,13 @@ const blank = {
   heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
-  visibility: 'public', publishFrom: null, publishUntil: null,
+  visibility: 'public', publishFrom: null, publishUntil: null, guidedTourOnly: false,
   consentGiven: false, consentContact: '', consentRecordedAt: null, consentRecordedBy: '', consentNoticeVersion: '',
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
 if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
 if (form.showPhotoCredit === undefined) form.showPhotoCredit = true // pre-credit-toggle records
+if (form.guidedTourOnly === undefined) form.guidedTourOnly = false // pre-guided-tour-only records
 
 // ── privacy / publication helpers ──
 const overrideDates = ref(!!(form.publishFrom || form.publishUntil)) // open the override if one's already set

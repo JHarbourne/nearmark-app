@@ -67,6 +67,7 @@ function rowToLocation(r) {
     consentNoticeVersion: r.consent_notice_version || '',
     consentContact: r.consent_contact || '',
     coarsePin: !!r.coarse_pin,
+    guidedTourOnly: r.guided_tour_only === true, // hide from Discover mode; only show inside a guided tour
   }
 }
 function locationToRow(l) {
@@ -118,6 +119,7 @@ function locationToRow(l) {
     consent_notice_version: l.consentNoticeVersion || null,
     consent_contact: l.consentContact || null,
     coarse_pin: !!l.coarsePin,
+    guided_tour_only: l.guidedTourOnly === true,
   }
 }
 function rowToTour(r) {

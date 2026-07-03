@@ -238,10 +238,13 @@ function fmtRouteDistance(stops) {
 }
 
 // ── map markers for current mode ──
+// Discovery mode omits locations flagged "guided tour only" — they only make
+// sense inside a narrated tour sequence. Guided tours still include every stop.
+const discoverableLocations = computed(() => locations.value.filter((l) => !l.guidedTourOnly))
 const mapMarkers = computed(() =>
   mapMode.value === 'guided'
     ? tourStops.value
-    : locations.value
+    : discoverableLocations.value
 )
 
 // ── next stop ──
@@ -300,7 +303,7 @@ watch(
       }
     } else {
       if (openId.value || proximityId.value) return
-      const near = locations.value.find(
+      const near = discoverableLocations.value.find(
         (l) => l.lat != null && !shownDiscovery.value.includes(l.id) && distanceMeters(pos, l) <= (l.triggerRadius || 80)
       )
       if (near) {
