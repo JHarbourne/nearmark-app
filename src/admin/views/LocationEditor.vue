@@ -109,6 +109,7 @@
               {{ uploading.historic ? 'Uploading…' : '⬆ Upload image' }}
               <input type="file" accept="image/*" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
             </label>
+            <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('historicImageUrl')">🖼 Library</button>
             <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
           </div>
           <div>
@@ -118,6 +119,7 @@
               {{ uploading.hero ? 'Uploading…' : '⬆ Upload image' }}
               <input type="file" accept="image/*" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
             </label>
+            <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('heroImageUrl')">🖼 Library</button>
             <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
           </div>
         </div>
@@ -202,6 +204,7 @@
           {{ uploading.portrait ? 'Uploading…' : '⬆ Upload image' }}
           <input type="file" accept="image/*" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
         </label>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="openPicker('portraitUrl')">🖼 Library</button>
         <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
         <div class="field-row" v-if="form.portraitUrl">
           <div>
@@ -276,6 +279,8 @@
         </div>
       </div>
     </div>
+
+    <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
   </div>
 </template>
 
@@ -285,6 +290,7 @@ import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { config, wikiDomain } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
+import MediaPicker from '../components/MediaPicker.vue'
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
 const cities = config.cities
@@ -331,7 +337,6 @@ function onConsent(e) {
 // ── replace-undo + orphan cleanup (so old uploads don't pile up in storage) ──
 const undoBuf = reactive({})                                   // field -> value before the last replace
 const sessionUploads = []                                      // every file uploaded during this edit
-const originalImages = { heroImageUrl: form.heroImageUrl || '', historicImageUrl: form.historicImageUrl || '', audioUrl: form.audioUrl || '' }
 function undoReplace(field) { if (field in undoBuf) { form[field] = undoBuf[field]; delete undoBuf[field] } }
 function canUndo(field) { return field in undoBuf }
 const coords = ref(form.lat != null ? { lat: form.lat, lng: form.lng } : null)
@@ -414,6 +419,11 @@ async function up(e, field, kind, key) {
   }
 }
 
+// ── choose an existing photo from the media library (reuse across locations) ──
+const picker = reactive({ open: false, field: null })
+function openPicker(field) { picker.field = field; picker.open = true }
+function onPickMedia(url) { if (picker.field) form[picker.field] = url }
+
 const saving = ref(false)
 const flash = ref('')
 let flashTimer
@@ -434,11 +444,12 @@ async function save(status) {
       const saved = store.locations.find((l) => l.id === form.id)
       if (saved) form.recordId = saved.recordId
     }
-    // delete orphaned uploads: anything uploaded this session, or originally set,
-    // that the saved record no longer uses (no-op for external URLs)
-    const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.audioUrl].filter(Boolean))
-    const candidates = new Set([...sessionUploads, originalImages.heroImageUrl, originalImages.historicImageUrl, originalImages.audioUrl].filter(Boolean))
-    for (const url of candidates) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
+    // delete orphaned uploads: files uploaded during THIS edit that the saved
+    // record no longer uses (no-op for external URLs). We deliberately never
+    // delete a pre-existing image just because this location switched away from
+    // it – it may be a library photo reused by other locations.
+    const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.portraitUrl, form.audioUrl].filter(Boolean))
+    for (const url of sessionUploads) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
     flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)
