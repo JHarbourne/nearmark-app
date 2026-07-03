@@ -53,7 +53,7 @@
           <button class="btn btn-ghost btn-sm" @click="copy(m)">{{ copied === m.url ? 'Copied ✓' : 'Copy URL' }}</button>
           <button class="btn btn-danger btn-sm" @click="remove(m)">Delete</button>
           <span class="muted" style="font-size:12px;">{{ m.type }} · {{ sizeLabel(m) }} · Used by: {{ usedBy(m) }}</span>
-          <a :href="m.url" target="_blank" rel="noopener" class="muted" style="font-size:12px; margin-left:auto;">Open ↗</a>
+          <a :href="m.url" target="_blank" rel="noopener" class="muted" style="font-size:12px; margin-left:auto;">Open<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-left:4px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
         </div>
       </div>
     </div>

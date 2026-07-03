@@ -338,6 +338,14 @@ export const db = {
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),
   setTourOrder: (recordId, order) => run(supabase.from('tours').update({ sort_order: order }).eq('id', recordId)),
+  // persistent activity log (migration 018) – best-effort; never blocks a save
+  logActivity: (action, target, actor) =>
+    supabase.from('activity_log').insert({ action, target: target || null, actor: actor || null }),
+  recentActivity: async (limit = 20) => {
+    const { data, error } = await supabase.from('activity_log').select('*').order('created_at', { ascending: false }).limit(limit)
+    if (error) throw new Error(error.message)
+    return (data || []).map((r) => ({ action: r.action, title: r.target || '', who: r.actor || 'admin', at: new Date(r.created_at) }))
+  },
 }
 
 // ── auth ──

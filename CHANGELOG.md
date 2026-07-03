@@ -8,6 +8,15 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+### Added
+- Persistent **activity log** (migration 018): the Dashboard "Recent activity" feed now
+  survives refreshes and shows every admin's actions with a timestamp — so you can see
+  when a tester has been in and what they changed.
+
+### Changed
+- Replaced the slanted "↗" on external links/buttons with a proper external-link icon,
+  consistent with the other line icons.
+
 ### Fixed
 - Tour-detail stop numbers are larger and bolder, with a subtle shadow, and use the
   per-hue readable-ink colour (dark on light accents, white on dark) — so the small

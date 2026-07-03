@@ -166,7 +166,15 @@ export const store = reactive({
   },
   logActivity(action, title) {
     this.activity.unshift({ action, title, who: this.user?.email || 'admin', at: new Date() })
-    this.activity = this.activity.slice(0, 10)
+    this.activity = this.activity.slice(0, 20)
+    // persist to the shared activity_log (migration 018) so the feed survives
+    // refreshes and shows other admins' actions – best-effort, never blocks a save
+    if (supabaseConfigured) Promise.resolve(db.logActivity(action, title, this.user?.email)).catch(() => {})
+  },
+  // pull the durable feed (all admins) – called when the Dashboard opens
+  async loadActivity() {
+    if (!supabaseConfigured) return
+    try { this.activity = await db.recentActivity(20) } catch { /* keep the in-memory feed */ }
   },
 
   // ── writes ──

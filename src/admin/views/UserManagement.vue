@@ -95,7 +95,7 @@
       </p>
       <ul style="list-style:none; margin:0; padding:0; display:grid; gap:10px;">
         <li v-for="s in services" :key="s.name" style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
-          <a :href="s.url" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="text-decoration:none; min-width:128px; text-align:left;">{{ s.name }} ↗</a>
+          <a :href="s.url" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="text-decoration:none; min-width:128px; text-align:left;">{{ s.name }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
           <span class="muted" style="font-size:13px;">{{ s.what }}</span>
         </li>
       </ul>

@@ -31,8 +31,8 @@
       <div style="margin-top:auto; padding:12px 8px; font-size:13px;">
         <div style="font-weight:600; word-break:break-all;">{{ store.user?.email }}</div>
         <div class="muted" style="font-size:12px;">Admin</div>
-        <a href="/" target="_blank" class="navlink" style="margin-top:10px; padding-left:0;">↗ View live app</a>
-        <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="padding-left:0;">↗ Suggest an improvement</a>
+        <a href="/" target="_blank" class="navlink" style="margin-top:10px; padding-left:0;">View live app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
+        <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="padding-left:0;">Suggest an improvement<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
         <button class="navlink" style="padding-left:0;" @click="store.signOut()">Sign out</button>
       </div>
     </aside>
