@@ -107,7 +107,7 @@
             @drop="drop(i)"
             @dragend="dragIdx = null"
           >
-            <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: byId[id]?.hue || '#ccc', color: ON_ACCENT_INK }">{{ i + 1 }}</span>
+            <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: byId[id]?.hue || '#ccc', color: readableInk(byId[id]?.hue || '#ccc') }">{{ i + 1 }}</span>
             <span style="flex:1;">{{ byId[id]?.title || id }}<span v-if="ov(id).title || ov(id).blurb" class="hint" style="margin-left:6px;">· custom text</span></span>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="moveStop(i, -1)" :aria-label="`Move ${byId[id]?.title || id} up`">▲</button>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
@@ -164,7 +164,7 @@ import { routeLength } from '../../lib/geo.js'
 import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 import MediaPicker from '../components/MediaPicker.vue'
-import { ON_ACCENT_INK } from '../../lib/tokens.js'
+import { readableInk } from '../../lib/tokens.js'
 
 const cities = config.cities
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))

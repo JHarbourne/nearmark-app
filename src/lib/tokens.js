@@ -27,10 +27,27 @@ export const HUE_OPTIONS = [
   { name: 'magenta', value: HUE.magenta },
 ]
 
-// Text colour for a number/label sitting ON a HUE badge (map pins, tour-stop
-// numbers). White fails WCAG on most accents (amber ~1.6:1); this dark ink clears
-// AA (≥5:1) on every HUE and on the grey "visited" state, in light or dark themes.
+// Dark text used on light/bright accents (clears AA on all seven HUEs).
 export const ON_ACCENT_INK = '#1c1526'
+
+// Pick the WCAG-best text colour for a number/label sitting ON a given colour:
+// dark ink on light/bright hues (where dark far out-scores white – e.g. amber
+// 11:1, green 7:1, blue 6:1), white on genuinely dark hues (navy, custom darks)
+// where dark would fail. Works for any hue, so custom colours stay readable too.
+const _lin = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+const _lum = (hex) => {
+  let h = String(hex).replace('#', '')
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  const [r, g, b] = [0, 2, 4].map((i) => _lin(parseInt(h.slice(i, i + 2), 16) / 255))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+const _ratio = (a, b) => { const hi = Math.max(a, b), lo = Math.min(a, b); return (hi + 0.05) / (lo + 0.05) }
+export function readableInk(hex) {
+  try {
+    const L = _lum(hex)
+    return _ratio(L, 1) > _ratio(L, _lum(ON_ACCENT_INK)) ? '#ffffff' : ON_ACCENT_INK
+  } catch { return ON_ACCENT_INK }
+}
 
 // Active palette + fonts → CSS variables (see styles/base.css :root for the var
 // names). These are the selected theme's, re-exported so theme.js and every
