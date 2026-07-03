@@ -18,6 +18,7 @@ export const store = reactive({
 
   route: 'dashboard',
   params: {},
+  dirtyCheck: null, // editors register a () => boolean here; go() confirms before leaving
 
   locations: [],
   tours: [],
@@ -137,8 +138,17 @@ export const store = reactive({
     if (error) throw new Error(error.message)
   },
 
-  // ── routing ──
-  go(route, params = {}) { this.route = route; this.params = params },
+  // ── routing (with an unsaved-changes guard) ──
+  go(route, params = {}) {
+    if (this.dirtyCheck && this.dirtyCheck()) {
+      if (typeof window !== 'undefined' && !window.confirm('You have unsaved changes on this page. Leave without saving?')) return
+      this.dirtyCheck = null
+    }
+    this.route = route
+    this.params = params
+  },
+  registerDirtyCheck(fn) { this.dirtyCheck = fn },
+  clearDirtyCheck() { this.dirtyCheck = null },
 
   // ── data ──
   async load() {

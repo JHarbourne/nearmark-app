@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted, onUnmounted } from 'vue'
 import { store } from '../store.js'
 import { routeLength } from '../../lib/geo.js'
 import { config } from '../../config.js'
@@ -185,6 +185,13 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   eventStart: null, eventEnd: null, takedownAt: null, routeGeometry: null,
 })
 if (form.routeGeometry === undefined) form.routeGeometry = null // tours predating the route column
+
+// ── unsaved-changes guard: warn before leaving (in-app nav + tab close/reload) ──
+const baseline = ref(JSON.stringify(form))
+const isDirty = () => JSON.stringify(form) !== baseline.value
+function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
+onMounted(() => { store.registerDirtyCheck(isDirty); window.addEventListener('beforeunload', onBeforeUnload) })
+onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
 if (!form.coverPosition) form.coverPosition = '50% 50%'
 if (!form.stopOverrides) form.stopOverrides = {} // older tours predate this column
 if (form.showCoverCredit === undefined) form.showCoverCredit = true // pre-credit-toggle tours
@@ -347,6 +354,7 @@ async function save(status) {
     for (const url of coverUploads) {
       if (url !== keep) await store.removeMedia(url).catch(() => {})
     }
+    baseline.value = JSON.stringify(form) // saved → no longer "dirty"
     flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)

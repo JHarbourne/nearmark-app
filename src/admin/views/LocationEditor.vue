@@ -318,7 +318,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, watch } from 'vue'
+import { reactive, ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { config, wikiDomain } from '../../config.js'
@@ -349,6 +349,13 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...bla
 if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
 if (form.showPhotoCredit === undefined) form.showPhotoCredit = true // pre-credit-toggle records
 if (form.guidedTourOnly === undefined) form.guidedTourOnly = false // pre-guided-tour-only records
+
+// ── unsaved-changes guard: warn before leaving (in-app nav + tab close/reload) ──
+const baseline = ref(JSON.stringify(form))
+const isDirty = () => JSON.stringify(form) !== baseline.value
+function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
+onMounted(() => { store.registerDirtyCheck(isDirty); window.addEventListener('beforeunload', onBeforeUnload) })
+onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
 
 // ── privacy / publication helpers ──
 const overrideDates = ref(!!(form.publishFrom || form.publishUntil)) // open the override if one's already set
@@ -484,6 +491,7 @@ async function save(status) {
     // it – it may be a library photo reused by other locations.
     const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.portraitUrl, form.audioUrl].filter(Boolean))
     for (const url of sessionUploads) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
+    baseline.value = JSON.stringify(form) // saved → no longer "dirty"
     flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)
