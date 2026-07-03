@@ -61,7 +61,7 @@ import TourEditor from './views/TourEditor.vue'
 import MediaLibrary from './views/MediaLibrary.vue'
 import UserManagement from './views/UserManagement.vue'
 
-const bars = ['#FF4D5E', '#FF8C42', '#FFC53D', '#2FBF71', '#3D9BFF', '#9B6DFF']
+const bars = config.brandBars // themed per deployment (matches the login + public app)
 const nav = [
   { route: 'dashboard', label: 'Dashboard' },
   { route: 'locations', label: 'Locations' },

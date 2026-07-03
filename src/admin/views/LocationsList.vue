@@ -45,7 +45,7 @@
             <tr v-for="l in g.locations" :key="g.key + '|' + l.id" class="row-clickable" @click="store.go('locationEditor', { id: l.id })">
               <td style="width:56px;">
                 <img v-if="l.heroImageUrl" :src="l.heroImageUrl" alt="" loading="lazy" style="width:48px; height:34px; object-fit:cover; border-radius:5px; display:block; background:var(--bg);" />
-                <span v-else title="No photo yet" style="display:flex; align-items:center; justify-content:center; width:48px; height:34px; border-radius:5px; background:var(--bg); border:1px dashed var(--line); color:var(--muted); font-size:15px;">📷</span>
+                <span v-else title="No photo yet" style="display:block; width:48px; height:34px; border-radius:5px; background:var(--bg); border:1px dashed var(--line);"></span>
               </td>
               <td style="font-weight:600;">
                 <span class="swatch" :style="{ background: l.hue, display:'inline-block', width:'14px', height:'14px', verticalAlign:'middle', marginRight:'8px' }"></span>

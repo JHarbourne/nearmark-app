@@ -1,6 +1,12 @@
 <!-- A6 Tour editor (BRD §11.6): metadata + drag-to-reorder stops + live route map. -->
 <template>
   <div>
+    <!-- inline icon sprite, referenced by the compact cover-image buttons below -->
+    <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4" /><path d="m6 10 6-6 6 6" /><path d="M4 20h16" /></symbol>
+      <symbol id="ic-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.6" /><path d="m21 15-5-5L5 21" /></symbol>
+    </svg>
+
     <div class="pagehead">
       <h1>{{ isNew ? 'New tour' : 'Edit tour' }}</h1>
       <button class="btn btn-ghost" @click="back">← Back to list</button>
@@ -29,12 +35,19 @@
         <textarea id="tour-description" v-model="form.description" rows="3"></textarea>
 
         <label for="tour-cover-url">Cover image <span class="hint">shown on the tour list</span></label>
-        <input id="tour-cover-url" type="url" v-model="form.coverImageUrl" placeholder="https://… or upload ↓" />
-        <label class="btn btn-ghost btn-sm" style="margin-top:6px; display:inline-block; cursor:pointer;">
-          {{ uploadingCover ? 'Uploading…' : '⬆ Upload cover image' }}
-          <input type="file" accept="image/*" style="display:none" @change="uploadCover" />
-        </label>
-        <button v-if="coverUndo !== undefined" type="button" class="btn btn-ghost btn-sm" style="margin:6px 0 0 6px;" @click="undoCover">↩ Undo</button>
+        <div class="media-input">
+          <input id="tour-cover-url" type="url" v-model="form.coverImageUrl" placeholder="Paste a URL, or use the icons →" />
+          <div class="media-actions">
+            <label class="icon-btn" :class="{ busy: uploadingCover }" :title="uploadingCover ? 'Uploading…' : 'Upload a cover image from your device'">
+              <svg class="ic"><use href="#ic-upload" /></svg>
+              <input type="file" accept="image/*" aria-label="Upload a cover image from your device" style="display:none" @change="uploadCover" />
+            </label>
+            <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a cover image from the media library" @click="openPicker('coverImageUrl')">
+              <svg class="ic"><use href="#ic-image" /></svg>
+            </button>
+          </div>
+        </div>
+        <button v-if="coverUndo !== undefined" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoCover">↩ Undo</button>
         <div v-if="form.coverImageUrl" role="button" tabindex="0" :style="focalBox(form.coverImageUrl, form.coverPosition)" aria-label="Cover image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'coverPosition')" @keydown="nudgeFocal($event,'coverPosition')">
           <span :style="focalDot(form.coverPosition)"></span>
         </div>
@@ -130,6 +143,8 @@
         <p class="muted" style="font-size:13px; margin-top:10px;">Stops: {{ form.stopIds.length }} · auto duration ≈ {{ autoMins }} min</p>
       </div>
     </div>
+
+    <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
   </div>
 </template>
 
@@ -139,6 +154,7 @@ import { store } from '../store.js'
 import { routeLength } from '../../lib/geo.js'
 import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
+import MediaPicker from '../components/MediaPicker.vue'
 
 const cities = config.cities
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
@@ -244,10 +260,14 @@ function nudgeFocal(e, field) {
 }
 
 const uploadingCover = ref(false)
-const originalCover = form.coverImageUrl || ''
 const coverUploads = []
 const coverUndo = ref(undefined)   // previous value before the last replace
 function undoCover() { if (coverUndo.value !== undefined) { form.coverImageUrl = coverUndo.value; coverUndo.value = undefined } }
+
+// choose an existing cover photo from the media library (reuse across tours)
+const picker = reactive({ open: false, field: null })
+function openPicker(field) { picker.field = field; picker.open = true }
+function onPickMedia(url) { if (picker.field) form[picker.field] = url }
 async function uploadCover(e) {
   const file = e.target.files[0]
   if (!file) return
@@ -276,9 +296,10 @@ async function save(status) {
       const saved = store.tours.find((t) => t.id === form.id)
       if (saved) form.recordId = saved.recordId
     }
-    // delete orphaned cover uploads no longer used
+    // delete orphaned cover uploads from THIS edit only – never a pre-existing
+    // library image, which may be reused by other tours.
     const keep = form.coverImageUrl
-    for (const url of new Set([...coverUploads, originalCover].filter(Boolean))) {
+    for (const url of coverUploads) {
       if (url !== keep) await store.removeMedia(url).catch(() => {})
     }
     flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
@@ -292,3 +313,19 @@ async function save(status) {
 }
 function back() { store.go('tours') }
 </script>
+
+<style scoped>
+/* compact cover field: upload / library actions sit as icons inside the field */
+.media-input { position: relative; }
+.media-input > input { padding-right: 78px; }
+.media-actions { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 2px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0; margin: 0; border: none; border-radius: 8px;
+  background: none; color: var(--muted); cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg); color: var(--ink); }
+.icon-btn:focus-visible { outline: 2px solid var(--violet); outline-offset: 1px; }
+.icon-btn.busy { opacity: 0.5; cursor: default; }
+.icon-btn .ic { width: 18px; height: 18px; display: block; }
+</style>
