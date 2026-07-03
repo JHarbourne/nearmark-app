@@ -11,3 +11,7 @@ dist/
 
 # macOS
 .DS_Store
+
+# Supabase CLI local scratch state (never commit)
+supabase/.temp/
+supabase/.branches/
