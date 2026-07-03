@@ -53,6 +53,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { ON_ACCENT_INK } from '../lib/tokens.js'
 const props = defineProps({
   tour: { type: Object, required: true },
   stops: { type: Array, default: () => [] },
@@ -115,7 +116,7 @@ function badge(s) {
   return {
     position: 'absolute', top: '-5px', left: '-5px', width: '23px', height: '23px', borderRadius: '8px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 700, fontSize: '13px', color: 'var(--bg)', background: s.hue, border: '2px solid var(--bg)',
+    fontWeight: 700, fontSize: '13px', color: ON_ACCENT_INK, background: s.hue, border: '2px solid var(--bg)',
   }
 }
 </script>

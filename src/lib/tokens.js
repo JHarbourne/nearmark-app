@@ -27,6 +27,11 @@ export const HUE_OPTIONS = [
   { name: 'magenta', value: HUE.magenta },
 ]
 
+// Text colour for a number/label sitting ON a HUE badge (map pins, tour-stop
+// numbers). White fails WCAG on most accents (amber ~1.6:1); this dark ink clears
+// AA (≥5:1) on every HUE and on the grey "visited" state, in light or dark themes.
+export const ON_ACCENT_INK = '#1c1526'
+
 // Active palette + fonts → CSS variables (see styles/base.css :root for the var
 // names). These are the selected theme's, re-exported so theme.js and every
 // importer keep working unchanged; switch the whole palette with VITE_THEME.
