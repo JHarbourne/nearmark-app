@@ -10,6 +10,8 @@
       </label>
     </div>
 
+    <p class="muted" style="font-size:12.5px; margin:-6px 0 14px;">Images are optimised automatically on upload (resized &amp; compressed). For a quick upload, use a web-sized landscape JPG (around 1600&nbsp;px wide, or smaller), not a full-resolution phone photo.</p>
+
     <div class="toolbar">
       <input type="text" v-model="q" placeholder="Search name / credit…" aria-label="Search media by name or credit" style="max-width:240px;" />
       <select v-model="typeFilter" aria-label="Filter by media type" style="max-width:150px;">

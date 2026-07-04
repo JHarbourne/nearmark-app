@@ -21,6 +21,11 @@ The [README](README.md) is documentation; this file is the release history.
   system serif); the cover headline uses a heavier cut (weight 800) and the mode-button
   labels a heavier/slightly larger cut.
 
+### Added
+- Image-size guidance for content editors (in the Location & Tour editors and the Media
+  library): a note that uploads are optimised automatically, with a recommended web-sized
+  landscape JPG (~1600px wide) so people don't upload full-resolution phone photos.
+
 ### Fixed
 - The **Install-app prompt** used a hardcoded light-lilac text colour (built for the dark
   theme) that was unreadable on light themes; it now uses theme-aware `--ink-muted`, and
