@@ -79,7 +79,7 @@
         <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
         <input id="loc-significance" type="text" v-model="form.significance" />
 
-        <label for="loc-summary">Summary text <span class="hint">~80–100 words</span></label>
+        <label for="loc-summary">Text <span class="hint">~80–100 words</span></label>
         <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
 
         <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
@@ -102,7 +102,7 @@
         </div>
 
         <!-- historic "before" image is optional: on → before/after slider, off → single photo (full width) -->
-        <label style="display:flex; align-items:center; gap:9px; margin:2px 0 8px; font-weight:500; cursor:pointer;">
+        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
           <input type="checkbox" v-model="showHistoric" />
           <span>Add a historic “before” photo <span class="hint">turns the photo into a before/after slider</span></span>
         </label>

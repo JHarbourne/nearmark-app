@@ -28,6 +28,9 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Location editor tidy-ups: the narrative field is labelled **"Text"** (not "Summary text",
+  since it isn't a summary), and the accent-colour swatches now have breathing room above the
+  "Add a historic before photo" toggle so they don't read as one control.
 - **Media-library picker** now lays photos out as a **masonry grid** — each thumbnail keeps
   the photo's own shape, so the whole image is visible (wide panoramas no longer collapse to
   a thin strip) with its filename beneath.

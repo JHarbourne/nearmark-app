@@ -58,7 +58,8 @@ Notable fields: `title`, `city`, `period`, `significance`, `summary`, `hue` (acc
 `lat`/`lng`, `trigger_radius`; imagery (`hero_image_url`, `historic_image_url`,
 `portrait_url`, focal `*_position`, alt text, slider labels, `caption`); credits
 (`photo_credit`, `historic_credit`, + `show_photo_credit` toggle); `wiki_url` +
-`link_label` (per-location CTA label); `audio_url`/`audio_duration`, `video_url`;
+`link_label` (per-location CTA label); `audio_url`/`audio_duration` + `transcript`
+(plain-text audio transcript, WCAG 1.2.1), `video_url`;
 `related_ids`; `status` (draft/published); privacy (`visibility`, consent fields,
 `publish_from`/`publish_until`); `guided_tour_only`.
 
@@ -95,6 +96,8 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 015 | `guided_tour_only` flag |
 | 016 | per-location `link_label` |
 | 017 | tour `route_geometry` (walking routes) |
+| 018 | persistent activity log |
+| 019 | per-location audio `transcript` (WCAG 1.2.1) |
 
 ---
 
@@ -109,9 +112,10 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
 - **Story card.** Photo (with focal point), category/period tag, title, narrative, optional
-  **before/after slider**, second photo, audio narration, credits (respecting the
-  show/hide toggles), an external link (label = `link_label` or the app default
-  `VITE_STORY_LINK_LABEL`), and "nearby stories".
+  **before/after slider**, second photo, audio narration (with a collapsible **"Show
+  transcript"** panel when a transcript exists — `[bracketed]` non-speech cues rendered
+  muted/italic), credits (respecting the show/hide toggles), an external link (label =
+  `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories".
 - **Map.** Leaflet + OSM tiles; hue-coloured numbered pins (dark/white number chosen per
   hue for contrast), "you are here" GPS marker, route polyline.
 - **Share.** A sheet with a brand-coloured **QR code** (primary, for in-person sharing),
@@ -136,9 +140,11 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   (ghost box when none) so missing photos are obvious; row actions Edit · Preview ·
   Duplicate · Delete.
 - **Location editor.** Full content form; click-to-place map pin; accent picker; image
-  fields with compact **upload** + **media-library picker** icons, in-place replace, focal
-  point, alt/caption/credits + credit toggle; audio; related locations; visibility/consent;
-  `guided_tour_only`; live story-card preview.
+  fields with compact **upload** + **media-library picker** icons (photos shown whole in a
+  masonry grid), in-place replace, focal point, alt/caption/credits + credit toggle; audio
+  (with a **transcript** field + a missing-transcript accessibility warning when audio is
+  present); related locations; visibility/consent; `guided_tour_only`; live story-card
+  preview. Tour titles are capped at 21 characters so the hero title stays on one line.
 - **Tours list & editor.** Drag-to-reorder tours; editor with cover image (same icon
   controls), drag/keyboard stop reordering, per-stop tour overrides, **Calculate walking
   route** button + numbered route preview, collapsible event window.
@@ -169,8 +175,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 Target **WCAG 2.1 AA**. Keyboard paths for every pointer action (e.g. list rows are a
 mouse shortcut, the Edit button the keyboard path); focus traps + Esc on dialogs; a main
 landmark and page headings; `readableInk()` picks dark/white number colour per hue for
-contrast on map pins and tour badges. A GitHub axe-core scanner runs in CI for DOM-level
-checks (it cannot evaluate SVG-over-map contrast — those are handled in code).
+contrast on map pins and tour badges. Audio narration can carry a plain-text **transcript**
+(WCAG 1.2.1); the editor warns when audio has none. A GitHub axe-core scanner runs in CI for
+DOM-level checks (it cannot evaluate SVG-over-map contrast — those are handled in code).
 
 ---
 
