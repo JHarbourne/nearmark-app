@@ -10,6 +10,9 @@ The [README](README.md) is documentation; this file is the release history.
 
 ### Added
 - **App version in the footer** (from `package.json`, baked at build).
+- **Dashboard "What's new" link** — the admin Dashboard shows the running version and links
+  to the GitHub Releases page (dated version history + notes). Defaults to the core repo's
+  releases; overridable via `VITE_RELEASES_URL` / `VITE_REPO_URL`.
 - **Guided-tour media pre-caching** — opening a tour pre-fetches all its stops' images +
   audio so the whole route works offline before the walker loses signal (best-effort;
   skips offline / Data Saver).

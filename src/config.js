@@ -52,6 +52,10 @@ export const config = {
   contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph – blank hides it
   wikiBaseUrl: pick(env.VITE_WIKI_BASE_URL, ''),               // base for article links + admin URL validation
   repoUrl: pick(env.VITE_REPO_URL, ''),                        // admin "source code" link – blank hides it
+  // "What's new" / release-notes link shown in the admin. Defaults to the core
+  // repo's GitHub Releases (every deployment runs this codebase); a fork can set
+  // VITE_RELEASES_URL, or VITE_REPO_URL (its releases are then repo/releases).
+  releasesUrl: pick(env.VITE_RELEASES_URL, pick(env.VITE_REPO_URL, 'https://github.com/JHarbourne/nearmark-app').replace(/\/$/, '') + '/releases'),
 
   // ── integrations ──
   supabaseUrl: pick(env.VITE_SUPABASE_URL, ''),
