@@ -82,7 +82,7 @@
           <a v-if="loc.wikiUrl" :href="loc.wikiUrl" target="_blank" rel="noopener" :style="wikiLink" @click="track('wiki_clicked', { location_id: loc.id, title: loc.title })">
             <span style="display: flex; align-items: center; gap: 11px;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 4 h9 a2 2 0 0 1 2 2 v13 a1 1 0 0 1-1.5 0.85 L12 18 l-2.5 1.85 A1 1 0 0 1 8 19 V6 a2 2 0 0 1 2-2 Z" stroke="var(--accent-warm)" stroke-width="1.7" stroke-linejoin="round"/></svg>
-              <span style="font-size: 14.5px; font-weight: 600;">{{ loc.linkLabel || storyLinkLabel }}</span>
+              <span style="font-size: 14.5px; font-weight: 600;">{{ loc.linkLabel || urlLabel }}</span>
             </span>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11 L11 3 M5 3 H11 V9" stroke="var(--ink-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
@@ -120,9 +120,11 @@
 import { computed, watch, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { useAudio } from '../composables/useAudio.js'
 import { track } from '../lib/analytics.js'
-import { config } from '../config.js'
-
-const storyLinkLabel = config.storyLinkLabel
+// No custom link label? Show the link's web address (host) rather than a generic
+// app-wide default, so it's always accurate (a church isn't an "artist's website").
+const urlLabel = computed(() => {
+  try { return new URL(props.loc.wikiUrl).hostname.replace(/^www\./, '') } catch { return props.loc.wikiUrl || '' }
+})
 
 const props = defineProps({
   loc: { type: Object, required: true },

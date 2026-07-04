@@ -23,6 +23,11 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Story-card external link: with no per-location label set, it now shows the link's **web
+  address** (e.g. "facebook.com") instead of the app-wide default — always accurate (a
+  church isn't an "artist's website").
+- Location editor: the historic "before" image is now **opt-in via a toggle**; a single
+  photo fills the full width instead of being squashed into half a column.
 - Media cache raised to 500 entries (was 200) so a full tour's pre-cached images fit.
 - Editors now use a single **Save** button with a **Published / Draft** toggle (replacing
   the separate "Save draft" / "Publish" buttons and the Tour editor's status dropdown).
@@ -63,6 +68,8 @@ The [README](README.md) is documentation; this file is the release history.
   consistent with the other line icons.
 
 ### Fixed
+- Tour-detail **back button** no longer hidden behind the "Walking Tour" tag on tours with
+  a long (two-line) title.
 - Tour-detail stop numbers are larger and bolder, with a subtle shadow, and use the
   per-hue readable-ink colour (dark on light accents, white on dark) — so the small
   badges over photo thumbnails are legible on every accent colour.

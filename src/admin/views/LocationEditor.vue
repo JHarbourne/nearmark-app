@@ -86,8 +86,8 @@
         <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
         <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
         <template v-if="form.wikiUrl">
-          <label for="loc-link-label">Link button text <span class="hint">optional · blank uses “{{ defaultLinkLabel }}”</span></label>
-          <input id="loc-link-label" type="text" v-model="form.linkLabel" :placeholder="defaultLinkLabel" maxlength="60" />
+          <label for="loc-link-label">Link button text <span class="hint">optional · blank shows the web address</span></label>
+          <input id="loc-link-label" type="text" v-model="form.linkLabel" :placeholder="linkUrlLabel || 'e.g. Visit the church website'" maxlength="60" />
         </template>
 
         <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
@@ -101,12 +101,17 @@
           <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
-        <p class="muted" style="font-size:12.5px; margin:0 0 8px;">These two images form the before/after slider – the columns are in the same order they appear on the story card.</p>
+        <!-- historic "before" image is optional: on → before/after slider, off → single photo (full width) -->
+        <label style="display:flex; align-items:center; gap:9px; margin:2px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showHistoric" />
+          <span>Add a historic “before” photo <span class="hint">turns the photo into a before/after slider</span></span>
+        </label>
+        <p v-if="showHistoric" class="muted" style="font-size:12.5px; margin:0 0 8px;">The two images form the before/after slider – historic (“before”) on the left, hero (“today”) on the right.</p>
         <p class="muted" style="font-size:12px; margin:0 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
 
         <!-- image source + upload -->
-        <div class="field-row">
-          <div>
+        <div :class="{ 'field-row': showHistoric }">
+          <div v-if="showHistoric">
             <label for="loc-historic-url">Historic image <span class="hint">“before” · slider LEFT</span></label>
             <div class="media-input">
               <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="Paste a URL, or use the icons →" />
@@ -141,7 +146,7 @@
         </div>
 
         <!-- focal point -->
-        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
           <div>
             <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition)" aria-label="Historic image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
               <span :style="focalDot(form.historicPosition)"></span>
@@ -157,7 +162,7 @@
         </div>
 
         <!-- alt text -->
-        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
           <div>
             <template v-if="form.historicImageUrl">
               <label for="loc-historic-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
@@ -183,14 +188,14 @@
             <input id="loc-hero-slabel" type="text" v-model="form.imageLabel" placeholder="e.g. Today · Reconstruction" />
           </div>
         </div>
-        <button v-if="form.heroImageUrl || form.historicImageUrl" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="swapImages">⇄ Swap hero / historic images</button>
+        <button v-if="showHistoric && form.historicImageUrl && form.heroImageUrl" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="swapImages">⇄ Swap hero / historic images</button>
 
         <template v-if="form.heroImageUrl || form.historicImageUrl">
           <label for="loc-caption">Image caption <span class="hint">shown under the photo · also read by screen readers, in place of alt text</span></label>
           <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Café Royal’s Domino Room, then and now" />
         </template>
         <!-- credits: left column = historic (left) image, right column = hero (right) image -->
-        <div class="field-row" v-if="form.historicImageUrl || form.heroImageUrl">
+        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
           <div>
             <template v-if="form.historicImageUrl">
               <label for="loc-historic-credit">Historic photo credit <span class="hint">the “before” image</span></label>
@@ -321,7 +326,8 @@ import PlaceMap from '../components/PlaceMap.vue'
 import MediaPicker from '../components/MediaPicker.vue'
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
-const defaultLinkLabel = config.storyLinkLabel
+// the URL's host, shown as the placeholder / the app-side label when no custom text is set
+const linkUrlLabel = computed(() => { try { return new URL(form.wikiUrl).hostname.replace(/^www\./, '') } catch { return '' } })
 const cities = config.cities
 
 const hues = HUE_OPTIONS
@@ -344,6 +350,11 @@ const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...bla
 if (!form.visibility) form.visibility = 'public' // records created before the privacy migration
 if (form.showPhotoCredit === undefined) form.showPhotoCredit = true // pre-credit-toggle records
 if (form.guidedTourOnly === undefined) form.guidedTourOnly = false // pre-guided-tour-only records
+
+// historic "before" image is opt-in (turns the photo into a before/after slider);
+// switching it off clears the image so the app shows a single, full-width photo.
+const showHistoric = ref(!!form.historicImageUrl)
+watch(showHistoric, (on) => { if (!on) form.historicImageUrl = '' })
 
 // ── unsaved-changes guard: warn before leaving (in-app nav + tab close/reload) ──
 const baseline = ref(JSON.stringify(form))

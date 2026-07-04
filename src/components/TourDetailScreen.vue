@@ -81,7 +81,7 @@ const creditLine = {
   maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 const backBtn = {
-  position: 'absolute', top: '56px', left: '18px', width: '38px', height: '38px', borderRadius: '50%',
+  position: 'absolute', top: '56px', left: '18px', zIndex: 3, width: '38px', height: '38px', borderRadius: '50%',
   background: 'rgba(23,17,31,0.5)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 }
