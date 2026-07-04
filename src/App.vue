@@ -6,6 +6,7 @@
 <template>
   <div class="app-stage">
     <main class="phone-frame">
+      <AppNotices />
       <!-- loading -->
       <div v-if="loading" :style="loadingWrap">
         <span style="display:flex;gap:3px;">
@@ -134,6 +135,7 @@ import LocationPrompt from './components/LocationPrompt.vue'
 import StoryCard from './components/StoryCard.vue'
 import CompletionScreen from './components/CompletionScreen.vue'
 import SettingsSheet from './components/SettingsSheet.vue'
+import AppNotices from './components/AppNotices.vue'
 
 import { fetchLocations, fetchTours } from './lib/supabase.js'
 import { precacheTourMedia } from './lib/precache.js'

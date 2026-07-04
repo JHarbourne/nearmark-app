@@ -8,7 +8,19 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+### Added
+- **App version in the footer** (from `package.json`, baked at build).
+- **Guided-tour media pre-caching** — opening a tour pre-fetches all its stops' images +
+  audio so the whole route works offline before the walker loses signal (best-effort;
+  skips offline / Data Saver).
+- **Offline banner** — a discreet "you're offline, photos may not load" notice while the
+  device is offline.
+- **Update notice** — when a newer release is deployed, a "tap to update" banner. It's
+  gated on the version number (only bumped at releases) so it stays quiet during rapid
+  edit-time deploys, and is dismissible per-version.
+
 ### Changed
+- Media cache raised to 500 entries (was 200) so a full tour's pre-cached images fit.
 - Editors now use a single **Save** button with a **Published / Draft** toggle (replacing
   the separate "Save draft" / "Publish" buttons and the Tour editor's status dropdown).
 - Buttons/CTAs read a themeable **`--font-button`** (a theme may set a sans where its

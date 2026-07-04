@@ -48,6 +48,15 @@ export default defineConfig(({ mode }) => {
           return out
         },
       },
+      // Emit /version.json (the package.json version). The running app fetches it
+      // fresh (it's not in the SW precache globs) to detect when a newer release
+      // has been deployed, and prompt the user to refresh.
+      {
+        name: 'nearmark-version-json',
+        generateBundle() {
+          this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version: pkg.version }) })
+        },
+      },
       // PWA service worker + web manifest. The manifest is generated from env so
       // the codebase carries no organisation-specific branding; a deployment sets
       // its identity in .env. The SW makes the app installable and work offline.
@@ -109,7 +118,7 @@ export default defineConfig(({ mode }) => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'supabase-media',
-                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
