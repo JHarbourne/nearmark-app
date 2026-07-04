@@ -136,6 +136,7 @@ import CompletionScreen from './components/CompletionScreen.vue'
 import SettingsSheet from './components/SettingsSheet.vue'
 
 import { fetchLocations, fetchTours } from './lib/supabase.js'
+import { precacheTourMedia } from './lib/precache.js'
 import { config } from './config.js'
 import { theme } from './theme.js'
 import { track } from './lib/analytics.js'
@@ -323,6 +324,13 @@ watch(
   },
   { deep: true }
 )
+
+// Warm the media cache the moment a tour is opened (tap-through or ?tour= deep
+// link), so images + audio for every stop are cached before the walker sets off
+// and loses signal. Best-effort and non-blocking (see lib/precache.js).
+watch(screen, (s) => {
+  if (s === 'tourDetail') precacheTourMedia(activeTour.value, tourStops.value)
+})
 
 // ── navigation ──
 function grantLocation() { geo.start(); goCity() }

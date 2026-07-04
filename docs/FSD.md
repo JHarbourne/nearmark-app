@@ -39,8 +39,10 @@ and PostHog.
   (`VITE_ICON_URL`) into **both** HTML entry points. Pushes to `main` auto-deploy on Vercel.
 - **Offline (PWA).** `vite-plugin-pwa` (Workbox, `autoUpdate`) precaches the app shell and
   adds runtime caching: OSM tiles (CacheFirst), Supabase REST (NetworkFirst), Supabase
-  Storage media (CacheFirst) and Google Fonts. The admin is excluded from the offline
-  shell (online-only).
+  Storage media (CacheFirst) and Google Fonts. On top of that lazy caching, **opening a tour
+  pre-fetches every stop's images + audio** (`src/lib/precache.js`) so a guided walk is fully
+  cached before the walker loses signal — best-effort, and skipped when offline or under Data
+  Saver. The admin is excluded from the offline shell (online-only).
 - **Canonical host.** A tiny inline guard in each HTML entry redirects `www.` → apex in
   normal browser tabs (installed PWAs excepted), backing up the server 308.
 
@@ -118,7 +120,8 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   shareable, and used by the admin Preview buttons. Drafts resolve when an admin is signed
   in in the same browser (shared session).
 - **Offline.** Installable to the home screen; previously-viewed content, tiles and media
-  are served from cache.
+  are served from cache. Opening a tour pre-caches all its stops' images and audio up front,
+  so the full route works offline even for stops not yet reached.
 
 ---
 
