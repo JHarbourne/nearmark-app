@@ -269,9 +269,11 @@
         <textarea id="loc-notes" v-model="form.notesInternal" rows="2"></textarea>
 
         <div style="display:flex; align-items:center; gap:12px; margin-top:22px; flex-wrap:wrap;">
-          <button class="btn btn-ghost" @click="save('draft')" :disabled="saving">Save draft</button>
-          <button class="btn btn-primary" @click="save('published')" :disabled="saving">{{ saving ? 'Saving…' : 'Publish' }}</button>
-          <span class="muted" style="font-size:13px;">Status: <span class="badge" :class="form.status">{{ form.status }}</span></span>
+          <div class="seg-toggle" role="group" aria-label="Visibility">
+            <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
+            <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
+          </div>
+          <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
         </div>
@@ -460,14 +462,13 @@ function onPickMedia(url) { if (picker.field) form[picker.field] = url }
 const saving = ref(false)
 const flash = ref('')
 let flashTimer
-async function save(status) {
+async function save() {
   if (!form.title) { alert('Title is required.'); return }
   if (form.lat == null) { alert('Drop a pin on the map to set the location.'); return }
-  if (status === 'published' && form.visibility === 'private' && !form.consentGiven) {
+  if (form.status === 'published' && form.visibility === 'private' && !form.consentGiven) {
     alert('This is a private address. Record the resident’s consent (tick the box) before publishing.')
     return
   }
-  form.status = status
   saving.value = true
   try {
     await store.saveLocation({ ...form })
@@ -484,7 +485,7 @@ async function save(status) {
     const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.portraitUrl, form.audioUrl].filter(Boolean))
     for (const url of sessionUploads) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
     baseline.value = JSON.stringify(form) // saved → no longer "dirty"
-    flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
+    flash.value = form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)
   } catch (e) {

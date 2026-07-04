@@ -48,12 +48,12 @@ const body = config.splashBody
 const wrap = { position: 'absolute', inset: 0, padding: '64px 26px 30px', display: 'flex', flexDirection: 'column' }
 const cta = {
   width: '100%', height: '56px', border: 'none', borderRadius: '16px', cursor: 'pointer',
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '17px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '17px', color: 'var(--bg)',
   background: 'var(--grad-warm)', marginBottom: '12px',
 }
 const ghost = {
   width: '100%', height: '52px', border: '1px solid var(--line)', borderRadius: '16px',
-  cursor: 'pointer', fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: '15px',
+  cursor: 'pointer', fontFamily: "var(--font-button)", fontWeight: 600, fontSize: '15px',
   color: 'var(--ink)', background: 'none',
 }
 </script>

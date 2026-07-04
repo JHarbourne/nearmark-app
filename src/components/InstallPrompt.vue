@@ -52,7 +52,7 @@ const iconWrap = { flexShrink: 0, display: 'block' }
 const shareChip = { whiteSpace: 'nowrap', fontWeight: 600, color: 'var(--ink)' }
 const cta = {
   flexShrink: 0, height: '38px', padding: '0 16px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '14px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '14px', color: 'var(--bg)',
   background: 'var(--grad-warm)',
 }
 const closeBtn = {

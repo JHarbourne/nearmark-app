@@ -44,12 +44,12 @@ const statNum = { display: 'block', fontFamily: "var(--font-heading)", fontWeigh
 const statLbl = { fontSize: '12px', color: 'var(--ink-muted)' }
 const cta = {
   width: '100%', height: '54px', border: 'none', borderRadius: '16px', cursor: 'pointer',
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '16px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '16px', color: 'var(--bg)',
   background: 'var(--grad-warm)', marginBottom: '12px',
 }
 const ghost = {
   width: '100%', height: '54px', border: '1px solid var(--line)', borderRadius: '16px',
-  cursor: 'pointer', fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: '16px',
+  cursor: 'pointer', fontFamily: "var(--font-button)", fontWeight: 600, fontSize: '16px',
   color: 'var(--ink)', background: 'none',
 }
 </script>

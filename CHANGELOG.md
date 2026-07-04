@@ -6,6 +6,16 @@ bug fixes bump the **patch** version; new features bump the **minor**.
 
 The [README](README.md) is documentation; this file is the release history.
 
+## [Unreleased]
+
+### Changed
+- Editors now use a single **Save** button with a **Published / Draft** toggle (replacing
+  the separate "Save draft" / "Publish" buttons and the Tour editor's status dropdown).
+- Buttons/CTAs read a themeable **`--font-button`** (a theme may set a sans where its
+  heading is a delicate serif). Tollesbury's buttons are now a clean sans instead of a
+  weedy serif; headings are unchanged, and other themes (e.g. LGBT) are unaffected.
+- Larger bottom-nav icons and labels for easier tapping on a walk.
+
 ## [1.1.0] — 2026-07-03
 
 ### Added

@@ -32,6 +32,7 @@ export default {
   fonts: {
   "heading": "'Fraunces', serif",
   "body": "'Newsreader', serif",
-  "ui": "'Hanken Grotesk', sans-serif"
+  "ui": "'Hanken Grotesk', sans-serif",
+  "button": "'Hanken Grotesk', sans-serif"
 },
 }

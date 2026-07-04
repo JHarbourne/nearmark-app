@@ -102,20 +102,20 @@
     <!-- bottom nav -->
     <div :style="nav">
       <button @click="$emit('home')" :style="navBtn('var(--nav-inactive)')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 11 L12 4 L20 11 V20 a1 1 0 0 1-1 1 H5 a1 1 0 0 1-1-1 Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        <span style="font-size: 10.5px; font-weight: 600;">Home</span>
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none"><path d="M4 11 L12 4 L20 11 V20 a1 1 0 0 1-1 1 H5 a1 1 0 0 1-1-1 Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span style="font-size: 12px; font-weight: 600;">Home</span>
       </button>
       <span :style="navBtn('var(--accent-warm)')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 3 L3 5.5 V21 L9 18.5 L15 21 L21 18.5 V3 L15 5.5 L9 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 3 V18.5 M15 5.5 V21" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span style="font-size: 10.5px; font-weight: 700;">Map</span>
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none"><path d="M9 3 L3 5.5 V21 L9 18.5 L15 21 L21 18.5 V3 L15 5.5 L9 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 3 V18.5 M15 5.5 V21" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span style="font-size: 12px; font-weight: 700;">Map</span>
       </span>
       <button @click="$emit('tours')" :style="navBtn('var(--nav-inactive)')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6.5" r="2" fill="currentColor"/><circle cx="6" cy="17.5" r="2" fill="currentColor"/><path d="M11 6.5 H20 M11 17.5 H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span style="font-size: 10.5px; font-weight: 600;">Tours</span>
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6.5" r="2" fill="currentColor"/><circle cx="6" cy="17.5" r="2" fill="currentColor"/><path d="M11 6.5 H20 M11 17.5 H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span style="font-size: 12px; font-weight: 600;">Tours</span>
       </button>
       <button @click="$emit('settings')" :style="navBtn('var(--nav-inactive)')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span style="font-size: 10.5px; font-weight: 600;">Settings</span>
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none"><path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span style="font-size: 12px; font-weight: 600;">Settings</span>
       </button>
     </div>
   </div>
@@ -319,10 +319,10 @@ const banner = { position: 'absolute', top: '100px', left: '16px', right: '16px'
 const nextCard = { position: 'absolute', bottom: '92px', left: '16px', right: '16px', zIndex: 30, padding: '15px 16px', borderRadius: '19px', background: 'var(--overlay-panel)', backdropFilter: 'blur(14px)', border: '1px solid var(--line)', boxShadow: '0 14px 40px rgba(0,0,0,0.5)' }
 const locNote = { position: 'absolute', top: '100px', left: '16px', right: '16px', zIndex: 40, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '16px', background: 'var(--overlay-panel)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,197,61,0.4)', boxShadow: '0 14px 40px rgba(0,0,0,0.5)', color: 'var(--ink)', animation: 'bannerDown .35s ease' }
 const locNoteIcon = { flexShrink: 0, width: '38px', height: '38px', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,197,61,0.14)' }
-const locNoteBtn = { flexShrink: 0, height: '34px', padding: '0 14px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '13px', color: 'var(--bg)', background: 'var(--grad-warm)' }
+const locNoteBtn = { flexShrink: 0, height: '34px', padding: '0 14px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '13px', color: 'var(--bg)', background: 'var(--grad-warm)' }
 const locNoteClose = { flexShrink: 0, width: '28px', height: '28px', borderRadius: '50%', border: 'none', background: 'var(--line)', color: 'var(--ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
-const arriveBtn = { width: '100%', height: '46px', marginTop: '13px', border: 'none', borderRadius: '13px', cursor: 'pointer', fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '15px', color: 'var(--bg)', background: 'var(--grad-warm)' }
-const simBtn = { position: 'absolute', bottom: '104px', left: '50%', transform: 'translateX(-50%)', zIndex: 30, height: '48px', padding: '0 22px', display: 'flex', alignItems: 'center', gap: '10px', borderRadius: '24px', background: 'var(--overlay-panel)', backdropFilter: 'blur(14px)', border: '1px solid var(--line)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', cursor: 'pointer', color: 'var(--ink)', fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: '15px', whiteSpace: 'nowrap' }
+const arriveBtn = { width: '100%', height: '46px', marginTop: '13px', border: 'none', borderRadius: '13px', cursor: 'pointer', fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '15px', color: 'var(--bg)', background: 'var(--grad-warm)' }
+const simBtn = { position: 'absolute', bottom: '104px', left: '50%', transform: 'translateX(-50%)', zIndex: 30, height: '48px', padding: '0 22px', display: 'flex', alignItems: 'center', gap: '10px', borderRadius: '24px', background: 'var(--overlay-panel)', backdropFilter: 'blur(14px)', border: '1px solid var(--line)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', cursor: 'pointer', color: 'var(--ink)', fontFamily: "var(--font-button)", fontWeight: 600, fontSize: '15px', whiteSpace: 'nowrap' }
 const nav = { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 35, height: '84px', paddingBottom: '18px', display: 'flex', alignItems: 'center', background: 'var(--overlay-nav)', backdropFilter: 'blur(16px)', borderTop: '1px solid var(--line)' }
 function navBtn(color) {
   return { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color, background: 'none', border: 'none', cursor: 'pointer' }

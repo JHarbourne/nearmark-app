@@ -50,4 +50,7 @@ export function applyTheme(t = theme) {
   r.setProperty('--font-heading', t.fonts.heading)
   r.setProperty('--font-body', t.fonts.body)
   r.setProperty('--font-ui', t.fonts.ui)
+  // buttons/CTAs: a theme may set a dedicated button font (e.g. a sans, where the
+  // heading is a delicate serif that reads as weedy on buttons); else use heading
+  r.setProperty('--font-button', t.fonts.button || t.fonts.heading)
 }

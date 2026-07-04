@@ -84,7 +84,7 @@ const permColor = computed(() => (props.permission === 'granted' ? '#2FBF71' : p
 const canEnable = computed(() => props.permission === 'prompt')
 const enableBtn = {
   border: 'none', borderRadius: '11px', padding: '7px 14px', cursor: 'pointer', flexShrink: 0,
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '13px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '13px', color: 'var(--bg)',
   background: 'var(--grad-warm)',
 }
 

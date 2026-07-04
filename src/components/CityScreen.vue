@@ -23,7 +23,7 @@
       :style="cityBtn(c.live)"
     >
       <span style="flex: 1;">
-        <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 19px;">{{ c.name }}</span>
+        <span style="display: block; font-family: var(--font-button); font-weight: 600; font-size: 19px;">{{ c.name }}</span>
         <span style="display: block; font-size: 13px; color: var(--ink-muted); margin-top: 2px;">
           {{ c.live ? `${c.area} · ${c.locationCount} locations · ${c.tourCount} tour` : 'Coming soon' }}
         </span>

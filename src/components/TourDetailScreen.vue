@@ -99,7 +99,7 @@ const ctaWrap = {
 }
 const cta = {
   width: '100%', height: '56px', border: 'none', borderRadius: '16px', cursor: 'pointer',
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '17px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '17px', color: 'var(--bg)',
   background: 'var(--grad-warm)', display: 'flex',
   alignItems: 'center', justifyContent: 'center', gap: '9px',
 }

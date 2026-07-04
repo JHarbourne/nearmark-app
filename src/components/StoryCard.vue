@@ -263,7 +263,7 @@ const relCard = {
 }
 const continueBtn = {
   width: '100%', height: '54px', marginTop: '24px', border: 'none', borderRadius: '15px', cursor: 'pointer',
-  fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '16px', color: 'var(--bg)',
+  fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '16px', color: 'var(--bg)',
   background: 'linear-gradient(100deg, #2FBF71, #3D9BFF)', display: 'flex', alignItems: 'center',
   justifyContent: 'center', gap: '9px',
 }

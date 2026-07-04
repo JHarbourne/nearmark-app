@@ -94,8 +94,8 @@ const closeBtn = { position: 'absolute', top: '14px', right: '16px', width: '30p
 const qrTile = { width: 'fit-content', margin: '0 auto 16px', padding: '14px', background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.08)', display: 'flex' }
 const urlRow = { display: 'flex', justifyContent: 'center', margin: '0 0 16px' }
 const urlText = { fontFamily: 'var(--font-ui)', fontSize: '13px', color: 'var(--ink-muted)', background: 'var(--raised)', borderRadius: '9px', padding: '8px 12px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
-const copyBtn = { width: '100%', height: '50px', border: 'none', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '15px', color: 'var(--bg)', background: 'var(--grad-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
-const shareBtn = { width: '100%', height: '48px', marginTop: '10px', border: '1px solid var(--line)', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '15px', color: 'var(--ink)', background: 'var(--raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
+const copyBtn = { width: '100%', height: '50px', border: 'none', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-button)', fontWeight: 700, fontSize: '15px', color: 'var(--bg)', background: 'var(--grad-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
+const shareBtn = { width: '100%', height: '48px', marginTop: '10px', border: '1px solid var(--line)', borderRadius: '14px', cursor: 'pointer', fontFamily: 'var(--font-button)', fontWeight: 700, fontSize: '15px', color: 'var(--ink)', background: 'var(--raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px' }
 </script>
 
 <style scoped>

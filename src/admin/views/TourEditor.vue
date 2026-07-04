@@ -17,16 +17,8 @@
         <label for="tour-title">Title</label>
         <input id="tour-title" type="text" v-model="form.title" />
 
-        <div class="field-row">
-          <div>
-            <label for="tour-city">City</label>
-            <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
-          </div>
-          <div>
-            <label for="tour-status">Status</label>
-            <select id="tour-status" v-model="form.status"><option value="draft">Draft</option><option value="published">Published</option></select>
-          </div>
-        </div>
+        <label for="tour-city">City</label>
+        <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
 
         <label for="tour-theme">Theme <span class="hint">short descriptor</span></label>
         <input id="tour-theme" type="text" v-model="form.theme" placeholder="Resistance & resilience 1890–1999" />
@@ -136,8 +128,11 @@
         </select>
 
         <div style="display:flex; gap:12px; margin-top:22px; align-items:center; flex-wrap:wrap;">
-          <button class="btn btn-ghost" @click="save('draft')" :disabled="saving">Save draft</button>
-          <button class="btn btn-primary" @click="save('published')" :disabled="saving">{{ saving ? 'Saving…' : 'Publish' }}</button>
+          <div class="seg-toggle" role="group" aria-label="Visibility">
+            <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
+            <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
+          </div>
+          <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
         </div>
@@ -337,9 +332,8 @@ async function uploadCover(e) {
 const saving = ref(false)
 const flash = ref('')
 let flashTimer
-async function save(status) {
+async function save() {
   if (!form.title) { alert('Title is required.'); return }
-  form.status = status
   saving.value = true
   try {
     await store.saveTour({ ...form })
@@ -355,7 +349,7 @@ async function save(status) {
       if (url !== keep) await store.removeMedia(url).catch(() => {})
     }
     baseline.value = JSON.stringify(form) // saved → no longer "dirty"
-    flash.value = status === 'published' ? 'Published ✓' : 'Saved as draft ✓'
+    flash.value = form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)
   } catch (e) {

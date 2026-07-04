@@ -41,7 +41,7 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="5.5" cy="6" r="2.4" fill="#fff"/><circle cx="18.5" cy="18" r="2.4" fill="#fff"/><path d="M5.5 8.5 V13 a4 4 0 0 0 4 4 H14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 3.4"/></svg>
       </span>
       <span style="flex: 1;">
-        <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 18px;">Guided Tour</span>
+        <span style="display: block; font-family: var(--font-button); font-weight: 600; font-size: 18px;">Guided Tour</span>
         <span style="display: block; font-size: 13px; color: var(--ink-muted); margin-top: 2px;">Follow a set walking route, stop by stop</span>
       </span>
       <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M1 1 L7.5 7.5 L1 14" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -52,7 +52,7 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.6" fill="#fff"/><path d="M7.5 7.5 a6 6 0 0 0 0 9 M16.5 7.5 a6 6 0 0 1 0 9" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M4.6 4.6 a10 10 0 0 0 0 14.8 M19.4 4.6 a10 10 0 0 1 0 14.8" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.5"/></svg>
       </span>
       <span style="flex: 1;">
-        <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 18px;">Discovery Mode</span>
+        <span style="display: block; font-family: var(--font-button); font-weight: 600; font-size: 18px;">Discovery Mode</span>
         <span style="display: block; font-size: 13px; color: var(--ink-muted); margin-top: 2px;">Wander freely – we’ll alert you near a site</span>
       </span>
       <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M1 1 L7.5 7.5 L1 14" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
