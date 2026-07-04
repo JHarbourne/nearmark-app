@@ -14,6 +14,7 @@ export default {
   "inkFaint": "#938C80",
   "line": "rgba(30, 27, 22, 0.14)",
   "accent": "#CC2127",
+  "qrInk": "#1E1B16",
   "gps": "#2E7CF6",
   "gradWarm": "linear-gradient(100deg, #D2362C, #B5202B)",
   "mapPaper": "#E7E4DD",

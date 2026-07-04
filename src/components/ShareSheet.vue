@@ -44,9 +44,10 @@ const props = defineProps({ url: { type: String, required: true } })
 const emit = defineEmits(['close'])
 
 const appName = config.appName
-// Brand-coloured QR on a white tile – the accent is dark enough on white to scan
-// reliably for the bundled themes; keep client accents reasonably dark.
-const qrFg = COLORS.accent
+// QR on a white tile. A theme may set `qrInk` (e.g. near-black) where a bright
+// accent reads as too aggressive in that quantity; otherwise use the accent
+// (kept dark enough on white to scan reliably).
+const qrFg = COLORS.qrInk || COLORS.accent
 const qrBg = '#ffffff'
 const displayUrl = computed(() => props.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))
 

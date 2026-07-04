@@ -15,6 +15,8 @@ The [README](README.md) is documentation; this file is the release history.
   heading is a delicate serif). Tollesbury's buttons are now a clean sans instead of a
   weedy serif; headings are unchanged, and other themes (e.g. LGBT) are unaffected.
 - Larger bottom-nav icons and labels for easier tapping on a walk.
+- The share **QR code** foreground is themeable (`qrInk`); Tollesbury's is now near-black
+  instead of its bright-red accent, which read as too heavy at QR scale.
 
 ## [1.1.0] — 2026-07-03
 
