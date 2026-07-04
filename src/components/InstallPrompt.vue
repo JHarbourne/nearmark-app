@@ -9,11 +9,11 @@
     </span>
 
     <span style="flex: 1; min-width: 0;">
-      <span style="display: block; font-family: var(--font-heading); font-weight: 700; font-size: 15px;">Install this app</span>
-      <span v-if="iosInstall" style="display: block; font-size: 12.5px; color: #C9BFD4; margin-top: 2px;">
+      <span style="display: block; font-family: var(--font-button); font-weight: 700; font-size: 15px;">Install this app</span>
+      <span v-if="iosInstall" style="display: block; font-size: 12.5px; color: var(--ink-muted); margin-top: 2px;">
         Tap <span :style="shareChip">Share <svg width="11" height="13" viewBox="0 0 14 18" fill="none" aria-hidden="true" style="vertical-align:-2px;"><path d="M7 1 L7 11 M3.5 4.5 L7 1 L10.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8 H1.5 V16.5 H12.5 V8 H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span> then “Add to Home Screen”.
       </span>
-      <span v-else style="display: block; font-size: 12.5px; color: #C9BFD4; margin-top: 2px;">Full-screen, on your home screen, works offline.</span>
+      <span v-else style="display: block; font-size: 12.5px; color: var(--ink-muted); margin-top: 2px;">Full-screen, on your home screen, works offline.</span>
     </span>
 
     <button v-if="!iosInstall" @click="install" :style="cta">Install</button>

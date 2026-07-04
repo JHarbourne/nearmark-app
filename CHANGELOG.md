@@ -17,6 +17,14 @@ The [README](README.md) is documentation; this file is the release history.
 - Larger bottom-nav icons and labels for easier tapping on a walk.
 - The share **QR code** foreground is themeable (`qrInk`); Tollesbury's is now near-black
   instead of its bright-red accent, which read as too heavy at QR scale.
+- Load the **Fraunces** font the Tollesbury theme specifies (it was falling back to the
+  system serif); the cover headline uses a heavier cut (weight 800) and the mode-button
+  labels a heavier/slightly larger cut.
+
+### Fixed
+- The **Install-app prompt** used a hardcoded light-lilac text colour (built for the dark
+  theme) that was unreadable on light themes; it now uses theme-aware `--ink-muted`, and
+  its title is the sans button font instead of a serif.
 
 ## [1.1.0] — 2026-07-03
 
