@@ -71,6 +71,19 @@
           </div>
           <div v-else style="height: 12px;"></div>
 
+          <!-- audio transcript (WCAG 1.2.1): collapsed by default, shown only when one exists -->
+          <div v-if="showTranscript" style="margin: -10px 0 20px;">
+            <button @click="transcriptOpen = !transcriptOpen" :aria-expanded="transcriptOpen" aria-controls="loc-transcript-panel" :style="transcriptToggle">
+              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true" :style="{ transition: 'transform 0.18s', transform: transcriptOpen ? 'rotate(90deg)' : 'none' }"><path d="M4 2 L10 7 L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {{ transcriptOpen ? 'Hide transcript' : 'Show transcript' }}
+            </button>
+            <div v-if="transcriptOpen" id="loc-transcript-panel" :style="transcriptPanel">
+              <p v-for="(para, i) in transcriptParas" :key="i" style="margin: 0 0 10px;">
+                <template v-for="(seg, j) in para" :key="j"><em v-if="seg.sound" :style="soundCue">{{ seg.text }}</em><template v-else>{{ seg.text }}</template></template>
+              </p>
+            </div>
+          </div>
+
           <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0; white-space: pre-line;">{{ loc.summary }}</p>
 
           <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
@@ -157,6 +170,28 @@ const showAudio = computed(() => props.audioOn && !!props.loc.audioUrl)
 // Reveal slider only when there's both a contemporary hero and a historic image,
 // and no video (video keeps priority). Otherwise the hero falls back to the single image.
 const showSlider = computed(() => !props.loc.videoUrl && !!props.loc.heroImageUrl && !!props.loc.historicImageUrl)
+
+// audio transcript (WCAG 1.2.1): only offered when audio is present AND a transcript exists
+const transcriptOpen = ref(false)
+const showTranscript = computed(() => showAudio.value && !!(props.loc.transcript && props.loc.transcript.trim()))
+// split into paragraphs, then each into plain / [bracketed non-speech] segments
+const transcriptParas = computed(() => {
+  const t = props.loc.transcript || ''
+  return t.split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line) =>
+    line.split(/(\[[^\]]*\])/).filter(Boolean).map((s) => ({ sound: /^\[[^\]]*\]$/.test(s), text: s })),
+  )
+})
+watch(() => props.loc.id, () => { transcriptOpen.value = false }) // collapse when the card changes
+const transcriptToggle = {
+  display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 2px',
+  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-warm)',
+  fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 700,
+}
+const transcriptPanel = {
+  marginTop: '6px', padding: '14px 16px', background: 'var(--raised)', borderRadius: '14px',
+  fontFamily: 'var(--font-body)', fontSize: '14.5px', lineHeight: 1.6, color: 'var(--ink-soft)',
+}
+const soundCue = { fontStyle: 'italic', color: 'var(--ink-muted)' }
 
 function loadAudio() {
   audio.load(props.loc.audioUrl, props.loc.audioDuration || 0)

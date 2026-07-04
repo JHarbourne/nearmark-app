@@ -9,6 +9,11 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Audio transcripts (WCAG 1.2.1)** — a location with an audio narration can carry a
+  plain-text transcript (migration 019). The editor shows a transcript field whenever an
+  audio file is present and warns if it's missing; the public story card offers a "Show
+  transcript" toggle below the player. Non-speech cues in `[square brackets]` (e.g.
+  `[Sound of church bells]`) render in a muted italic style.
 - **App version in the footer** (from `package.json`, baked at build).
 - **Dashboard "What's new" link** — the admin Dashboard shows the running version and links
   to the GitHub Releases page (dated version history + notes). Defaults to the core repo's
@@ -23,6 +28,13 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- **Media-library picker** now lays photos out as a **masonry grid** — each thumbnail keeps
+  the photo's own shape, so the whole image is visible (wide panoramas no longer collapse to
+  a thin strip) with its filename beneath.
+- Brighter, purer **amber** accent (`#FFD60A`, was `#FFC53D`): it had been muted to a mustard
+  gold to survive white numbers; now that pin/stop numbers use dark ink, the true yellow
+  reads better still (dark-on-yellow ≈ 12.6:1). Existing locations keep their saved hex until
+  re-picked.
 - Story-card external link: with no per-location label set, it now shows the link's **web
   address** (e.g. "facebook.com") instead of the app-wide default — always accurate (a
   church isn't an "artist's website").
@@ -40,6 +52,14 @@ The [README](README.md) is documentation; this file is the release history.
 - Load the **Fraunces** font the Tollesbury theme specifies (it was falling back to the
   system serif); the cover headline uses a heavier cut (weight 800) and the mode-button
   labels a heavier/slightly larger cut.
+
+### Fixed
+- Tour-detail hero now uses a flex layout so the **back button always sits clear of the
+  "Walking Tour" tag and title** — the earlier fix only brought it in front; on a long
+  two-line title the circle still overlapped the tag.
+- Tour-detail **title stays on one line** (ellipsis if too long) so it can't wrap and ride up
+  over the gradient, becoming unreadable. Tour titles are now capped at **21 characters** in
+  the editor (with a live counter) to keep them legible.
 
 ### Added
 - Image-size guidance for content editors (in the Location & Tour editors and the Media

@@ -81,12 +81,14 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 .mp-title { margin: 0; font-size: 16px; white-space: nowrap; }
 .mp-search { flex: 1; width: auto; }
 .mp-msg { padding: 56px 24px; text-align: center; color: var(--muted); }
-.mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; padding: 20px; overflow-y: auto; }
-.mp-item { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; cursor: pointer; padding: 0; display: flex; flex-direction: column; text-align: left; transition: border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
+/* Masonry (CSS columns): each tile keeps the photo's own aspect ratio, so the
+   WHOLE photo is visible whatever its shape – wide panoramas stay short, portraits
+   tall – instead of every photo being squashed into one fixed-height box. */
+.mp-grid { columns: 190px; column-gap: 16px; padding: 20px; overflow-y: auto; }
+.mp-item { break-inside: avoid; width: 100%; margin: 0 0 16px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); cursor: pointer; padding: 0; display: block; text-align: left; transition: border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
 .mp-item:hover, .mp-item:focus-visible { border-color: var(--violet); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(107, 70, 229, 0.18); outline: none; }
 .mp-item.sel { border-color: var(--violet); box-shadow: 0 0 0 2px var(--violet); }
-/* contain (not cover) so the WHOLE photo is visible, on a neutral tile */
-.mp-item img { width: 100%; height: 150px; object-fit: contain; display: block; background: var(--bg); }
-.mp-name { font-size: 12.5px; padding: 9px 10px; color: var(--ink); line-height: 1.35; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mp-item img { width: 100%; height: auto; display: block; background: var(--bg); }
+.mp-name { display: block; font-size: 12.5px; padding: 9px 10px; color: var(--ink); line-height: 1.35; word-break: break-word; overflow-wrap: anywhere; }
 .mp-foot { padding: 10px 18px; border-top: 1px solid var(--line); }
 </style>

@@ -52,6 +52,7 @@ function rowToLocation(r) {
     videoUrl: r.video_url || null,
     audioUrl: r.audio_url || null,
     audioDuration: r.audio_duration || 0,
+    transcript: r.transcript || '', // plain-text audio transcript (WCAG 1.2.1)
     thumbnailUrl: r.thumbnail_url || null,
     hue: r.hue || '#9B6DFF',
     relatedIds: r.related_ids || [],
@@ -105,6 +106,7 @@ function locationToRow(l) {
     video_url: l.videoUrl || null,
     audio_url: l.audioUrl || null,
     audio_duration: Number(l.audioDuration) || 0,
+    transcript: l.transcript || null,
     thumbnail_url: l.thumbnailUrl || null,
     hue: l.hue,
     related_ids: l.relatedIds || [],

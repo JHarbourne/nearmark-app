@@ -14,8 +14,8 @@
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start;">
       <div class="card" style="padding:22px;">
-        <label for="tour-title">Title</label>
-        <input id="tour-title" type="text" v-model="form.title" />
+        <label for="tour-title">Title <span class="hint">keep it short so it fits on one line ({{ (form.title || '').length }}/21)</span></label>
+        <input id="tour-title" type="text" v-model="form.title" maxlength="21" />
 
         <label for="tour-city">City</label>
         <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>

@@ -1,0 +1,59 @@
+<!--
+  LGBT History Project — Supabase "Invite user" email.
+  Paste into: Supabase → project rewowvjmeoggigrwhdvl → Authentication → Emails →
+  Templates → "Invite user" → Message body (source). Subject line (set above the body):
+      You're invited to help edit the LGBT History Project
+  Supabase fills {{ .ConfirmationURL }} and {{ .Email }} automatically.
+  Rainbow bar + lilac button on a light card (emails read best on light, whatever the app theme).
+-->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">You’ve been added as an editor for the LGBT History Project.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F1F7;margin:0;padding:24px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(23,17,31,0.10);">
+        <tr>
+          <td style="height:6px;background:linear-gradient(90deg,#E40303 0%,#FF8C00 20%,#FFED00 40%,#008026 60%,#004DFF 80%,#750787 100%);font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:34px 40px 8px;text-align:center;">
+            <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A3FD6;">LGBT History Project</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 40px 0;">
+            <h1 style="margin:0 0 14px;font-size:23px;line-height:1.25;color:#1A1522;font-weight:800;text-align:center;">You’ve been invited to help edit the app</h1>
+            <p style="margin:0 0 18px;font-size:15.5px;line-height:1.6;color:#463C52;">
+              Hello – you’ve been added as an <strong>editor</strong> for the LGBT History Project. You’ll be able to add and update locations, photos, audio and guided tours.
+            </p>
+            <p style="margin:0 0 26px;font-size:15.5px;line-height:1.6;color:#463C52;">
+              To get started, set your password and sign in:
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 40px 8px;text-align:center;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#7A3FD6;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 34px;border-radius:12px;">Accept invitation</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:18px 40px 4px;">
+            <p style="margin:0;font-size:12.5px;line-height:1.5;color:#6E6579;text-align:center;">
+              If the button doesn’t work, copy and paste this link into your browser:<br>
+              <a href="{{ .ConfirmationURL }}" style="color:#7A3FD6;word-break:break-all;">{{ .ConfirmationURL }}</a>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:22px 40px 34px;border-top:1px solid #EDE7F2;">
+            <p style="margin:18px 0 0;font-size:12px;line-height:1.55;color:#938BA0;text-align:center;">
+              This invitation was sent to {{ .Email }}. If you weren’t expecting it, you can safely ignore this email – no account will be created.
+            </p>
+            <p style="margin:12px 0 0;font-size:12px;color:#938BA0;text-align:center;">
+              LGBT History Project · powered by Nearmark
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

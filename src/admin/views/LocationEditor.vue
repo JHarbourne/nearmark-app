@@ -266,6 +266,17 @@
           </div>
         </div>
 
+        <!-- Audio transcript (WCAG 1.2.1) – only relevant when there's an audio file -->
+        <template v-if="form.audioUrl">
+          <label for="loc-transcript">Audio transcript <span class="hint">required for accessibility if audio is present</span></label>
+          <textarea id="loc-transcript" v-model="form.transcript" rows="6" placeholder="Type or paste what is spoken in the narration. Put non-speech sounds in square brackets, e.g. [Sound of church bells]."></textarea>
+          <p v-if="!form.transcript.trim()" class="warn" role="alert" style="display:flex; gap:8px; align-items:flex-start; margin:6px 0 0; font-size:13px; color:var(--danger,#c0392b);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0; margin-top:1px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span>No transcript — audio without a transcript fails WCAG 1.2.1.</span>
+          </p>
+          <p v-else class="hint" style="margin:6px 0 0;">Wrap non-speech sounds in [square brackets] — they’ll show in a muted style in the app.</p>
+        </template>
+
         <label for="loc-related">Related locations <span class="hint">powers “Nearby stories”</span></label>
         <select id="loc-related" multiple v-model="form.relatedIds" style="height:96px;">
           <option v-for="l in others" :key="l.id" :value="l.id">{{ l.title }}</option>
@@ -340,7 +351,7 @@ const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, linkLabel: '', lat: null, lng: null, triggerRadius: 80,
-  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, videoUrl: '', thumbnailUrl: '',
+  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
   visibility: 'public', publishFrom: null, publishUntil: null, guidedTourOnly: false,

@@ -6,12 +6,15 @@
     <div :style="heroStyle" :role="tour.coverImageUrl ? 'img' : null" :aria-label="tour.coverImageUrl ? (tour.coverAlt || tour.title) : null">
       <div v-if="!tour.coverImageUrl" style="position: absolute; inset: 0; opacity: 0.22; background-image: radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1.4px); background-size: 13px 13px;"></div>
       <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.22) 48%, rgba(0,0,0,0) 76%);"></div>
-      <button @click="$emit('back')" :style="backBtn" aria-label="Back to tours">
-        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" aria-hidden="true"><path d="M8.5 1 L2 8 L8.5 15" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div style="position: absolute; left: 24px; bottom: 22px; right: 24px;">
+      <!-- top row: back button. Flow layout (space-between) keeps it clear of the title below. -->
+      <div style="position: relative; padding: 54px 18px 0;">
+        <button @click="$emit('back')" :style="backBtn" aria-label="Back to tours">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" aria-hidden="true"><path d="M8.5 1 L2 8 L8.5 15" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div style="position: relative; padding: 0 24px 22px;">
         <span :style="eyebrowPill">Walking Tour</span>
-        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -1px; margin: 10px 0 0; color: #fff;">{{ tour.title }}</h1>
+        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ tour.title }}</h1>
         <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
         <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
       </div>
@@ -63,7 +66,7 @@ const props = defineProps({
 defineEmits(['start', 'back', 'open-stop'])
 
 const heroStyle = computed(() => {
-  const base = { height: '226px', position: 'relative', overflow: 'hidden' }
+  const base = { minHeight: '226px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }
   if (props.tour.coverImageUrl) {
     return { ...base, backgroundImage: `url(${props.tour.coverImageUrl})`, backgroundSize: 'cover', backgroundPosition: props.tour.coverPosition || '50% 50%', backgroundRepeat: 'no-repeat' }
   }
@@ -81,7 +84,7 @@ const creditLine = {
   maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 const backBtn = {
-  position: 'absolute', top: '56px', left: '18px', zIndex: 3, width: '38px', height: '38px', borderRadius: '50%',
+  width: '38px', height: '38px', borderRadius: '50%',
   background: 'rgba(23,17,31,0.5)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 }

@@ -9,7 +9,7 @@ import { config } from '../config.js'
 export const HUE = {
   red: '#FF4D5E',
   orange: '#FF8C42',
-  amber: '#FFC53D',
+  amber: '#FFD60A', // pure bright yellow – dark ink now sits on it, so no need to mute it (black-on-yellow ≈ 12.6:1)
   green: '#2FBF71',
   blue: '#3D9BFF',
   violet: '#9B6DFF',
