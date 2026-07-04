@@ -2,6 +2,11 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
+import { createRequire } from 'module'
+
+// package.json is the single source of truth for the app version; it's baked in
+// at build time via the __APP_VERSION__ define below and shown in the footer.
+const pkg = createRequire(import.meta.url)('./package.json')
 
 // Two entry points share one codebase:
 //   index.html  → public mobile web app
@@ -17,6 +22,11 @@ export default defineConfig(({ mode }) => {
   const iconUrl = pick(env.VITE_ICON_URL, '')
 
   return {
+    // Bake the package.json version in at build time so the footer can show it
+    // without a manual version string living anywhere in the source.
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     plugins: [
       vue({
         // <img-comparison-slider> is a web component, not a Vue component

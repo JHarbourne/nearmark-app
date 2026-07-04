@@ -5,7 +5,8 @@
       v-if="sourceUrl" :href="sourceUrl" target="_blank" rel="noopener"
       style="color: inherit; text-decoration: underline;">{{ label }}</a><span v-else>{{ label }}</span>. </template>Powered by <a
       v-if="platformUrl" :href="platformUrl" target="_blank" rel="noopener"
-      style="color: inherit; text-decoration: underline;">{{ platformName }}</a><span v-else>{{ platformName }}</span>.
+      style="color: inherit; text-decoration: underline;">{{ platformName }}</a><span v-else>{{ platformName }}</span><span
+      style="font-size: 9px; opacity: 0.6;"> · v{{ appVersion }}</span>.
   </p>
 </template>
 
@@ -15,4 +16,6 @@ const label = config.contentSourceLabel
 const sourceUrl = config.contentSourceUrl
 const platformName = config.platformName
 const platformUrl = config.platformUrl
+// Baked in from package.json at build time (see vite.config.js define).
+const appVersion = __APP_VERSION__
 </script>
