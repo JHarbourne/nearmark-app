@@ -1,9 +1,10 @@
 // Client-side image optimisation before upload. A typical phone photo is several
 // MB; downscaling to a sensible max dimension and re-encoding as WebP keeps stored
-// files small (usually 150–400 KB), which directly improves load performance for
-// the public app. Falls back to the original file if anything goes wrong.
+// files small (usually ~80–250 KB at these settings), which directly improves load
+// performance for the public app. The cap (~1400px longest edge) stays comfortably
+// sharp for the phone-width story cards. Falls back to the original if anything fails.
 
-export async function compressImage(file, { maxDim = 1600, quality = 0.82 } = {}) {
+export async function compressImage(file, { maxDim = 1400, quality = 0.78 } = {}) {
   if (!file || !file.type?.startsWith('image/') || file.type === 'image/gif') return file
   try {
     const bitmap = await createImageBitmap(file)

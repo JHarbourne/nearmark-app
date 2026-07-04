@@ -102,7 +102,7 @@
         </div>
 
         <p class="muted" style="font-size:12.5px; margin:0 0 8px;">These two images form the before/after slider – the columns are in the same order they appear on the story card.</p>
-        <p class="muted" style="font-size:12px; margin:0 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1600&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
+        <p class="muted" style="font-size:12px; margin:0 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
 
         <!-- image source + upload -->
         <div class="field-row">

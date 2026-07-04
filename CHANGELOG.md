@@ -24,7 +24,12 @@ The [README](README.md) is documentation; this file is the release history.
 ### Added
 - Image-size guidance for content editors (in the Location & Tour editors and the Media
   library): a note that uploads are optimised automatically, with a recommended web-sized
-  landscape JPG (~1600px wide) so people don't upload full-resolution phone photos.
+  landscape JPG (~1400px wide) so people don't upload full-resolution phone photos.
+
+### Changed
+- Tuned the client-side image optimiser tighter — cap ~1400px (was 1600) and WebP quality
+  0.78 (was 0.82), so stored images are smaller (~80–250 KB) with no visible loss on the
+  phone-width cards.
 
 ### Fixed
 - The **Install-app prompt** used a hardcoded light-lilac text colour (built for the dark

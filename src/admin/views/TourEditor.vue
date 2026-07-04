@@ -27,7 +27,7 @@
         <textarea id="tour-description" v-model="form.description" rows="3"></textarea>
 
         <label for="tour-cover-url">Cover image <span class="hint">shown on the tour list</span></label>
-        <p class="muted" style="font-size:12px; margin:2px 0 6px;">Optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1600&nbsp;px wide, or smaller), not a full-resolution phone photo.</p>
+        <p class="muted" style="font-size:12px; margin:2px 0 6px;">Optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller), not a full-resolution phone photo.</p>
         <div class="media-input">
           <input id="tour-cover-url" type="url" v-model="form.coverImageUrl" placeholder="Paste a URL, or use the icons →" />
           <div class="media-actions">
