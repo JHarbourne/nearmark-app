@@ -112,7 +112,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
 - **Story card.** Photo (with focal point), category/period tag, title, narrative, optional
-  **before/after slider**, second photo, audio narration (with a collapsible **"Show
+  **before/after slider**, second photo, optional **video** (a direct `.mp4`/`.webm` plays as
+  the muted looping hero; a **YouTube** link embeds as a player in the body — a non-playable
+  link is ignored so it can't blank the hero), audio narration (with a collapsible **"Show
   transcript"** panel when a transcript exists — `[bracketed]` non-speech cues rendered
   muted/italic), credits (respecting the show/hide toggles), an external link (label =
   `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories".

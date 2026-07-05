@@ -261,8 +261,12 @@
             <input id="loc-audio-dur" type="number" v-model.number="form.audioDuration" min="0" />
           </div>
           <div>
-            <label for="loc-video">Video URL <span class="hint">optional, mp4</span></label>
+            <label for="loc-video">Video URL <span class="hint">optional · mp4 file or YouTube link</span></label>
             <input id="loc-video" type="url" v-model="form.videoUrl" placeholder="https://…" />
+            <p v-if="form.videoUrl && !videoPlayable" class="warn" role="alert" style="display:flex; gap:8px; align-items:flex-start; margin:6px 0 0; font-size:12.5px; color:var(--danger,#c0392b);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0; margin-top:1px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span>Not a playable video – use a direct <strong>.mp4</strong> file or a <strong>YouTube</strong> link. Anything else is ignored in the app.</span>
+            </p>
           </div>
         </div>
 
@@ -332,6 +336,7 @@
 import { reactive, ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
+import { isPlayableVideo } from '../../lib/video.js'
 import { config, wikiDomain } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 import MediaPicker from '../components/MediaPicker.vue'
@@ -339,6 +344,7 @@ import MediaPicker from '../components/MediaPicker.vue'
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
 // the URL's host, shown as the placeholder / the app-side label when no custom text is set
 const linkUrlLabel = computed(() => { try { return new URL(form.wikiUrl).hostname.replace(/^www\./, '') } catch { return '' } })
+const videoPlayable = computed(() => isPlayableVideo(form.videoUrl))
 const cities = config.cities
 
 const hues = HUE_OPTIONS

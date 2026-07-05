@@ -8,7 +8,7 @@
       <div style="overflow-y: auto;">
         <!-- hero -->
         <div style="height: 200px; position: relative; background: var(--raised); overflow: hidden;">
-          <video v-if="loc.videoUrl" :src="loc.videoUrl" autoplay muted loop playsinline :aria-label="loc.caption ? null : (loc.imageAlt || loc.title)" :style="[heroMedia, { objectPosition: loc.heroPosition || '50% 50%' }]"></video>
+          <video v-if="heroVideoUrl" :src="heroVideoUrl" autoplay muted loop playsinline :aria-label="loc.caption ? null : (loc.imageAlt || loc.title)" :style="[heroMedia, { objectPosition: loc.heroPosition || '50% 50%' }]"></video>
           <!-- before/after reveal slider: only when BOTH a contemporary and a historic image exist -->
           <img-comparison-slider v-else-if="showSlider" class="story-slider" value="50">
             <figure slot="first" class="ics-fig">
@@ -86,6 +86,11 @@
 
           <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0; white-space: pre-line;">{{ loc.summary }}</p>
 
+          <!-- embedded YouTube player (when the Video URL is a YouTube link, not a file) -->
+          <div v-if="ytEmbedUrl" :style="videoFrame">
+            <iframe :src="ytEmbedUrl" :title="`${loc.title} – video`" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="position:absolute; inset:0; width:100%; height:100%; border:0;"></iframe>
+          </div>
+
           <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
           <figure v-if="loc.portraitUrl" :style="portraitFig">
             <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" />
@@ -133,6 +138,7 @@
 import { computed, watch, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { useAudio } from '../composables/useAudio.js'
 import { track } from '../lib/analytics.js'
+import { isFileVideo, youtubeEmbed } from '../lib/video.js'
 // No custom link label? Show the link's web address (host) rather than a generic
 // app-wide default, so it's always accurate (a church isn't an "artist's website").
 const urlLabel = computed(() => {
@@ -169,7 +175,11 @@ const audio = useAudio()
 const showAudio = computed(() => props.audioOn && !!props.loc.audioUrl)
 // Reveal slider only when there's both a contemporary hero and a historic image,
 // and no video (video keeps priority). Otherwise the hero falls back to the single image.
-const showSlider = computed(() => !props.loc.videoUrl && !!props.loc.heroImageUrl && !!props.loc.historicImageUrl)
+// Only a real video FILE drives the hero background; a YouTube link (or any non-file
+// URL) never blanks the hero – it's embedded in the body instead, or ignored.
+const heroVideoUrl = computed(() => (isFileVideo(props.loc.videoUrl) ? props.loc.videoUrl : ''))
+const ytEmbedUrl = computed(() => youtubeEmbed(props.loc.videoUrl))
+const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.heroImageUrl && !!props.loc.historicImageUrl)
 
 // audio transcript (WCAG 1.2.1): only offered when audio is present AND a transcript exists
 const transcriptOpen = ref(false)
@@ -258,6 +268,7 @@ const credit = { ...creditBase, bottom: '8px', right: '12px', maxWidth: '60%' } 
 const creditSliderL = { ...creditBase, bottom: '34px', left: '12px', maxWidth: '44%' } // slider: historic (before)
 const creditSliderR = { ...creditBase, bottom: '34px', right: '12px', maxWidth: '44%' } // slider: hero (today)
 const heroMedia = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }
+const videoFrame = { position: 'relative', aspectRatio: '16 / 9', width: '100%', margin: '20px 0 0', borderRadius: '14px', overflow: 'hidden', background: '#000' }
 const scrim = { position: 'absolute', inset: 0, background: 'rgba(10,7,14,0.6)', border: 'none', cursor: 'pointer', backdropFilter: 'blur(2px)' }
 const sheet = {
   // minHeight keeps sparse stories from opening only part-way (looking half-open);

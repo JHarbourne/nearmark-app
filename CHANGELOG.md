@@ -9,6 +9,9 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **YouTube in the story video field** — a YouTube link in a location's Video URL now shows
+  as an embedded (cookie-free) player in the story body. A direct `.mp4`/`.webm` file still
+  drives the muted looping hero background as before.
 - **Audio transcripts (WCAG 1.2.1)** — a location with an audio narration can carry a
   plain-text transcript (migration 019). The editor shows a transcript field whenever an
   audio file is present and warns if it's missing; the public story card offers a "Show
@@ -57,6 +60,11 @@ The [README](README.md) is documentation; this file is the release history.
   labels a heavier/slightly larger cut.
 
 ### Fixed
+- **Video URL no longer blanks the hero.** A non-file link (e.g. a YouTube *watch* URL)
+  pasted into a location's Video URL used to hijack the hero as an unplayable `<video>`,
+  hiding the perfectly good photo behind a blank placeholder. Only a real video file now
+  drives the hero; YouTube links embed in the body; anything else is ignored. The editor
+  warns when the Video URL isn't a playable file or YouTube link.
 - Tour-detail hero now uses a flex layout so the **back button always sits clear of the
   "Walking Tour" tag and title** — the earlier fix only brought it in front; on a long
   two-line title the circle still overlapped the tag.
