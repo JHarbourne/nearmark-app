@@ -6,35 +6,20 @@
     <button @click="$emit('close')" :style="scrim" aria-label="Close story" tabindex="-1"></button>
     <div :style="sheet" role="dialog" aria-modal="true" :aria-label="loc.title">
       <div style="overflow-y: auto;">
-        <!-- hero -->
+        <!-- hero: a static header image (or looping video). This same image is
+             the location's thumbnail. The before/after slider now lives in the
+             body, after the first paragraph, so it gets its own room. -->
         <div style="height: 200px; position: relative; background: var(--raised); overflow: hidden;">
           <video v-if="heroVideoUrl" :src="heroVideoUrl" autoplay muted loop playsinline :aria-label="loc.caption ? null : (loc.imageAlt || loc.title)" :style="[heroMedia, { objectPosition: loc.heroPosition || '50% 50%' }]"></video>
-          <!-- before/after reveal slider: only when BOTH a contemporary and a historic image exist -->
-          <img-comparison-slider v-else-if="showSlider" class="story-slider" value="50">
-            <figure slot="first" class="ics-fig">
-              <img :src="loc.historicImageUrl" :alt="loc.caption ? '' : (loc.historicAlt || (loc.title + ' – historic image, ' + loc.period))" :style="{ objectPosition: loc.historicPosition || '50% 50%' }" />
-              <figcaption v-if="loc.historicLabel || loc.period" class="ics-label ics-left">{{ loc.historicLabel || loc.period }}</figcaption>
-            </figure>
-            <figure slot="second" class="ics-fig">
-              <img :src="loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' – today'))" :style="{ objectPosition: loc.heroPosition || '50% 50%' }" />
-              <figcaption v-if="loc.imageLabel" class="ics-label ics-right">{{ loc.imageLabel }}</figcaption>
-            </figure>
-          </img-comparison-slider>
           <div v-else :style="heroFill" :role="(loc.heroImageUrl && !loc.caption) ? 'img' : null" :aria-label="(loc.heroImageUrl && !loc.caption) ? (loc.imageAlt || loc.title) : null"></div>
-          <div v-if="!showSlider" style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(28,21,38,0.94) 1%, rgba(28,21,38,0) 42%);"></div>
+          <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(28,21,38,0.94) 1%, rgba(28,21,38,0) 42%);"></div>
           <span style="position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 38px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.6); pointer-events: none; z-index: 3;"></span>
           <button ref="closeRef" @click="$emit('close')" :style="closeBtn" aria-label="Close story">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
           </button>
-          <span v-if="!showSlider" :style="period">{{ loc.period }}</span>
-          <!-- photographer / source credit(s) -->
-          <template v-if="!showSlider">
-            <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
-          </template>
-          <template v-else>
-            <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">Photo: {{ loc.historicCredit }}</component>
-            <component v-if="loc.photoCredit" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderR">Photo: {{ loc.photoCredit }}</component>
-          </template>
+          <span :style="period">{{ loc.period }}</span>
+          <!-- photographer / source credit for the header image -->
+          <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
         </div>
 
         <div style="padding: 18px 22px 26px;">
@@ -84,7 +69,26 @@
             </div>
           </div>
 
-          <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0; white-space: pre-line;">{{ loc.summary }}</p>
+          <!-- story text, with the before/after slider tucked in after the first paragraph -->
+          <p v-if="summaryParas[0]" :style="bodyText">{{ summaryParas[0] }}</p>
+
+          <!-- before/after reveal slider (only when both a today + a historic image exist) -->
+          <figure v-if="showSlider" :style="sliderFig">
+            <img-comparison-slider class="story-slider" value="50">
+              <figure slot="first" class="ics-fig">
+                <img :src="loc.historicImageUrl" :alt="loc.caption ? '' : (loc.historicAlt || (loc.title + ' – historic image, ' + loc.period))" :style="{ objectPosition: loc.historicPosition || '50% 50%' }" />
+                <figcaption v-if="loc.historicLabel || loc.period" class="ics-label ics-left">{{ loc.historicLabel || loc.period }}</figcaption>
+              </figure>
+              <figure slot="second" class="ics-fig">
+                <img :src="loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' – today'))" :style="{ objectPosition: loc.heroPosition || '50% 50%' }" />
+                <figcaption v-if="loc.imageLabel" class="ics-label ics-right">{{ loc.imageLabel }}</figcaption>
+              </figure>
+            </img-comparison-slider>
+            <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">Photo: {{ loc.historicCredit }}</component>
+            <component v-if="loc.photoCredit" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderR">Photo: {{ loc.photoCredit }}</component>
+          </figure>
+
+          <p v-for="(para, i) in summaryParas.slice(1)" :key="i" :style="bodyText">{{ para }}</p>
 
           <!-- embedded YouTube player (when the Video URL is a YouTube link, not a file) -->
           <div v-if="ytEmbedUrl" :style="videoFrame">
@@ -180,6 +184,12 @@ const showAudio = computed(() => props.audioOn && !!props.loc.audioUrl)
 const heroVideoUrl = computed(() => (isFileVideo(props.loc.videoUrl) ? props.loc.videoUrl : ''))
 const ytEmbedUrl = computed(() => youtubeEmbed(props.loc.videoUrl))
 const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.heroImageUrl && !!props.loc.historicImageUrl)
+
+// Split the story into paragraphs so the before/after slider can sit after the
+// first one. Blank lines separate paragraphs; single newlines are kept (pre-line).
+const summaryParas = computed(() =>
+  (props.loc.summary || '').split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
+)
 
 // audio transcript (WCAG 1.2.1): only offered when audio is present AND a transcript exists
 const transcriptOpen = ref(false)
@@ -297,6 +307,8 @@ const furtherLink = {
   borderRadius: '12px', background: 'var(--raised)', border: '1px solid var(--line)',
   textDecoration: 'none', color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500,
 }
+const bodyText = { fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.66, color: 'var(--ink-soft)', margin: '0 0 16px', whiteSpace: 'pre-line' }
+const sliderFig = { position: 'relative', margin: '6px 0 20px', borderRadius: '16px', overflow: 'hidden' }
 const portraitFig = { margin: '22px 0 0' }
 const portraitImg = { display: 'block', width: '100%', borderRadius: '16px' }
 const portraitCap = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--ink-muted)', margin: '8px 2px 0', textAlign: 'center' }
@@ -318,17 +330,19 @@ const continueBtn = {
 </script>
 
 <style scoped>
-/* before/after reveal slider (img-comparison-slider) sized to the hero region */
+/* before/after reveal slider (img-comparison-slider) — sits in the body and
+   takes the images' natural shape (3:4 or 16:9), matched Rephoto pairs so both
+   sides line up. */
 .story-slider {
   width: 100%;
-  height: 200px;
+  display: block;
   --divider-width: 2px;
   --divider-color: #ffffff;
   --default-handle-opacity: 1;
   --divider-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
 }
-.story-slider .ics-fig { position: relative; margin: 0; width: 100%; height: 200px; }
-.story-slider .ics-fig img { display: block; width: 100%; height: 200px; object-fit: cover; }
+.story-slider .ics-fig { position: relative; margin: 0; width: 100%; }
+.story-slider .ics-fig img { display: block; width: 100%; height: auto; }
 .story-slider .ics-label {
   position: absolute;
   bottom: 12px;

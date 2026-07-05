@@ -107,10 +107,10 @@ const cta = {
   alignItems: 'center', justifyContent: 'center', gap: '9px',
 }
 function thumb(s) {
-  // thumbnail = the "first" image (slider's left/first slot = historic), falling
-  // back to the hero when there's only one – kept consistent with the slider order
-  const img = s.historicImageUrl || s.heroImageUrl
-  const pos = (s.historicImageUrl ? s.historicPosition : s.heroPosition) || '50% 50%'
+  // thumbnail = the static header image (heroImageUrl), which every location has;
+  // fall back to the historic image only if a hero is somehow missing.
+  const img = s.heroImageUrl || s.historicImageUrl
+  const pos = (s.heroImageUrl ? s.heroPosition : s.historicPosition) || '50% 50%'
   const base = { width: '56px', height: '56px', display: 'block', borderRadius: '13px' }
   if (img) return { ...base, backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: pos, backgroundRepeat: 'no-repeat' }
   return { ...base, background: `linear-gradient(150deg, ${s.hue} 0%, var(--raised) 85%)` }
