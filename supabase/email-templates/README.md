@@ -28,19 +28,32 @@ link variable differs per template (`{{ .ConfirmationURL }}` for invite/confirm/
 `{{ .Token }}`/`{{ .ConfirmationURL }}` for magic link — Supabase shows the available
 variables above each editor).
 
-## Sender name — needs custom SMTP (separate from the template)
+## Custom SMTP — configured (Brevo)
 
-The template changes the *body*, but the **From** name is still "Supabase Auth" until you
-point the project at your own SMTP. To fix the sender:
+Both projects send auth emails through **Brevo** (custom SMTP), so the From name is the app —
+not "Supabase Auth" — and Supabase's built-in-mailer rate limit no longer applies.
 
-- Authentication → Emails → **SMTP Settings** → enable custom SMTP.
-- A Brevo (Sendinblue) SMTP account is already set up on the shared feedback project
-  (`rzfrnnoixxlqyiavivtp`) — reuse those SMTP credentials here, or add a sender for each app.
-- Set **Sender name** to e.g. `Tollesbury Arts Trail` / `LGBT History UK` and a sender email
-  on a domain you control.
+**Supabase → each project → Authentication → Emails → SMTP settings:**
+- Host `smtp-relay.brevo.com` · Port `587` · Username `af78db001@smtp-brevo.com`
+- Password = a Brevo **SMTP key** (Brevo → *SMTP & API → SMTP*). The key is **account-level** —
+  one key works for every project. Brevo shows it once; generating a new one does **not** revoke
+  existing keys, so it's safe to regenerate if you lose it.
 
-Until custom SMTP is on, Supabase's built-in mailer also rate-limits invites (a few per
-hour), which is another reason to switch it on before inviting several editors.
+| Project | Sender email | Sender name |
+|---|---|---|
+| Tollesbury (`wijnnlzxjerymjrlvblv`) | `hello@tollesbury.app` | Tollesbury App |
+| LGBT (`rewowvjmeoggigrwhdvl`) | `noreply@lgbthistoryuk.org` | LGBT History Project |
 
-> Note: these are dashboard settings, not code — nothing here is deployed by a build. The
-> files live in the repo only so the branded HTML is versioned and easy to re-paste.
+Both sender **domains are authenticated in Brevo** (DKIM CNAMEs + `brevo-code` TXT). Notes:
+- `tollesbury.app` DNS is at **GoDaddy** (site is on Vercel, but DNS is GoDaddy).
+- `lgbthistoryuk.org` has an SPF record; `tollesbury.app` should add one so a brand-new domain
+  doesn't get junked on its first sends (DKIM alone passes DMARC, but filters like to see SPF):
+
+      TXT  @  v=spf1 include:spf.brevo.com ~all
+
+- No mailbox exists at `tollesbury.app`, so set a working **reply-to** (e.g. an `lgbthistoryuk.org`
+  address) if replies matter.
+
+> Note: SMTP + domain authentication are dashboard/DNS settings, not code — nothing here is
+> deployed by a build. These template files live in the repo only so the branded HTML is
+> versioned and easy to re-paste.

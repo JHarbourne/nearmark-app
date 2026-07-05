@@ -163,6 +163,10 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 
 - **Supabase** — Postgres (RLS: anon reads published only; authenticated admins read/write
   all), Auth (+ MFA), Storage (`media` bucket, public read), Edge Functions.
+- **Brevo** (transactional SMTP) — auth emails (editor invites, magic links, password resets)
+  send through Brevo with **branded per-app templates** and app-specific senders on
+  DKIM/SPF-authenticated domains, instead of Supabase's default "Supabase Auth" mailer. Set
+  per project in the dashboard; templates live in `supabase/email-templates/`.
 - **OpenRouteService** (optional) — `compute-route` Edge Function calls the `foot-walking`
   directions API with a server-side `ORS_KEY` secret; result stored on the tour and drawn
   offline. See README → Optional features.

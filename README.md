@@ -89,6 +89,10 @@ Then create your first admin user: **Authentication → Users → Add user → C
 user**, set an email + password, and tick **Auto Confirm User**. Keep **"Allow new users
 to sign up" turned off** so only people you invite can reach the admin.
 
+> **Branded invite emails (optional).** By default invites come from "Supabase Auth". To
+> send them from your app instead, paste the branded templates and configure custom SMTP —
+> see [`supabase/email-templates/`](supabase/email-templates/).
+
 ### 4. Set your `.env`
 
 Copy the example and fill it in:
