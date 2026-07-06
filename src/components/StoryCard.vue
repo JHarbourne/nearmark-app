@@ -97,6 +97,7 @@
           <figure v-if="loc.portraitUrl" :style="portraitFig">
             <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" />
             <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ loc.portraitCaption }}</figcaption>
+            <figcaption v-if="loc.portraitCredit" :style="portraitCreditLine"><component :is="loc.portraitCreditUrl ? 'a' : 'span'" :href="loc.portraitCreditUrl || null" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Photo: {{ loc.portraitCredit }}</component></figcaption>
           </figure>
 
           <a v-if="loc.wikiUrl" :href="loc.wikiUrl" target="_blank" rel="noopener" :style="wikiLink" @click="track('wiki_clicked', { location_id: loc.id, title: loc.title })">
@@ -311,6 +312,7 @@ const sliderFig = { position: 'relative', margin: '6px 0 20px', borderRadius: '1
 const portraitFig = { margin: '22px 0 0' }
 const portraitImg = { display: 'block', width: '100%', borderRadius: '16px' }
 const portraitCap = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--ink-muted)', margin: '8px 2px 0', textAlign: 'center' }
+const portraitCreditLine = { fontSize: '11px', color: 'var(--ink-faint)', margin: '4px 2px 0', textAlign: 'center' }
 const wikiLink = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '22px', padding: '15px 16px',
   borderRadius: '14px', background: 'var(--raised)', border: '1px solid var(--line)',

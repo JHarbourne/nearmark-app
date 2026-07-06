@@ -222,30 +222,48 @@
           <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
-        <!-- second in-body image (a person, a detail, anything), shown within the story text, separate from the hero -->
-        <label for="loc-portrait-url">Second photo <span class="hint">shown within the story text, separate from the hero</span></label>
-        <div class="media-input">
-          <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="Paste a URL, or use the icons →" />
-          <div class="media-actions">
-            <label class="icon-btn" :class="{ busy: uploading.portrait }" :title="uploading.portrait ? 'Uploading…' : 'Upload an image from your device'">
-              <svg class="ic"><use href="#ic-upload" /></svg>
-              <input type="file" accept="image/*" aria-label="Upload a second photo from your device" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
-            </label>
-            <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a second photo from the media library" @click="openPicker('portraitUrl')">
-              <svg class="ic"><use href="#ic-image" /></svg>
-            </button>
+        <!-- second in-body photo is optional; behind a toggle to keep the form tidy -->
+        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showPortrait" />
+          <span>Add a second photo <span class="hint">a person or a detail, shown within the story text — separate from the hero</span></span>
+        </label>
+        <div v-if="showPortrait">
+          <label for="loc-portrait-url">Second photo</label>
+          <div class="media-input">
+            <input id="loc-portrait-url" type="url" v-model="form.portraitUrl" placeholder="Paste a URL, or use the icons →" />
+            <div class="media-actions">
+              <label class="icon-btn" :class="{ busy: uploading.portrait }" :title="uploading.portrait ? 'Uploading…' : 'Upload an image from your device'">
+                <svg class="ic"><use href="#ic-upload" /></svg>
+                <input type="file" accept="image/*" aria-label="Upload a second photo from your device" style="display:none" @change="up($event,'portraitUrl','image','portrait')" />
+              </label>
+              <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a second photo from the media library" @click="openPicker('portraitUrl')">
+                <svg class="ic"><use href="#ic-image" /></svg>
+              </button>
+            </div>
           </div>
-        </div>
-        <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
-        <div class="field-row" v-if="form.portraitUrl">
-          <div>
-            <label for="loc-portrait-alt">Alt text <span class="hint">describe the photo for screen readers</span></label>
-            <input id="loc-portrait-alt" type="text" v-model="form.portraitAlt" placeholder="Describe the photo" />
-          </div>
-          <div>
-            <label for="loc-portrait-cap">Caption <span class="hint">optional, shown under the photo</span></label>
-            <input id="loc-portrait-cap" type="text" v-model="form.portraitCaption" placeholder="Optional caption" />
-          </div>
+          <button v-if="canUndo('portraitUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('portraitUrl')">↩ Undo</button>
+          <template v-if="form.portraitUrl">
+            <div class="field-row">
+              <div>
+                <label for="loc-portrait-alt">Alt text <span class="hint">describe the photo for screen readers</span></label>
+                <input id="loc-portrait-alt" type="text" v-model="form.portraitAlt" placeholder="Describe the photo" />
+              </div>
+              <div>
+                <label for="loc-portrait-cap">Caption <span class="hint">optional, shown under the photo</span></label>
+                <input id="loc-portrait-cap" type="text" v-model="form.portraitCaption" placeholder="Optional caption" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div>
+                <label for="loc-portrait-credit">Photo credit <span class="hint">photographer / source</span></label>
+                <input id="loc-portrait-credit" type="text" v-model="form.portraitCredit" placeholder="Photographer / source" />
+              </div>
+              <div>
+                <label for="loc-portrait-credit-link">Credit link <span class="hint">optional</span></label>
+                <input id="loc-portrait-credit-link" type="url" v-model="form.portraitCreditUrl" placeholder="https://…" />
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Audio + video are optional; behind a toggle to keep the form tidy -->
@@ -271,7 +289,7 @@
             <input id="loc-audio-dur" type="number" v-model.number="form.audioDuration" min="0" />
           </div>
           <div>
-            <label for="loc-video">Video URL <span class="hint">optional · mp4 file or YouTube link</span></label>
+            <label for="loc-video">Video URL <span class="hint">optional · mp4 or YouTube</span></label>
             <input id="loc-video" type="url" v-model="form.videoUrl" placeholder="https://…" />
             <p v-if="form.videoUrl && !videoPlayable" class="warn" role="alert" style="display:flex; gap:8px; align-items:flex-start; margin:6px 0 0; font-size:12.5px; color:var(--danger,#c0392b);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0; margin-top:1px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
@@ -368,7 +386,7 @@ const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, linkLabel: '', lat: null, lng: null, triggerRadius: 80,
-  heroImageUrl: '', historicImageUrl: '', sliderAfterUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', sliderAfterPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '',
+  heroImageUrl: '', historicImageUrl: '', sliderAfterUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', sliderAfterPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', portraitCredit: '', portraitCreditUrl: '', audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
   visibility: 'public', publishFrom: null, publishUntil: null, guidedTourOnly: false,
@@ -387,6 +405,12 @@ watch(showHistoric, (on) => { if (!on) { form.historicImageUrl = ''; form.slider
 // audio + video are opt-in too, tucked behind a toggle to keep the form tidy
 const showMedia = ref(!!(form.audioUrl || form.videoUrl))
 watch(showMedia, (on) => { if (!on) { form.audioUrl = ''; form.videoUrl = '' } })
+
+// the second (in-body) photo is opt-in as well
+const showPortrait = ref(!!form.portraitUrl)
+watch(showPortrait, (on) => {
+  if (!on) { form.portraitUrl = ''; form.portraitAlt = ''; form.portraitCaption = ''; form.portraitCredit = ''; form.portraitCreditUrl = '' }
+})
 
 // inline "learn more" toggles for the Visibility / Guided-tour boxes
 const showVisHelp = ref(false)

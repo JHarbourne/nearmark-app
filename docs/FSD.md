@@ -100,6 +100,7 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 018 | persistent activity log |
 | 019 | per-location audio `transcript` (WCAG 1.2.1) |
 | 020 | slider `after` image (`slider_after_url`), separate from the hero |
+| 021 | second-photo credit (`portrait_credit`, `portrait_credit_url`) |
 
 ---
 

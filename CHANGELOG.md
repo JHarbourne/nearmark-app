@@ -9,6 +9,10 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Second photo gets a credit** (migration 021) — the in-body "second photo" now takes a
+  photographer/source credit + link, like the other photos, shown under it on the card. The
+  whole second-photo section is now behind an **"Add a second photo"** toggle to keep the form
+  tidy.
 - **Separate before/after "after" image** (migration 020) — the story hero and the before/after
   slider are now independent photos. The slider has its own **After** image; left blank it
   falls back to the hero, so existing slider stops are unaffected. Previously the hero and the
@@ -35,6 +39,8 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Location editor: the **Video URL** field label shortened ("mp4 or YouTube") so it stays on
+  one line and aligns with the Audio-duration field beside it.
 - Location editor **visual tidy-up**: text inputs, selects and date fields now share one
   height so they line up; the **Visibility** panel drops its misleading heading; the
   Visibility radios / Guided-tour checkbox are larger and brand-coloured, both panels share
