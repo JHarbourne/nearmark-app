@@ -35,14 +35,19 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Location editor **visual tidy-up**: text inputs, selects and date fields now share one
+  height so they line up; the **Visibility** panel drops its misleading heading; the
+  Visibility radios / Guided-tour checkbox are larger and brand-coloured, both panels share
+  the same padding, and each "learn more" note sits **inline** on the control's row (opening
+  below only when tapped). The Hero crop preview fills the full column width.
 - Location editor now follows the **story-page order** — the photo/image block sits **above
   the Text field** (photo first, as on the finished card). The **Hero image** is its own
   section; the **before/after slider** (its own Before + After photos) and the **audio/video**
   fields each sit behind their own toggle to keep the form tidy. The **Visibility** and
   **Guided-tour-only** explanations are now tucked into small "learn more" accordions.
 - Story card: the **before/after slider now sits below the hero and the full story text**
-  (it was tucked in after the first paragraph), and the **image caption moves under the
-  slider** when there is one (instead of under the hero at the top).
+  (it was tucked in after the first paragraph). The image caption stays under the hero photo;
+  the slider carries its own before/after labels.
 - Location editor tidy-ups: the narrative field is labelled **"Text"** (not "Summary text",
   since it isn't a summary), and the accent-colour swatches now have breathing room above the
   "Add a historic before photo" toggle so they don't read as one control.

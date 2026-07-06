@@ -23,8 +23,7 @@
         </div>
 
         <div style="padding: 18px 22px 26px;">
-          <!-- hero caption sits here; when there's a slider the caption belongs to it and moves below -->
-          <p v-if="loc.caption && !showSlider" style="font-family: var(--font-body); font-style: italic; font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); margin: 0 0 12px;">{{ loc.caption }}</p>
+          <p v-if="loc.caption" style="font-family: var(--font-body); font-style: italic; font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); margin: 0 0 12px;">{{ loc.caption }}</p>
           <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 27px; line-height: 1.05; letter-spacing: -0.6px; margin: 0;">{{ loc.title }}</h2>
           <p style="font-size: 13.5px; color: var(--ink-muted); margin: 7px 0 0; font-weight: 500;">{{ loc.significance }}</p>
 
@@ -88,7 +87,6 @@
             <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">Photo: {{ loc.historicCredit }}</component>
             <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderR">Photo: {{ loc.photoCredit }}</component>
           </figure>
-          <p v-if="showSlider && loc.caption" :style="sliderCaption">{{ loc.caption }}</p>
 
           <!-- embedded YouTube player (when the Video URL is a YouTube link, not a file) -->
           <div v-if="ytEmbedUrl" :style="videoFrame">
@@ -309,8 +307,7 @@ const furtherLink = {
   textDecoration: 'none', color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500,
 }
 const bodyText = { fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.66, color: 'var(--ink-soft)', margin: '0 0 16px', whiteSpace: 'pre-line' }
-const sliderFig = { position: 'relative', margin: '6px 0 8px', borderRadius: '16px', overflow: 'hidden' }
-const sliderCaption = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', lineHeight: 1.45, color: 'var(--ink-muted)', margin: '0 0 20px', textAlign: 'center' }
+const sliderFig = { position: 'relative', margin: '6px 0 20px', borderRadius: '16px', overflow: 'hidden' }
 const portraitFig = { margin: '22px 0 0' }
 const portraitImg = { display: 'block', width: '100%', borderRadius: '16px' }
 const portraitCap = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--ink-muted)', margin: '8px 2px 0', textAlign: 'center' }

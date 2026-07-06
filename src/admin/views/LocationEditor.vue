@@ -33,15 +33,14 @@
 
         <!-- privacy / publication (migration 011) -->
         <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
-          <span class="field-label" style="margin-top:0;">Visibility</span>
-          <div style="display:flex; gap:18px; margin:6px 0 0;">
-            <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="public" v-model="form.visibility" /> Public</label>
-            <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="private" v-model="form.visibility" /> Private</label>
+          <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            <div role="radiogroup" aria-label="Is this a public place or a private address?" style="display:flex; gap:20px;">
+              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="public" v-model="form.visibility" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" /> Public</label>
+              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="private" v-model="form.visibility" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" /> Private</label>
+            </div>
+            <button type="button" @click="showVisHelp = !showVisHelp" :aria-expanded="showVisHelp" style="margin-left:auto; background:none; border:none; padding:0; font:inherit; font-size:12px; font-weight:600; color:var(--violet); cursor:pointer;">What’s the difference?</button>
           </div>
-          <details style="margin:8px 0 0;">
-            <summary style="font-size:12px; color:var(--violet); cursor:pointer;">What’s the difference?</summary>
-            <p class="muted" style="font-size:12.5px; margin:6px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
-          </details>
+          <p v-if="showVisHelp" class="muted" style="font-size:12.5px; margin:10px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
 
           <div v-if="form.visibility === 'private'" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
             <!-- consent is per resident -->
@@ -72,15 +71,15 @@
         </div>
 
         <!-- Guided-tour-only: hide from Discover mode; only shown inside a guided tour -->
-        <div style="margin:18px 0; padding:12px 16px; border:1px solid var(--line); border-radius:12px;">
-          <label style="display:flex; align-items:center; gap:9px; font-weight:500; cursor:pointer;">
-            <input type="checkbox" v-model="form.guidedTourOnly" />
-            <span>Guided tour only – hide from Discover mode</span>
-          </label>
-          <details style="margin:8px 0 0;">
-            <summary style="font-size:12px; color:var(--violet); cursor:pointer;">What does this do?</summary>
-            <p class="muted" style="font-weight:400; font-size:12.5px; margin:6px 0 0;">The stop only appears while someone is following a guided tour that includes it – never in proximity-based Discover browsing. Use for stops that only make sense in a narrated sequence.</p>
-          </details>
+        <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:9px; font-weight:500; margin:0; cursor:pointer;">
+              <input type="checkbox" v-model="form.guidedTourOnly" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" />
+              <span>Guided tour only – hide from Discover mode</span>
+            </label>
+            <button type="button" @click="showTourHelp = !showTourHelp" :aria-expanded="showTourHelp" style="margin-left:auto; background:none; border:none; padding:0; font:inherit; font-size:12px; font-weight:600; color:var(--violet); cursor:pointer;">What does this do?</button>
+          </div>
+          <p v-if="showTourHelp" class="muted" style="font-weight:400; font-size:12.5px; margin:10px 0 0;">The stop only appears while someone is following a guided tour that includes it – never in proximity-based Discover browsing. Use for stops that only make sense in a narrated sequence.</p>
         </div>
 
         <!-- Hero image: the lead photo at the top of the story card – its own image, separate from the slider -->
@@ -106,7 +105,7 @@
           <p class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
           <label for="loc-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
           <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
-          <label for="loc-caption">Image caption <span class="hint">under the photo, or under the before/after slider if you add one · also read by screen readers</span></label>
+          <label for="loc-caption">Image caption <span class="hint">under the photo</span></label>
           <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
           <label for="loc-hero-credit">Photo credit <span class="hint">photographer / source</span></label>
           <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
@@ -388,6 +387,10 @@ watch(showHistoric, (on) => { if (!on) { form.historicImageUrl = ''; form.slider
 const showMedia = ref(!!(form.audioUrl || form.videoUrl))
 watch(showMedia, (on) => { if (!on) { form.audioUrl = ''; form.videoUrl = '' } })
 
+// inline "learn more" toggles for the Visibility / Guided-tour boxes
+const showVisHelp = ref(false)
+const showTourHelp = ref(false)
+
 // ── unsaved-changes guard: warn before leaving (in-app nav + tab close/reload) ──
 const baseline = ref(JSON.stringify(form))
 const isDirty = () => JSON.stringify(form) !== baseline.value
@@ -445,7 +448,7 @@ function swapImages() {
 // accurate: hero is 39:20 (390×200 on a phone), the slider's before/after images are 4:3.
 function focalBox(url, pos, aspect) {
   return {
-    marginTop: '8px', width: '100%', maxWidth: '390px', aspectRatio: aspect || '39 / 20',
+    marginTop: '8px', width: '100%', aspectRatio: aspect || '39 / 20',
     borderRadius: '10px', border: '1px solid var(--line)',
     backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: pos || '50% 50%',
     backgroundRepeat: 'no-repeat', position: 'relative', cursor: 'crosshair',
