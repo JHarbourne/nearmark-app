@@ -51,6 +51,9 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- **Related locations** is now an obvious picker — **removable chips** for the current picks
+  plus a **"+ Add a related stop…" dropdown** — instead of a native multi-select that needed
+  Cmd/Ctrl-click to add or remove (and wiped the selection on a plain click).
 - Dashboard **stat cards are now shortcuts** — clicking "Total/Published/Draft locations" opens
   the Locations list and "Total tours" opens the Tours list.
 - **Story text is now paragraph-spaced** — each line break in a stop's text renders as its

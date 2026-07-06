@@ -321,9 +321,19 @@
         </template>
         </div>
 
-        <label for="loc-related">Related locations <span class="hint">powers “Nearby stories”</span></label>
-        <select id="loc-related" multiple v-model="form.relatedIds" style="height:96px;">
-          <option v-for="l in others" :key="l.id" :value="l.id">{{ l.title }}</option>
+        <span class="field-label">Related locations <span class="hint">shown as “Nearby stories” at the foot of this stop’s card</span></span>
+        <!-- current picks, each removable -->
+        <div v-if="form.relatedIds.length" style="display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px;">
+          <span v-for="id in form.relatedIds" :key="id" style="display:inline-flex; align-items:center; gap:7px; padding:5px 6px 5px 12px; background:var(--raised); border:1px solid var(--line); border-radius:999px; font-size:13px; font-weight:500;">
+            {{ relatedTitle(id) }}
+            <button type="button" class="chip-x" :aria-label="`Remove ${relatedTitle(id)}`" @click="removeRelated(id)">✕</button>
+          </span>
+        </div>
+        <p v-else class="hint" style="margin:6px 0 10px;">None yet – add stops below to cross-link them.</p>
+        <!-- add one -->
+        <select v-if="availableRelated.length" aria-label="Add a related location" @change="addRelated($event)">
+          <option value="">+ Add a related stop…</option>
+          <option v-for="l in availableRelated" :key="l.id" :value="l.id">{{ l.title }}</option>
         </select>
 
         <label for="loc-notes">Internal notes <span class="hint">never shown in the app</span></label>
@@ -468,6 +478,15 @@ function pasteCoords(v) {
 
 const showPreview = ref(false)
 const others = computed(() => store.locations.filter((l) => l.id !== form.id))
+// related-locations picker (chips + add dropdown)
+const availableRelated = computed(() => others.value.filter((l) => !form.relatedIds.includes(l.id)))
+const relatedTitle = (id) => store.locations.find((l) => l.id === id)?.title || id
+function removeRelated(id) { form.relatedIds = form.relatedIds.filter((x) => x !== id) }
+function addRelated(e) {
+  const id = e.target.value
+  if (id && !form.relatedIds.includes(id)) form.relatedIds.push(id)
+  e.target.value = ''
+}
 const validWiki = computed(() => !wikiDomain || form.wikiUrl.includes(wikiDomain))
 
 // swap the slider's before (historic) and after (today) image + their paired fields
@@ -596,6 +615,9 @@ const previewPeriod = { position: 'absolute', bottom: '8px', left: '14px', fontF
 .media-input { position: relative; }
 .media-input > input { padding-right: 78px; }
 .media-input.solo > input { padding-right: 46px; }
+/* removable "related location" chips */
+.chip-x { border: none; background: none; cursor: pointer; color: var(--muted); font-size: 11px; line-height: 1; padding: 4px; border-radius: 50%; display: inline-flex; }
+.chip-x:hover, .chip-x:focus-visible { color: var(--ink); background: var(--line); outline: none; }
 /* field + its "Undo" on one line, the button pinned to the right */
 .media-row { display: flex; align-items: center; gap: 8px; }
 .media-row > .media-input { flex: 1; min-width: 0; }
