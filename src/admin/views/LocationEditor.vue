@@ -76,32 +76,7 @@
           </span>
         </label>
 
-        <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
-        <input id="loc-significance" type="text" v-model="form.significance" />
-
-        <label for="loc-summary">Text <span class="hint">~80–100 words</span></label>
-        <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
-
-        <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
-        <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
-        <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
-        <template v-if="form.wikiUrl">
-          <label for="loc-link-label">Link button text <span class="hint">optional · blank shows the web address</span></label>
-          <input id="loc-link-label" type="text" v-model="form.linkLabel" :placeholder="linkUrlLabel || 'e.g. Visit the church website'" maxlength="60" />
-        </template>
-
-        <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
-        <textarea id="loc-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
-
-        <label for="loc-radius">Trigger radius <span class="hint">metres · how close before a story unlocks</span></label>
-        <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
-
-        <span class="field-label" id="loc-hue-label">Accent colour</span>
-        <div role="group" aria-labelledby="loc-hue-label" style="display:flex; gap:8px;">
-          <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
-        </div>
-
-        <!-- historic "before" image is optional: on → before/after slider, off → single photo (full width) -->
+        <!-- historic “before” image is optional: on → before/after slider, off → single photo (full width) -->
         <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
           <input type="checkbox" v-model="showHistoric" />
           <span>Add a historic “before” photo <span class="hint">turns the photo into a before/after slider</span></span>
@@ -128,7 +103,7 @@
             <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
           </div>
           <div>
-            <label for="loc-hero-url">Hero image <span class="hint">“today” · slider RIGHT</span></label>
+            <label for="loc-hero-url">Hero image <span v-if="showHistoric" class="hint">“today” · slider RIGHT</span></label>
             <div class="media-input">
               <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="Paste a URL, or use the icons →" />
               <div class="media-actions">
@@ -216,6 +191,31 @@
               </label>
             </template>
           </div>
+        </div>
+
+        <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
+        <input id="loc-significance" type="text" v-model="form.significance" />
+
+        <label for="loc-summary">Text <span class="hint">~80–100 words</span></label>
+        <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
+
+        <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
+        <input id="loc-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
+        <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
+        <template v-if="form.wikiUrl">
+          <label for="loc-link-label">Link button text <span class="hint">optional · blank shows the web address</span></label>
+          <input id="loc-link-label" type="text" v-model="form.linkLabel" :placeholder="linkUrlLabel || 'e.g. Visit the church website'" maxlength="60" />
+        </template>
+
+        <label for="loc-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
+        <textarea id="loc-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
+
+        <label for="loc-radius">Trigger radius <span class="hint">metres · how close before a story unlocks</span></label>
+        <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
+
+        <span class="field-label" id="loc-hue-label">Accent colour</span>
+        <div role="group" aria-labelledby="loc-hue-label" style="display:flex; gap:8px;">
+          <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
         <!-- second in-body image (a person, a detail, anything), shown within the story text, separate from the hero -->
