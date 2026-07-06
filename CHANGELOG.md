@@ -39,6 +39,13 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- **Story text is now paragraph-spaced** — each line break in a stop's text renders as its
+  own spaced paragraph (it previously needed a blank line between paragraphs, so single-spaced
+  text ran together).
+- **House-style typography on displayed text** — a `typo()` helper renders content with proper
+  curly apostrophes/quotes and spaced en-dashes (applied to the story card and tour detail),
+  whatever an editor typed; compound hyphens and number ranges are left alone. App "no value"
+  placeholders now use an en-dash too.
 - Location editor: the **Video URL** field label shortened ("mp4 or YouTube") so it stays on
   one line and aligns with the Audio-duration field beside it.
 - Location editor **visual tidy-up**: text inputs, selects and date fields now share one

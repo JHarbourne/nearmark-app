@@ -23,9 +23,9 @@
         </div>
 
         <div style="padding: 18px 22px 26px;">
-          <p v-if="loc.caption" style="font-family: var(--font-body); font-style: italic; font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); margin: 0 0 12px;">{{ loc.caption }}</p>
-          <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 27px; line-height: 1.05; letter-spacing: -0.6px; margin: 0;">{{ loc.title }}</h2>
-          <p style="font-size: 13.5px; color: var(--ink-muted); margin: 7px 0 0; font-weight: 500;">{{ loc.significance }}</p>
+          <p v-if="loc.caption" style="font-family: var(--font-body); font-style: italic; font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); margin: 0 0 12px;">{{ typo(loc.caption) }}</p>
+          <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 27px; line-height: 1.05; letter-spacing: -0.6px; margin: 0;">{{ typo(loc.title) }}</h2>
+          <p style="font-size: 13.5px; color: var(--ink-muted); margin: 7px 0 0; font-weight: 500;">{{ typo(loc.significance) }}</p>
 
           <!-- audio player (hidden if no narration available) -->
           <div v-if="showAudio" style="margin: 20px 0 22px; padding: 13px 14px; background: var(--raised); border-radius: 16px; display: flex; align-items: center; gap: 13px;">
@@ -96,7 +96,7 @@
           <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
           <figure v-if="loc.portraitUrl" :style="portraitFig">
             <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" />
-            <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ loc.portraitCaption }}</figcaption>
+            <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ typo(loc.portraitCaption) }}</figcaption>
             <figcaption v-if="loc.portraitCredit" :style="portraitCreditLine"><component :is="loc.portraitCreditUrl ? 'a' : 'span'" :href="loc.portraitCreditUrl || null" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Photo: {{ loc.portraitCredit }}</component></figcaption>
           </figure>
 
@@ -142,6 +142,7 @@ import { computed, watch, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { useAudio } from '../composables/useAudio.js'
 import { track } from '../lib/analytics.js'
 import { isFileVideo, youtubeEmbed } from '../lib/video.js'
+import { typo } from '../lib/typography.js'
 // No custom link label? Show the link's web address (host) rather than a generic
 // app-wide default, so it's always accurate (a church isn't an "artist's website").
 const urlLabel = computed(() => {
@@ -187,8 +188,10 @@ const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.historicIma
 
 // Split the story into paragraphs so the before/after slider can sit after the
 // first one. Blank lines separate paragraphs; single newlines are kept (pre-line).
+// Split on any line break (not just blank lines) so each block is its own spaced
+// paragraph, and apply house-style typography to the displayed text.
 const summaryParas = computed(() =>
-  (props.loc.summary || '').split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
+  (props.loc.summary || '').split(/\n+/).map((s) => typo(s.trim())).filter(Boolean),
 )
 
 // audio transcript (WCAG 1.2.1): only offered when audio is present AND a transcript exists

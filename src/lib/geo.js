@@ -18,7 +18,7 @@ export function distanceMeters(a, b) {
 
 // Format a metre distance for the UI, respecting the user's unit preference.
 export function formatDistance(meters, units = 'mi') {
-  if (!isFinite(meters)) return '—'
+  if (!isFinite(meters)) return '–'
   if (units === 'km') {
     if (meters < 1000) return `${Math.round(meters)}m`
     return `${(meters / 1000).toFixed(1)}km`

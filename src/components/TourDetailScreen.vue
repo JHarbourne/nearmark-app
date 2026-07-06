@@ -14,7 +14,7 @@
       </div>
       <div style="position: relative; padding: 0 24px 22px;">
         <span :style="eyebrowPill">Walking Tour</span>
-        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ tour.title }}</h1>
+        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typo(tour.title) }}</h1>
         <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
         <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
       </div>
@@ -27,7 +27,7 @@
         <span :style="stat"><span :style="statNum">{{ distanceLabel }}</span><span :style="statLbl">distance</span></span>
       </div>
 
-      <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.62; color: var(--ink-soft); margin: 0 0 26px;">{{ tour.description }}</p>
+      <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.62; color: var(--ink-soft); margin: 0 0 26px;">{{ typo(tour.description) }}</p>
 
       <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 14px;">The Route</div>
 
@@ -57,6 +57,7 @@
 <script setup>
 import { computed } from 'vue'
 import { readableInk } from '../lib/tokens.js'
+import { typo } from '../lib/typography.js'
 const props = defineProps({
   tour: { type: Object, required: true },
   stops: { type: Array, default: () => [] },

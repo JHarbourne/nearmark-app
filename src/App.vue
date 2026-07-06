@@ -240,7 +240,7 @@ function estimateMins(tour, stops) {
   return dwell + walk
 }
 function fmtDuration(mins) {
-  if (!mins) return '—'
+  if (!mins) return '–'
   const h = Math.floor(mins / 60)
   const m = mins % 60
   return h ? `~${h}h ${m}m` : `~${m}m`
@@ -266,7 +266,7 @@ const nextStopDistance = computed(() => {
   if (gpsLive.value) {
     return formatDistance(distanceMeters(geo.position.value, nextStop.value), settings.units)
   }
-  return '—'
+  return '–'
 })
 
 // ── story ──
@@ -301,7 +301,7 @@ function relatedFor(loc) {
 const proximityLoc = computed(() => (proximityId.value ? byId.value[proximityId.value] : null))
 const showNextCard = computed(() => isMap.value && mapMode.value === 'guided' && nextStop.value && !openId.value)
 const showDiscoverySim = computed(() => isMap.value && mapMode.value === 'discovery' && !proximityId.value && !openId.value)
-const timeTaken = ref('—')
+const timeTaken = ref('–')
 
 // Real-GPS proximity detection (BRD §10): auto-unlock on arrival within radius.
 watch(

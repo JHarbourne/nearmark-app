@@ -34,7 +34,7 @@
         <tbody>
           <tr v-for="u in users" :key="u.id">
             <td style="font-weight:600;">{{ u.email }}<span v-if="!u.confirmed" class="muted" style="font-weight:400; margin-left:6px;">· invited</span></td>
-            <td class="muted">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '—' }}</td>
+            <td class="muted">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '–' }}</td>
             <td class="right">
               <button v-if="u.email !== store.user?.email" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
               <span v-else class="muted" style="font-size:13px;">you</span>

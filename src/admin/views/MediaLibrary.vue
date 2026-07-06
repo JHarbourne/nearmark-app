@@ -121,7 +121,7 @@ async function doReplace(m, e) {
   const f = e.target.files[0]
   if (!f) return
   const used = usedBy(m)
-  const where = used !== '—' ? `\n\nIt will update everywhere it's used: ${used}.` : ''
+  const where = used !== '–' ? `\n\nIt will update everywhere it's used: ${used}.` : ''
   if (!confirm(`Replace “${m.filename}” with this new file?${where}`)) { e.target.value = ''; return }
   replacing.value = m.url
   try {
@@ -141,7 +141,7 @@ async function save(m) {
 }
 async function remove(m) {
   const used = usedBy(m)
-  const warn = used !== '—' ? `\n\n⚠️ This file is currently used by: ${used}. Deleting it will break those images.` : ''
+  const warn = used !== '–' ? `\n\n⚠️ This file is currently used by: ${used}. Deleting it will break those images.` : ''
   if (!confirm(`Delete “${m.filename}”? This removes the file permanently.${warn}`)) return
   try { await store.deleteMediaAsset(m) } catch (e) { alert('Delete failed: ' + e.message) }
 }
@@ -150,10 +150,10 @@ function usedBy(m) {
   const locs = store.locations.filter((l) => [l.heroImageUrl, l.historicImageUrl, l.audioUrl, l.videoUrl].includes(m.url)).map((l) => l.title)
   const tours = store.tours.filter((t) => t.coverImageUrl === m.url).map((t) => t.title)
   const all = [...locs, ...tours]
-  return all.length ? all.join(', ') : '—'
+  return all.length ? all.join(', ') : '–'
 }
 function sizeLabel(m) {
-  if (!m.sizeBytes) return '—'
+  if (!m.sizeBytes) return '–'
   return m.sizeBytes < 1024 * 1024 ? `${Math.round(m.sizeBytes / 1024)} KB` : `${(m.sizeBytes / 1024 / 1024).toFixed(1)} MB`
 }
 function thumb(m) {
