@@ -55,8 +55,9 @@ Per-client Postgres on Supabase, guarded by Row-Level Security. Three core table
 ### `locations`
 A place on the map with its story. Keyed by a stable `slug` (used as the app-level `id`).
 Notable fields: `title`, `city`, `period`, `significance`, `summary`, `hue` (accent),
-`lat`/`lng`, `trigger_radius`; imagery (`hero_image_url`, `historic_image_url`,
-`portrait_url`, focal `*_position`, alt text, slider labels, `caption`); credits
+`lat`/`lng`, `trigger_radius`; imagery (`hero_image_url` = the lead photo; the before/after
+slider's own pair `historic_image_url` + `slider_after_url`, the latter falling back to the
+hero; `portrait_url`; focal `*_position`; alt text; slider labels; `caption`); credits
 (`photo_credit`, `historic_credit`, + `show_photo_credit` toggle); `wiki_url` +
 `link_label` (per-location CTA label); `audio_url`/`audio_duration` + `transcript`
 (plain-text audio transcript, WCAG 1.2.1), `video_url`;
@@ -98,6 +99,7 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 017 | tour `route_geometry` (walking routes) |
 | 018 | persistent activity log |
 | 019 | per-location audio `transcript` (WCAG 1.2.1) |
+| 020 | slider `after` image (`slider_after_url`), separate from the hero |
 
 ---
 
@@ -111,8 +113,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
     a story on GPS arrival within `trigger_radius`.
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
-- **Story card.** Photo (with focal point), category/period tag, title, narrative, optional
-  **before/after slider**, second photo, optional **video** (a direct `.mp4`/`.webm` plays as
+- **Story card.** Hero photo (with focal point), category/period tag, title, narrative, an
+  optional **before/after slider** (its own before + after photos, independent of the hero;
+  after falls back to the hero if unset), second photo, optional **video** (a direct `.mp4`/`.webm` plays as
   the muted looping hero; a **YouTube** link embeds as a player in the body — a non-playable
   link is ignored so it can't blank the hero), audio narration (with a collapsible **"Show
   transcript"** panel when a transcript exists — `[bracketed]` non-speech cues rendered

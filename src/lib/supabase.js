@@ -31,6 +31,8 @@ function rowToLocation(r) {
     triggerRadius: r.trigger_radius || 80,
     heroImageUrl: r.hero_image_url || null,
     historicImageUrl: r.historic_image_url || null,
+    sliderAfterUrl: r.slider_after_url || null, // slider "after"/today image; blank → falls back to the hero
+    sliderAfterPosition: r.slider_after_position || '50% 50%',
     heroPosition: r.hero_position || '50% 50%',
     historicPosition: r.historic_position || '50% 50%',
     photoCredit: r.photo_credit || '',
@@ -87,6 +89,8 @@ function locationToRow(l) {
     trigger_radius: Number(l.triggerRadius) || 80,
     hero_image_url: l.heroImageUrl || null,
     historic_image_url: l.historicImageUrl || null,
+    slider_after_url: l.sliderAfterUrl || null,
+    slider_after_position: l.sliderAfterPosition || '50% 50%',
     hero_position: l.heroPosition || '50% 50%',
     historic_position: l.historicPosition || '50% 50%',
     photo_credit: l.photoCredit || null,

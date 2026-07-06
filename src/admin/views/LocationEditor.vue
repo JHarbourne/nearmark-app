@@ -76,121 +76,118 @@
           </span>
         </label>
 
-        <!-- historic “before” image is optional: on → before/after slider, off → single photo (full width) -->
+        <!-- Hero image: the lead photo at the top of the story card – its own image, separate from the slider -->
+        <p class="muted" style="font-size:12px; margin:14px 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
+        <label for="loc-hero-url">Hero image <span class="hint">the main photo, shown at the top</span></label>
+        <div class="media-input">
+          <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="Paste a URL, or use the icons →" />
+          <div class="media-actions">
+            <label class="icon-btn" :class="{ busy: uploading.hero }" :title="uploading.hero ? 'Uploading…' : 'Upload an image from your device'">
+              <svg class="ic"><use href="#ic-upload" /></svg>
+              <input type="file" accept="image/*" aria-label="Upload a hero image from your device" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
+            </label>
+            <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a hero image from the media library" @click="openPicker('heroImageUrl')">
+              <svg class="ic"><use href="#ic-image" /></svg>
+            </button>
+          </div>
+        </div>
+        <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
+        <template v-if="form.heroImageUrl">
+          <div role="button" tabindex="0" :style="focalBox(form.heroImageUrl, form.heroPosition)" aria-label="Hero image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'heroPosition')" @keydown="nudgeFocal($event,'heroPosition')">
+            <span :style="focalDot(form.heroPosition)"></span>
+          </div>
+          <p class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
+          <label for="loc-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
+          <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
+          <label for="loc-caption">Image caption <span class="hint">shown under the photo · also read by screen readers, in place of alt text</span></label>
+          <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
+          <label for="loc-hero-credit">Photo credit <span class="hint">photographer / source</span></label>
+          <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
+          <label for="loc-hero-credit-link">Credit link <span class="hint">optional</span></label>
+          <input id="loc-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
+          <label style="display:flex; align-items:center; gap:9px; margin-top:10px; font-weight:500; cursor:pointer;">
+            <input type="checkbox" v-model="form.showPhotoCredit" />
+            <span>Show this credit on the photo <span class="hint">off = kept on record, hidden in the app</span></span>
+          </label>
+        </template>
+
+        <!-- Before/after slider is optional; kept behind a toggle to keep the form tidy -->
         <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
           <input type="checkbox" v-model="showHistoric" />
-          <span>Add a historic “before” photo <span class="hint">turns the photo into a before/after slider</span></span>
+          <span>Add a before/after slider <span class="hint">a historic “before” photo revealed against a “today” photo</span></span>
         </label>
-        <p v-if="showHistoric" class="muted" style="font-size:12.5px; margin:0 0 8px;">The two images form the before/after slider – historic (“before”) on the left, hero (“today”) on the right.</p>
-        <p class="muted" style="font-size:12px; margin:0 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
-
-        <!-- image source + upload -->
-        <div :class="{ 'field-row': showHistoric }">
-          <div v-if="showHistoric">
-            <label for="loc-historic-url">Historic image <span class="hint">“before” · slider LEFT</span></label>
-            <div class="media-input">
-              <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="Paste a URL, or use the icons →" />
-              <div class="media-actions">
-                <label class="icon-btn" :class="{ busy: uploading.historic }" :title="uploading.historic ? 'Uploading…' : 'Upload an image from your device'">
-                  <svg class="ic"><use href="#ic-upload" /></svg>
-                  <input type="file" accept="image/*" aria-label="Upload a historic image from your device" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
-                </label>
-                <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a historic image from the media library" @click="openPicker('historicImageUrl')">
-                  <svg class="ic"><use href="#ic-image" /></svg>
-                </button>
+        <div v-if="showHistoric">
+          <p class="muted" style="font-size:12.5px; margin:0 0 10px;">A reveal slider shown in the story body – these two photos are separate from the hero above.</p>
+          <div class="field-row">
+            <div>
+              <label for="loc-historic-url">Before image <span class="hint">historic · slider LEFT</span></label>
+              <div class="media-input">
+                <input id="loc-historic-url" type="url" v-model="form.historicImageUrl" placeholder="Paste a URL, or use the icons →" />
+                <div class="media-actions">
+                  <label class="icon-btn" :class="{ busy: uploading.historic }" :title="uploading.historic ? 'Uploading…' : 'Upload an image from your device'">
+                    <svg class="ic"><use href="#ic-upload" /></svg>
+                    <input type="file" accept="image/*" aria-label="Upload a before (historic) image from your device" style="display:none" @change="up($event,'historicImageUrl','image','historic')" />
+                  </label>
+                  <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a before image from the media library" @click="openPicker('historicImageUrl')">
+                    <svg class="ic"><use href="#ic-image" /></svg>
+                  </button>
+                </div>
               </div>
+              <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
             </div>
-            <button v-if="canUndo('historicImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('historicImageUrl')">↩ Undo</button>
-          </div>
-          <div>
-            <label for="loc-hero-url">Hero image <span v-if="showHistoric" class="hint">“today” · slider RIGHT</span></label>
-            <div class="media-input">
-              <input id="loc-hero-url" type="url" v-model="form.heroImageUrl" placeholder="Paste a URL, or use the icons →" />
-              <div class="media-actions">
-                <label class="icon-btn" :class="{ busy: uploading.hero }" :title="uploading.hero ? 'Uploading…' : 'Upload an image from your device'">
-                  <svg class="ic"><use href="#ic-upload" /></svg>
-                  <input type="file" accept="image/*" aria-label="Upload a hero image from your device" style="display:none" @change="up($event,'heroImageUrl','image','hero')" />
-                </label>
-                <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose a hero image from the media library" @click="openPicker('heroImageUrl')">
-                  <svg class="ic"><use href="#ic-image" /></svg>
-                </button>
+            <div>
+              <label for="loc-after-url">After image <span class="hint">today · slider RIGHT · blank = reuse the hero</span></label>
+              <div class="media-input">
+                <input id="loc-after-url" type="url" v-model="form.sliderAfterUrl" placeholder="Paste a URL, or use the icons →" />
+                <div class="media-actions">
+                  <label class="icon-btn" :class="{ busy: uploading.after }" :title="uploading.after ? 'Uploading…' : 'Upload an image from your device'">
+                    <svg class="ic"><use href="#ic-upload" /></svg>
+                    <input type="file" accept="image/*" aria-label="Upload an after (today) image from your device" style="display:none" @change="up($event,'sliderAfterUrl','image','after')" />
+                  </label>
+                  <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose an after image from the media library" @click="openPicker('sliderAfterUrl')">
+                    <svg class="ic"><use href="#ic-image" /></svg>
+                  </button>
+                </div>
               </div>
+              <button v-if="canUndo('sliderAfterUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('sliderAfterUrl')">↩ Undo</button>
             </div>
-            <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
           </div>
-        </div>
 
-        <!-- focal point -->
-        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
-          <div>
-            <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition)" aria-label="Historic image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
-              <span :style="focalDot(form.historicPosition)"></span>
+          <!-- focal points -->
+          <div class="field-row">
+            <div>
+              <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition)" aria-label="Before image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
+                <span :style="focalDot(form.historicPosition)"></span>
+              </div>
+              <p v-if="form.historicImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
             </div>
-            <p v-if="form.historicImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
-          </div>
-          <div>
-            <div v-if="form.heroImageUrl" role="button" tabindex="0" :style="focalBox(form.heroImageUrl, form.heroPosition)" aria-label="Hero image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'heroPosition')" @keydown="nudgeFocal($event,'heroPosition')">
-              <span :style="focalDot(form.heroPosition)"></span>
+            <div>
+              <div v-if="form.sliderAfterUrl" role="button" tabindex="0" :style="focalBox(form.sliderAfterUrl, form.sliderAfterPosition)" aria-label="After image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'sliderAfterPosition')" @keydown="nudgeFocal($event,'sliderAfterPosition')">
+                <span :style="focalDot(form.sliderAfterPosition)"></span>
+              </div>
+              <p v-if="form.sliderAfterUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
             </div>
-            <p v-if="form.heroImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
           </div>
-        </div>
 
-        <!-- alt text -->
-        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
-          <div>
-            <template v-if="form.historicImageUrl">
-              <label for="loc-historic-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
-              <input id="loc-historic-alt" type="text" v-model="form.historicAlt" placeholder="e.g. The Domino Room, c.1893" />
-            </template>
+          <!-- slider captions -->
+          <div class="field-row">
+            <div>
+              <label for="loc-historic-slabel">Caption <span class="hint">over the LEFT (before) image</span></label>
+              <input id="loc-historic-slabel" type="text" v-model="form.historicLabel" :placeholder="form.period ? `default: ${form.period}` : 'e.g. 1890s'" />
+            </div>
+            <div>
+              <label for="loc-hero-slabel">Caption <span class="hint">over the RIGHT (after) image</span></label>
+              <input id="loc-hero-slabel" type="text" v-model="form.imageLabel" placeholder="e.g. Today" />
+            </div>
           </div>
-          <div>
-            <template v-if="form.heroImageUrl">
-              <label for="loc-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
-              <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
-            </template>
-          </div>
-        </div>
 
-        <!-- slider captions (only when both images form a slider) -->
-        <div class="field-row" v-if="form.heroImageUrl && form.historicImageUrl">
-          <div>
-            <label for="loc-historic-slabel">Slider caption <span class="hint">over the LEFT image</span></label>
-            <input id="loc-historic-slabel" type="text" v-model="form.historicLabel" :placeholder="form.period ? `default: ${form.period}` : 'e.g. 1890s'" />
-          </div>
-          <div>
-            <label for="loc-hero-slabel">Slider caption <span class="hint">over the RIGHT image</span></label>
-            <input id="loc-hero-slabel" type="text" v-model="form.imageLabel" placeholder="e.g. Today · Reconstruction" />
-          </div>
-        </div>
-        <button v-if="showHistoric && form.historicImageUrl && form.heroImageUrl" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="swapImages">⇄ Swap hero / historic images</button>
+          <!-- the historic (before) image has its own credit; the after image reuses the hero photo credit above -->
+          <label for="loc-historic-credit">Before photo credit <span class="hint">the historic image · archive / source</span></label>
+          <input id="loc-historic-credit" type="text" v-model="form.historicCredit" placeholder="Archive / source" />
+          <label for="loc-historic-credit-link">Credit link <span class="hint">optional</span></label>
+          <input id="loc-historic-credit-link" type="url" v-model="form.historicCreditUrl" placeholder="https://…" />
 
-        <template v-if="form.heroImageUrl || form.historicImageUrl">
-          <label for="loc-caption">Image caption <span class="hint">shown under the photo · also read by screen readers, in place of alt text</span></label>
-          <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Café Royal’s Domino Room, then and now" />
-        </template>
-        <!-- credits: left column = historic (left) image, right column = hero (right) image -->
-        <div :class="{ 'field-row': showHistoric }" v-if="form.historicImageUrl || form.heroImageUrl">
-          <div>
-            <template v-if="form.historicImageUrl">
-              <label for="loc-historic-credit">Historic photo credit <span class="hint">the “before” image</span></label>
-              <input id="loc-historic-credit" type="text" v-model="form.historicCredit" placeholder="Archive / source" />
-              <label for="loc-historic-credit-link">Credit link <span class="hint">optional</span></label>
-              <input id="loc-historic-credit-link" type="url" v-model="form.historicCreditUrl" placeholder="https://…" />
-            </template>
-          </div>
-          <div>
-            <template v-if="form.heroImageUrl">
-              <label for="loc-hero-credit">Hero photo credit <span class="hint">contemporary photo</span></label>
-              <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
-              <label for="loc-hero-credit-link">Credit link <span class="hint">optional</span></label>
-              <input id="loc-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
-              <label style="display:flex; align-items:center; gap:9px; margin-top:10px; font-weight:500; cursor:pointer;">
-                <input type="checkbox" v-model="form.showPhotoCredit" />
-                <span>Show this credit on the photo <span class="hint">off = kept on record, hidden in the app</span></span>
-              </label>
-            </template>
-          </div>
+          <button v-if="form.historicImageUrl && form.sliderAfterUrl" type="button" class="btn btn-ghost btn-sm" style="margin-top:10px;" @click="swapImages">⇄ Swap before / after images</button>
         </div>
 
         <label for="loc-significance">Historical significance <span class="hint">one-line subtitle</span></label>
@@ -244,6 +241,12 @@
           </div>
         </div>
 
+        <!-- Audio + video are optional; behind a toggle to keep the form tidy -->
+        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showMedia" />
+          <span>Add audio or video <span class="hint">narration, a video clip, or a YouTube link</span></span>
+        </label>
+        <div v-if="showMedia">
         <label for="loc-audio">Audio narration <span class="hint">mp3/m4a</span></label>
         <div class="media-input solo">
           <input id="loc-audio" type="url" v-model="form.audioUrl" placeholder="Paste a URL, or upload →" />
@@ -280,6 +283,7 @@
           </p>
           <p v-else class="hint" style="margin:6px 0 0;">Wrap non-speech sounds in [square brackets] — they’ll show in a muted style in the app.</p>
         </template>
+        </div>
 
         <label for="loc-related">Related locations <span class="hint">powers “Nearby stories”</span></label>
         <select id="loc-related" multiple v-model="form.relatedIds" style="height:96px;">
@@ -357,7 +361,7 @@ const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
   recordId: undefined, title: '', city: config.cities[0], period: '', significance: '', summary: '',
   wikiUrl: config.wikiBaseUrl, linkLabel: '', lat: null, lng: null, triggerRadius: 80,
-  heroImageUrl: '', historicImageUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '',
+  heroImageUrl: '', historicImageUrl: '', sliderAfterUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', sliderAfterPosition: '50% 50%', imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true, historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '',
   caption: '', links: '',
   hue: HUE_OPTIONS[0].value, relatedIds: [], tourNum: null, status: 'draft', notesInternal: '',
   visibility: 'public', publishFrom: null, publishUntil: null, guidedTourOnly: false,
@@ -371,7 +375,11 @@ if (form.guidedTourOnly === undefined) form.guidedTourOnly = false // pre-guided
 // historic "before" image is opt-in (turns the photo into a before/after slider);
 // switching it off clears the image so the app shows a single, full-width photo.
 const showHistoric = ref(!!form.historicImageUrl)
-watch(showHistoric, (on) => { if (!on) form.historicImageUrl = '' })
+watch(showHistoric, (on) => { if (!on) { form.historicImageUrl = ''; form.sliderAfterUrl = '' } })
+
+// audio + video are opt-in too, tucked behind a toggle to keep the form tidy
+const showMedia = ref(!!(form.audioUrl || form.videoUrl))
+watch(showMedia, (on) => { if (!on) { form.audioUrl = ''; form.videoUrl = '' } })
 
 // ── unsaved-changes guard: warn before leaving (in-app nav + tab close/reload) ──
 const baseline = ref(JSON.stringify(form))
@@ -416,11 +424,11 @@ const showPreview = ref(false)
 const others = computed(() => store.locations.filter((l) => l.id !== form.id))
 const validWiki = computed(() => !wikiDomain || form.wikiUrl.includes(wikiDomain))
 
-// swap the hero (today) and historic (before) image and all their paired fields
+// swap the slider's before (historic) and after (today) image + their paired fields
 function swapImages() {
   const pairs = [
-    ['heroImageUrl', 'historicImageUrl'], ['heroPosition', 'historicPosition'],
-    ['imageAlt', 'historicAlt'], ['photoCredit', 'historicCredit'], ['photoCreditUrl', 'historicCreditUrl'],
+    ['sliderAfterUrl', 'historicImageUrl'], ['sliderAfterPosition', 'historicPosition'],
+    ['imageLabel', 'historicLabel'],
   ]
   for (const [a, b] of pairs) { const tmp = form[a]; form[a] = form[b]; form[b] = tmp }
 }
@@ -459,7 +467,7 @@ function nudgeFocal(e, field) {
 }
 
 // ── file uploads to Supabase Storage ──
-const uploading = reactive({ hero: false, historic: false, portrait: false, audio: false })
+const uploading = reactive({ hero: false, historic: false, after: false, portrait: false, audio: false })
 async function up(e, field, kind, key) {
   const file = e.target.files[0]
   if (!file) return
@@ -511,7 +519,7 @@ async function save() {
     // record no longer uses (no-op for external URLs). We deliberately never
     // delete a pre-existing image just because this location switched away from
     // it – it may be a library photo reused by other locations.
-    const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.portraitUrl, form.audioUrl].filter(Boolean))
+    const inUse = new Set([form.heroImageUrl, form.historicImageUrl, form.sliderAfterUrl, form.portraitUrl, form.audioUrl].filter(Boolean))
     for (const url of sessionUploads) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
     baseline.value = JSON.stringify(form) // saved → no longer "dirty"
     flash.value = form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓'

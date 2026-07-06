@@ -9,6 +9,10 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Separate before/after "after" image** (migration 020) — the story hero and the before/after
+  slider are now independent photos. The slider has its own **After** image; left blank it
+  falls back to the hero, so existing slider stops are unaffected. Previously the hero and the
+  slider's "today" side were the same field, so a slider stop showed one photo twice.
 - **YouTube in the story video field** — a YouTube link in a location's Video URL now shows
   as an embedded (cookie-free) player in the story body. A direct `.mp4`/`.webm` file still
   drives the muted looping hero background as before.
@@ -32,8 +36,9 @@ The [README](README.md) is documentation; this file is the release history.
 
 ### Changed
 - Location editor now follows the **story-page order** — the photo/image block sits **above
-  the Text field** (photo first, as on the finished card). The Hero image's "today · slider
-  RIGHT" hint only appears when the before/after slider is actually enabled.
+  the Text field** (photo first, as on the finished card). The **Hero image** is its own
+  section; the **before/after slider** (its own Before + After photos) and the **audio/video**
+  fields each sit behind their own toggle to keep the form tidy.
 - Location editor tidy-ups: the narrative field is labelled **"Text"** (not "Summary text",
   since it isn't a summary), and the accent-colour swatches now have breathing room above the
   "Add a historic before photo" toggle so they don't read as one control.

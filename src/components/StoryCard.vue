@@ -80,7 +80,7 @@
                 <figcaption v-if="loc.historicLabel || loc.period" class="ics-label ics-left">{{ loc.historicLabel || loc.period }}</figcaption>
               </figure>
               <figure slot="second" class="ics-fig">
-                <img :src="loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' – today'))" :style="{ objectPosition: loc.heroPosition || '50% 50%' }" />
+                <img :src="loc.sliderAfterUrl || loc.heroImageUrl" :alt="loc.caption ? '' : (loc.imageAlt || (loc.title + ' – today'))" :style="{ objectPosition: (loc.sliderAfterUrl ? loc.sliderAfterPosition : loc.heroPosition) || '50% 50%' }" />
                 <figcaption v-if="loc.imageLabel" class="ics-label ics-right">{{ loc.imageLabel }}</figcaption>
               </figure>
             </img-comparison-slider>
@@ -183,7 +183,8 @@ const showAudio = computed(() => props.audioOn && !!props.loc.audioUrl)
 // URL) never blanks the hero – it's embedded in the body instead, or ignored.
 const heroVideoUrl = computed(() => (isFileVideo(props.loc.videoUrl) ? props.loc.videoUrl : ''))
 const ytEmbedUrl = computed(() => youtubeEmbed(props.loc.videoUrl))
-const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.heroImageUrl && !!props.loc.historicImageUrl)
+// slider needs a "before" (historic) and an "after" – the after is its own image, or the hero as a fallback
+const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.historicImageUrl && !!(props.loc.sliderAfterUrl || props.loc.heroImageUrl))
 
 // Split the story into paragraphs so the before/after slider can sit after the
 // first one. Blank lines separate paragraphs; single newlines are kept (pre-line).
