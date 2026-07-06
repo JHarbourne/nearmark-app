@@ -48,7 +48,9 @@ export const config = {
   contentSourceUrl: pick(env.VITE_CONTENT_SOURCE_URL, ''),     // optional link on the content-source label
   feedbackUrl: pick(env.VITE_FEEDBACK_URL, 'https://nearmark.co.uk/feedback'), // admin "Suggest an improvement" link; override or set '' to hide
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
-  platformUrl: pick(env.VITE_PLATFORM_URL, ''),                 // link for the platform name (blank = plain text)
+  // link for the "Powered by …" name. Defaults to nearmark.app for the default brand;
+  // a white-label deploy (custom VITE_PLATFORM_NAME) stays plain text unless it sets a URL.
+  platformUrl: pick(env.VITE_PLATFORM_URL, env.VITE_PLATFORM_NAME ? '' : 'https://nearmark.app'),
   contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph – blank hides it
   wikiBaseUrl: pick(env.VITE_WIKI_BASE_URL, ''),               // base for article links + admin URL validation
   repoUrl: pick(env.VITE_REPO_URL, ''),                        // admin "source code" link – blank hides it

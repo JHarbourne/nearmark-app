@@ -9,6 +9,10 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **"Powered by Nearmark" footer in the admin** — the backoffice sidebar now carries the same
+  attribution + version the public app has, linking to the platform site. `platformUrl` now
+  defaults to `nearmark.app` for the default brand (so both footers are real links); a
+  white-label deploy with a custom platform name stays plain text unless it sets a URL.
 - **Dashboard "Edits by editor"** — a bar chart summarising how many changes each editor has
   made (from the persistent activity log), so you can see who's been in and how active they are.
 - **Dashboard "View analytics" link** — opens the PostHog dashboard (visitor/usage analytics)

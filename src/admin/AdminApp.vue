@@ -34,6 +34,7 @@
         <a href="/" target="_blank" class="navlink" style="display:block; margin-top:10px; padding-left:0;">View live app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
         <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="display:block; padding-left:0;">Suggest an improvement<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
         <button class="navlink" style="padding-left:0;" @click="store.signOut()">Sign out</button>
+        <p class="muted" style="font-size:11.5px; margin:16px 0 0; color:var(--ink-faint);">Powered by <a v-if="platformUrl" :href="platformUrl" target="_blank" rel="noopener" style="color:inherit;">{{ platformName }}</a><span v-else>{{ platformName }}</span> · v{{ version }}</p>
       </div>
     </aside>
 
@@ -62,6 +63,9 @@ import MediaLibrary from './views/MediaLibrary.vue'
 import UserManagement from './views/UserManagement.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
+const platformName = config.platformName
+const platformUrl = config.platformUrl
+const version = __APP_VERSION__
 const nav = [
   { route: 'dashboard', label: 'Dashboard' },
   { route: 'locations', label: 'Locations' },
