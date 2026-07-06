@@ -67,7 +67,7 @@ input[type=text], input[type=email], input[type=password], input[type=url], inpu
 }
 /* single-line fields + selects share one height so text inputs and pulldowns line up */
 input[type=text], input[type=email], input[type=password], input[type=url], input[type=number], input[type=date], select { height: 42px; }
-textarea { resize: vertical; min-height: 90px; }
+textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .swatch { width: 30px; height: 30px; padding: 0; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
 .swatch.sel { box-shadow: 0 0 0 2px var(--ink); }

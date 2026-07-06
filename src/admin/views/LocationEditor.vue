@@ -207,7 +207,7 @@
         <input id="loc-significance" type="text" v-model="form.significance" />
 
         <label for="loc-summary">Text <span class="hint">~80–100 words</span></label>
-        <textarea id="loc-summary" v-model="form.summary" rows="6"></textarea>
+        <textarea id="loc-summary" v-model="form.summary" rows="9"></textarea>
         <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph.</p>
 
         <label for="loc-wiki">URL to more information <span class="hint">optional</span></label>
