@@ -31,6 +31,9 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Location editor now follows the **story-page order** — the photo/image block sits **above
+  the Text field** (photo first, as on the finished card). The Hero image's "today · slider
+  RIGHT" hint only appears when the before/after slider is actually enabled.
 - Location editor tidy-ups: the narrative field is labelled **"Text"** (not "Summary text",
   since it isn't a summary), and the accent-colour swatches now have breathing room above the
   "Add a historic before photo" toggle so they don't read as one control.
@@ -60,6 +63,9 @@ The [README](README.md) is documentation; this file is the release history.
   labels a heavier/slightly larger cut.
 
 ### Fixed
+- **"Show this credit" toggle is now respected in the before/after slider.** A stop with a
+  historic image showed the hero photographer's credit even when the credit was switched off;
+  the slider view now honours `show_photo_credit` just like the single-photo view does.
 - **Video URL no longer blanks the hero.** A non-file link (e.g. a YouTube *watch* URL)
   pasted into a location's Video URL used to hijack the hero as an unplayable `<video>`,
   hiding the perfectly good photo behind a blank placeholder. Only a real video file now
