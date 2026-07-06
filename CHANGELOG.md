@@ -9,6 +9,8 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Dashboard "Edits by editor"** — a bar chart summarising how many changes each editor has
+  made (from the persistent activity log), so you can see who's been in and how active they are.
 - **Second photo gets a credit** (migration 021) — the in-body "second photo" now takes a
   photographer/source credit + link, like the other photos, shown under it on the card. The
   whole second-photo section is now behind an **"Add a second photo"** toggle to keep the form
@@ -39,6 +41,8 @@ The [README](README.md) is documentation; this file is the release history.
   edit-time deploys, and is dismissible per-version.
 
 ### Changed
+- Dashboard **stat cards are now shortcuts** — clicking "Total/Published/Draft locations" opens
+  the Locations list and "Total tours" opens the Tours list.
 - **Story text is now paragraph-spaced** — each line break in a stop's text renders as its
   own spaced paragraph (it previously needed a blank line between paragraphs, so single-spaced
   text ran together).
@@ -100,6 +104,8 @@ The [README](README.md) is documentation; this file is the release history.
   tests can reach it). Production always has Supabase, so a real login is always required there.
 
 ### Fixed
+- Admin sidebar: the **external-link icons** ("View live app", "Suggest an improvement") no
+  longer float mid-block on a wrapped link — they now sit inline after the text.
 - **Version footer contrast** — the "· vX.Y.Z" in the "Powered by" footer used 60% opacity,
   dropping it to ~1.9:1 (well under AA). It now uses the full footer colour (found by the new
   a11y test).

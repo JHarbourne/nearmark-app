@@ -48,6 +48,9 @@ h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
 .stat { padding: 18px; }
 .stat .n { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 30px; }
 .stat .l { color: var(--muted); font-size: 13px; margin-top: 2px; }
+/* stat cards that are also shortcuts to a list */
+button.statlink { font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer; transition: border-color .12s ease, box-shadow .12s ease; }
+button.statlink:hover, button.statlink:focus-visible { border-color: var(--violet); box-shadow: 0 2px 12px rgba(107, 70, 229, 0.14); outline: none; }
 
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; padding: 12px 14px; border-bottom: 1px solid var(--line); }

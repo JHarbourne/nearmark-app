@@ -356,6 +356,15 @@ export const db = {
     if (error) throw new Error(error.message)
     return (data || []).map((r) => ({ action: r.action, title: r.target || '', who: r.actor || 'admin', at: new Date(r.created_at) }))
   },
+  // Edits per editor: count activity-log rows grouped by actor (client-side; the
+  // log is small during a testing phase). Returns [{ who, count }], busiest first.
+  editorStats: async (limit = 2000) => {
+    const { data, error } = await supabase.from('activity_log').select('actor').order('created_at', { ascending: false }).limit(limit)
+    if (error) throw new Error(error.message)
+    const counts = {}
+    for (const r of (data || [])) { const who = r.actor || 'admin'; counts[who] = (counts[who] || 0) + 1 }
+    return Object.entries(counts).map(([who, count]) => ({ who, count })).sort((a, b) => b.count - a.count)
+  },
 }
 
 // ── auth ──

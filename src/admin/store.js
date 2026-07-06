@@ -25,6 +25,7 @@ export const store = reactive({
   loading: false,
   error: '',
   activity: [],
+  editors: [],
 
   // ── session ──
   async init() {
@@ -184,6 +185,11 @@ export const store = reactive({
   async loadActivity() {
     if (!supabaseConfigured) return
     try { this.activity = await db.recentActivity(20) } catch { /* keep the in-memory feed */ }
+  },
+  // edits-per-editor summary for the Dashboard chart
+  async loadEditorStats() {
+    if (!supabaseConfigured) { this.editors = []; return }
+    try { this.editors = await db.editorStats() } catch { /* leave as-is */ }
   },
 
   // ── writes ──
