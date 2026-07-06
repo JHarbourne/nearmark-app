@@ -38,7 +38,11 @@ The [README](README.md) is documentation; this file is the release history.
 - Location editor now follows the **story-page order** — the photo/image block sits **above
   the Text field** (photo first, as on the finished card). The **Hero image** is its own
   section; the **before/after slider** (its own Before + After photos) and the **audio/video**
-  fields each sit behind their own toggle to keep the form tidy.
+  fields each sit behind their own toggle to keep the form tidy. The **Visibility** and
+  **Guided-tour-only** explanations are now tucked into small "learn more" accordions.
+- Story card: the **before/after slider now sits below the hero and the full story text**
+  (it was tucked in after the first paragraph), and the **image caption moves under the
+  slider** when there is one (instead of under the hero at the top).
 - Location editor tidy-ups: the narrative field is labelled **"Text"** (not "Summary text",
   since it isn't a summary), and the accent-colour swatches now have breathing room above the
   "Add a historic before photo" toggle so they don't read as one control.

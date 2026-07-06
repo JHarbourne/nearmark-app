@@ -38,7 +38,10 @@
             <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="public" v-model="form.visibility" /> Public</label>
             <label style="display:flex; align-items:center; gap:7px; font-weight:500;"><input type="radio" value="private" v-model="form.visibility" /> Private</label>
           </div>
-          <p class="muted" style="font-size:12.5px; margin:8px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
+          <details style="margin:8px 0 0;">
+            <summary style="font-size:12px; color:var(--violet); cursor:pointer;">What’s the difference?</summary>
+            <p class="muted" style="font-size:12.5px; margin:6px 0 0;">Public = a permanent place anyone can see year-round (a church, a pub, the marina). Private = someone’s home or private address (an open studio or garden). Private addresses are only shown during the event window and require the resident’s consent.</p>
+          </details>
 
           <div v-if="form.visibility === 'private'" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
             <!-- consent is per resident -->
@@ -69,12 +72,16 @@
         </div>
 
         <!-- Guided-tour-only: hide from Discover mode; only shown inside a guided tour -->
-        <label style="display:flex; align-items:flex-start; gap:9px; margin:18px 0; padding:12px 16px; border:1px solid var(--line); border-radius:12px; font-weight:500; cursor:pointer;">
-          <input type="checkbox" v-model="form.guidedTourOnly" style="margin-top:3px;" />
-          <span>Guided tour only – hide from Discover mode
-            <br><span class="muted" style="font-weight:400; font-size:12.5px;">The stop only appears while someone is following a guided tour that includes it – never in proximity-based Discover browsing. Use for stops that only make sense in a narrated sequence.</span>
-          </span>
-        </label>
+        <div style="margin:18px 0; padding:12px 16px; border:1px solid var(--line); border-radius:12px;">
+          <label style="display:flex; align-items:center; gap:9px; font-weight:500; cursor:pointer;">
+            <input type="checkbox" v-model="form.guidedTourOnly" />
+            <span>Guided tour only – hide from Discover mode</span>
+          </label>
+          <details style="margin:8px 0 0;">
+            <summary style="font-size:12px; color:var(--violet); cursor:pointer;">What does this do?</summary>
+            <p class="muted" style="font-weight:400; font-size:12.5px; margin:6px 0 0;">The stop only appears while someone is following a guided tour that includes it – never in proximity-based Discover browsing. Use for stops that only make sense in a narrated sequence.</p>
+          </details>
+        </div>
 
         <!-- Hero image: the lead photo at the top of the story card – its own image, separate from the slider -->
         <p class="muted" style="font-size:12px; margin:14px 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
@@ -99,7 +106,7 @@
           <p class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
           <label for="loc-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
           <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
-          <label for="loc-caption">Image caption <span class="hint">shown under the photo · also read by screen readers, in place of alt text</span></label>
+          <label for="loc-caption">Image caption <span class="hint">under the photo, or under the before/after slider if you add one · also read by screen readers</span></label>
           <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
           <label for="loc-hero-credit">Photo credit <span class="hint">photographer / source</span></label>
           <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
