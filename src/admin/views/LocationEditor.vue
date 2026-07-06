@@ -100,7 +100,7 @@
         </div>
         <button v-if="canUndo('heroImageUrl')" type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" @click="undoReplace('heroImageUrl')">↩ Undo</button>
         <template v-if="form.heroImageUrl">
-          <div role="button" tabindex="0" :style="focalBox(form.heroImageUrl, form.heroPosition)" aria-label="Hero image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'heroPosition')" @keydown="nudgeFocal($event,'heroPosition')">
+          <div role="button" tabindex="0" :style="focalBox(form.heroImageUrl, form.heroPosition, '39 / 20')" aria-label="Hero image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'heroPosition')" @keydown="nudgeFocal($event,'heroPosition')">
             <span :style="focalDot(form.heroPosition)"></span>
           </div>
           <p class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
@@ -163,13 +163,13 @@
           <!-- focal points -->
           <div class="field-row">
             <div>
-              <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition)" aria-label="Before image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
+              <div v-if="form.historicImageUrl" role="button" tabindex="0" :style="focalBox(form.historicImageUrl, form.historicPosition, '4 / 3')" aria-label="Before image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'historicPosition')" @keydown="nudgeFocal($event,'historicPosition')">
                 <span :style="focalDot(form.historicPosition)"></span>
               </div>
               <p v-if="form.historicImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
             </div>
             <div>
-              <div v-if="form.sliderAfterUrl" role="button" tabindex="0" :style="focalBox(form.sliderAfterUrl, form.sliderAfterPosition)" aria-label="After image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'sliderAfterPosition')" @keydown="nudgeFocal($event,'sliderAfterPosition')">
+              <div v-if="form.sliderAfterUrl" role="button" tabindex="0" :style="focalBox(form.sliderAfterUrl, form.sliderAfterPosition, '4 / 3')" aria-label="After image focal point. Click, or focus and use arrow keys, to set what stays in view." @click="setFocal($event,'sliderAfterPosition')" @keydown="nudgeFocal($event,'sliderAfterPosition')">
                 <span :style="focalDot(form.sliderAfterPosition)"></span>
               </div>
               <p v-if="form.sliderAfterUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
@@ -441,9 +441,12 @@ function swapImages() {
 }
 
 // ── focal point picker (click the preview to set what stays in view when cropped) ──
-function focalBox(url, pos) {
+// The crop preview matches how the image is shown on the card, so the focal point is
+// accurate: hero is 39:20 (390×200 on a phone), the slider's before/after images are 4:3.
+function focalBox(url, pos, aspect) {
   return {
-    marginTop: '8px', height: '120px', borderRadius: '10px', border: '1px solid var(--line)',
+    marginTop: '8px', width: '100%', maxWidth: '390px', aspectRatio: aspect || '39 / 20',
+    borderRadius: '10px', border: '1px solid var(--line)',
     backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: pos || '50% 50%',
     backgroundRepeat: 'no-repeat', position: 'relative', cursor: 'crosshair',
   }

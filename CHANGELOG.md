@@ -72,6 +72,10 @@ The [README](README.md) is documentation; this file is the release history.
   labels a heavier/slightly larger cut.
 
 ### Fixed
+- **Focal-point crop previews now match the card's proportions** — the editor's crop box was
+  a fixed short strip (~4:1), so the focal point you set didn't reflect what the card would
+  show. It now uses the real aspect of each image on the card (hero **39:20**, before/after
+  slider images **4:3**), so setting the focal point is accurate.
 - **"Show this credit" toggle is now respected in the before/after slider.** A stop with a
   historic image showed the hero photographer's credit even when the credit was switched off;
   the slider view now honours `show_photo_credit` just like the single-photo view does.
