@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test:a11y": "playwright test",
     "supabase:gen-seed": "node supabase/gen-seed-sql.mjs",
     "prepare": "husky"
   },
@@ -22,7 +23,9 @@
     "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "axe-core": "^4.12.1",
     "eslint": "^10.5.0",

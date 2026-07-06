@@ -76,7 +76,16 @@ The [README](README.md) is documentation; this file is the release history.
   system serif); the cover headline uses a heavier cut (weight 800) and the mode-button
   labels a heavier/slightly larger cut.
 
+### Added
+- **Accessibility test harness** — `npm run test:a11y` (Playwright + `@axe-core/playwright`)
+  builds the app in seed mode and scans the cover, main shell, a story card and a tour detail,
+  failing on serious/critical WCAG 2.x A/AA issues. It runs on every PR (CI `a11y` job),
+  complementing the scheduled scan of the live sites.
+
 ### Fixed
+- **Version footer contrast** — the "· vX.Y.Z" in the "Powered by" footer used 60% opacity,
+  dropping it to ~1.9:1 (well under AA). It now uses the full footer colour (found by the new
+  a11y test).
 - **Focal-point crop previews now match the card's proportions** — the editor's crop box was
   a fixed short strip (~4:1), so the focal point you set didn't reflect what the card would
   show. It now uses the real aspect of each image on the card (hero **39:20**, before/after

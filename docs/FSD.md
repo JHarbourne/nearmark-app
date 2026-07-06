@@ -185,8 +185,11 @@ Target **WCAG 2.1 AA**. Keyboard paths for every pointer action (e.g. list rows 
 mouse shortcut, the Edit button the keyboard path); focus traps + Esc on dialogs; a main
 landmark and page headings; `readableInk()` picks dark/white number colour per hue for
 contrast on map pins and tour badges. Audio narration can carry a plain-text **transcript**
-(WCAG 1.2.1); the editor warns when audio has none. A GitHub axe-core scanner runs in CI for
-DOM-level checks (it cannot evaluate SVG-over-map contrast — those are handled in code).
+(WCAG 1.2.1); the editor warns when audio has none. **axe-core runs at two levels:** a
+**PR gate** (`tests/a11y.spec.js` — Playwright builds the app in seed mode and scans the key
+public screens, failing on serious/critical WCAG 2.x A/AA issues), and a **scheduled scan**
+(`a11y-scan.yml`) of the live sites that files issues. Neither can evaluate SVG-over-map
+contrast — those are handled in code (`readableInk()`).
 
 ---
 
