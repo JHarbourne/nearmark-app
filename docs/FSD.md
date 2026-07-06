@@ -114,7 +114,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
     a story on GPS arrival within `trigger_radius`.
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
-- **Story card.** Hero photo (with focal point), category/period tag, title, narrative, an
+- **Story card.** Hero photo (with focal point), category/period tag, title, narrative (a safe
+  **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets — rendered with fixed paragraph
+  spacing; plain text is unaffected), an
   optional **before/after slider** (its own before + after photos, independent of the hero;
   after falls back to the hero if unset), second photo, optional **video** (a direct `.mp4`/`.webm` plays as
   the muted looping hero; a **YouTube** link embeds as a player in the body — a non-playable

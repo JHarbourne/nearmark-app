@@ -9,6 +9,9 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Light Markdown in story text** — the body supports `**bold**`, `*italic*` and `- ` bullet
+  points (a tiny, safe subset — no toolbar, no headings/links/HTML, so nothing to abuse and
+  nothing to sanitise; plain text is unaffected). Paragraph spacing is baked into the render.
 - **"Powered by Nearmark" footer in the admin** — the backoffice sidebar now carries the same
   attribution + version the public app has, linking to the platform site. `platformUrl` now
   defaults to `nearmark.app` for the default brand (so both footers are real links); a

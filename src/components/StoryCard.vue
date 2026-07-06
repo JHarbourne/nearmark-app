@@ -69,8 +69,9 @@
             </div>
           </div>
 
-          <!-- story text (all of it) sits above the slider -->
-          <p v-for="(para, i) in summaryParas" :key="i" :style="bodyText">{{ para }}</p>
+          <!-- story text (all of it) sits above the slider; Markdown subset: **bold**, *italic*, - bullets -->
+          <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em> are emitted -->
+          <div class="story-body" v-html="bodyHtml"></div>
 
           <!-- before/after reveal slider, below the hero + text (only when both a today + a historic image exist) -->
           <figure v-if="showSlider" :style="sliderFig">
@@ -143,6 +144,7 @@ import { useAudio } from '../composables/useAudio.js'
 import { track } from '../lib/analytics.js'
 import { isFileVideo, youtubeEmbed } from '../lib/video.js'
 import { typo } from '../lib/typography.js'
+import { renderBody } from '../lib/richtext.js'
 // No custom link label? Show the link's web address (host) rather than a generic
 // app-wide default, so it's always accurate (a church isn't an "artist's website").
 const urlLabel = computed(() => {
@@ -188,11 +190,9 @@ const showSlider = computed(() => !heroVideoUrl.value && !!props.loc.historicIma
 
 // Split the story into paragraphs so the before/after slider can sit after the
 // first one. Blank lines separate paragraphs; single newlines are kept (pre-line).
-// Split on any line break (not just blank lines) so each block is its own spaced
-// paragraph, and apply house-style typography to the displayed text.
-const summaryParas = computed(() =>
-  (props.loc.summary || '').split(/\n+/).map((s) => typo(s.trim())).filter(Boolean),
-)
+// Body text → safe HTML: paragraphs, bullet lists and inline **bold**/*italic*,
+// with house-style typography. Each line is its own spaced paragraph.
+const bodyHtml = computed(() => renderBody(props.loc.summary))
 
 // audio transcript (WCAG 1.2.1): only offered when audio is present AND a transcript exists
 const transcriptOpen = ref(false)
@@ -310,7 +310,6 @@ const furtherLink = {
   borderRadius: '12px', background: 'var(--raised)', border: '1px solid var(--line)',
   textDecoration: 'none', color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500,
 }
-const bodyText = { fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.66, color: 'var(--ink-soft)', margin: '0 0 16px', whiteSpace: 'pre-line' }
 const sliderFig = { position: 'relative', margin: '6px 0 20px', borderRadius: '16px', overflow: 'hidden' }
 const portraitFig = { margin: '22px 0 0' }
 const portraitImg = { display: 'block', width: '100%', borderRadius: '16px' }
@@ -334,6 +333,15 @@ const continueBtn = {
 </script>
 
 <style scoped>
+/* rendered story body: paragraphs, bullets and inline bold/italic (see richtext.js).
+   :deep() so scoped styles reach the v-html-injected elements. */
+.story-body :deep(p) { font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0 0 16px; }
+.story-body :deep(ul) { margin: 0 0 16px; padding-left: 22px; }
+.story-body :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; }
+.story-body :deep(strong) { font-weight: 700; }
+.story-body :deep(em) { font-style: italic; }
+.story-body :deep(:last-child) { margin-bottom: 0; }
+
 /* before/after reveal slider (img-comparison-slider) — sits in the body and
    takes the images' natural shape (3:4 or 16:9), matched Rephoto pairs so both
    sides line up. */
