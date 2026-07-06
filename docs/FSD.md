@@ -187,7 +187,8 @@ landmark and page headings; `readableInk()` picks dark/white number colour per h
 contrast on map pins and tour badges. Audio narration can carry a plain-text **transcript**
 (WCAG 1.2.1); the editor warns when audio has none. **axe-core runs at two levels:** a
 **PR gate** (`tests/a11y.spec.js` — Playwright builds the app in seed mode and scans the key
-public screens, failing on serious/critical WCAG 2.x A/AA issues), and a **scheduled scan**
+public screens **and the admin backoffice** — which the seed build opens read-only as a demo —
+failing on serious/critical WCAG 2.x A/AA issues), and a **scheduled scan**
 (`a11y-scan.yml`) of the live sites that files issues. Neither can evaluate SVG-over-map
 contrast — those are handled in code (`readableInk()`).
 

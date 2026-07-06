@@ -78,14 +78,20 @@ The [README](README.md) is documentation; this file is the release history.
 
 ### Added
 - **Accessibility test harness** — `npm run test:a11y` (Playwright + `@axe-core/playwright`)
-  builds the app in seed mode and scans the cover, main shell, a story card and a tour detail,
-  failing on serious/critical WCAG 2.x A/AA issues. It runs on every PR (CI `a11y` job),
-  complementing the scheduled scan of the live sites.
+  builds the app in seed mode and scans the public app (cover, main shell, a story card, a
+  tour detail) **and the admin backoffice** (dashboard, locations list, location editor, tours
+  list, media library), failing on serious/critical WCAG 2.x A/AA issues. It runs on every PR
+  (CI `a11y` job), complementing the scheduled scan of the live sites.
+- **Admin demo mode** — with no Supabase configured (the seed/OSS-demo build), the admin now
+  opens **read-only without a login**, so the app can be explored end-to-end (and the a11y
+  tests can reach it). Production always has Supabase, so a real login is always required there.
 
 ### Fixed
 - **Version footer contrast** — the "· vX.Y.Z" in the "Powered by" footer used 60% opacity,
   dropping it to ~1.9:1 (well under AA). It now uses the full footer colour (found by the new
   a11y test).
+- **"Published" status badge contrast** — the green-on-mint badge was 3.1:1; darkened the
+  green to clear AA (5.5:1). Also caught by the new admin a11y scans.
 - **Focal-point crop previews now match the card's proportions** — the editor's crop box was
   a fixed short strip (~4:1), so the focal point you set didn't reflect what the card would
   show. It now uses the real aspect of each image on the card (hero **39:20**, before/after

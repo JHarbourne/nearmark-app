@@ -54,7 +54,7 @@ th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; t
 td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
 .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-.badge.published { background: #e3f6ec; color: var(--green); }
+.badge.published { background: #e3f6ec; color: #12703c; } /* darker than --green so 12px bold clears AA (5.5:1) */
 .badge.draft { background: #f1eef7; color: var(--muted); }
 
 label, .field-label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }

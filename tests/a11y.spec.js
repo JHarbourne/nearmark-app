@@ -47,3 +47,46 @@ test.describe('Accessibility — public app', () => {
     expect(violations, `\n${report(violations)}`).toEqual([])
   })
 })
+
+// The admin is login-gated in production, but the seed build (no Supabase) opens
+// it read-only as a demo, so we can scan its screens too.
+test.describe('Accessibility — admin backoffice', () => {
+  test('dashboard', async ({ page }) => {
+    await page.goto('/admin.html')
+    await page.getByRole('heading', { name: 'Dashboard' }).waitFor()
+    const violations = await scan(page)
+    expect(violations, `\n${report(violations)}`).toEqual([])
+  })
+
+  test('locations list', async ({ page }) => {
+    await page.goto('/admin.html')
+    await page.getByRole('button', { name: 'Locations', exact: true }).click()
+    await page.getByRole('heading', { name: 'Locations' }).waitFor()
+    const violations = await scan(page)
+    expect(violations, `\n${report(violations)}`).toEqual([])
+  })
+
+  test('location editor', async ({ page }) => {
+    await page.goto('/admin.html')
+    await page.getByRole('button', { name: /add location/i }).first().click()
+    await page.locator('#loc-title').waitFor()
+    const violations = await scan(page)
+    expect(violations, `\n${report(violations)}`).toEqual([])
+  })
+
+  test('tours list', async ({ page }) => {
+    await page.goto('/admin.html')
+    await page.getByRole('button', { name: 'Tours', exact: true }).click()
+    await page.getByRole('heading', { name: 'Tours' }).waitFor()
+    const violations = await scan(page)
+    expect(violations, `\n${report(violations)}`).toEqual([])
+  })
+
+  test('media library', async ({ page }) => {
+    await page.goto('/admin.html')
+    await page.getByRole('button', { name: 'Media library', exact: true }).click()
+    await page.getByRole('heading', { name: /media/i }).waitFor()
+    const violations = await scan(page)
+    expect(violations, `\n${report(violations)}`).toEqual([])
+  })
+})

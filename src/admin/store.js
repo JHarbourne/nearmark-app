@@ -28,7 +28,16 @@ export const store = reactive({
 
   // ── session ──
   async init() {
-    if (!supabaseConfigured) return
+    if (!supabaseConfigured) {
+      // No backend configured (the seed / OSS-demo build): let the admin be browsed
+      // read-only without a login, so people can explore it — and the a11y tests can
+      // scan it. Saves are no-ops here; the demo banner explains why. In production
+      // Supabase is always configured, so a real login is always required.
+      this.authed = true
+      this.user = { email: 'Demo (read-only)' }
+      await this.load()
+      return
+    }
     // Listen first so we catch the PASSWORD_RECOVERY event the Supabase client
     // fires after parsing a reset link's URL hash.
     auth.onChange((user, event) => {
