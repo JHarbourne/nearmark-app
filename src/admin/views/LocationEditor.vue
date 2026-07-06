@@ -107,14 +107,15 @@
           <input id="loc-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
           <label for="loc-caption">Image caption <span class="hint">under the photo</span></label>
           <input id="loc-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
-          <label for="loc-hero-credit">Photo credit <span class="hint">photographer / source</span></label>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin:16px 0 6px;">
+            <label for="loc-hero-credit" style="margin:0;">Photo credit <span class="hint">photographer / source</span></label>
+            <label style="display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;" title="Off = kept on record, hidden in the app">
+              <input type="checkbox" v-model="form.showPhotoCredit" style="width:17px; height:17px; margin:0; accent-color:var(--violet);" /> Show
+            </label>
+          </div>
           <input id="loc-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
           <label for="loc-hero-credit-link">Credit link <span class="hint">optional</span></label>
           <input id="loc-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
-          <label style="display:flex; align-items:center; gap:9px; margin-top:10px; font-weight:500; cursor:pointer;">
-            <input type="checkbox" v-model="form.showPhotoCredit" />
-            <span>Show this credit on the photo <span class="hint">off = kept on record, hidden in the app</span></span>
-          </label>
         </template>
 
         <!-- Before/after slider is optional; kept behind a toggle to keep the form tidy -->
