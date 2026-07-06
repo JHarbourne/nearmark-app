@@ -119,7 +119,7 @@
 
           <div v-if="related.length" style="margin-top: 24px;">
             <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 1.3px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 11px;">Nearby stories</div>
-            <div style="display: flex; gap: 10px; overflow-x: auto; margin: 0 -22px; padding: 0 22px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; margin: 0 -22px; padding: 0 22px;">
               <button v-for="r in related" :key="r.id" @click="$emit('open-related', r.id)" :style="relCard">
                 <span :style="{ display: 'block', width: '28px', height: '28px', borderRadius: '9px', marginBottom: '9px', background: r.hue }"></span>
                 <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 14px; line-height: 1.15;">{{ r.title }}</span>
