@@ -25,7 +25,8 @@
         <h3 style="margin:0 0 14px; font-size:16px;">Quick links</h3>
         <button class="btn btn-primary" style="width:100%; margin-bottom:10px;" @click="store.go('locationEditor', { id: null })">+ Add location</button>
         <button class="btn btn-ghost" style="width:100%; margin-bottom:10px;" @click="store.go('tourEditor', { id: null })">+ Add tour</button>
-        <a class="btn btn-ghost" style="width:100%; display:block; text-align:center; text-decoration:none;" href="/" target="_blank">View live app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
+        <a class="btn btn-ghost" style="width:100%; display:block; text-align:center; text-decoration:none;" href="/" target="_blank">View live app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
+        <a v-if="analyticsUrl" class="btn btn-ghost" style="width:100%; display:block; text-align:center; text-decoration:none; margin-top:10px;" :href="analyticsUrl" target="_blank" rel="noopener">View analytics<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
         <p class="muted" style="font-size:12.5px; text-align:center; margin:14px 0 0;">Version {{ version }} · <a :href="releasesUrl" target="_blank" rel="noopener" style="color:inherit;">What’s new<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:4px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a></p>
       </div>
     </div>
@@ -53,6 +54,7 @@ import { store } from '../store.js'
 import { config } from '../../config.js'
 const version = __APP_VERSION__
 const releasesUrl = config.releasesUrl
+const analyticsUrl = config.analyticsUrl
 const published = computed(() => store.locations.filter((l) => l.status === 'published').length)
 const drafts = computed(() => store.locations.filter((l) => l.status !== 'published').length)
 // bar chart: scale each editor's bar against the busiest editor

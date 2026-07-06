@@ -11,6 +11,9 @@ The [README](README.md) is documentation; this file is the release history.
 ### Added
 - **Dashboard "Edits by editor"** — a bar chart summarising how many changes each editor has
   made (from the persistent activity log), so you can see who's been in and how active they are.
+- **Dashboard "View analytics" link** — opens the PostHog dashboard (visitor/usage analytics)
+  when PostHog is configured. Set `VITE_ANALYTICS_URL` to your project URL for a direct landing;
+  otherwise it's derived from the PostHog host.
 - **Second photo gets a credit** (migration 021) — the in-body "second photo" now takes a
   photographer/source credit + link, like the other photos, shown under it on the card. The
   whole second-photo section is now behind an **"Add a second photo"** toggle to keep the form

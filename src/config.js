@@ -62,6 +62,13 @@ export const config = {
   supabaseAnonKey: pick(env.VITE_SUPABASE_ANON_KEY, ''),
   posthogKey: pick(env.VITE_POSTHOG_KEY, ''),
   posthogHost: pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com'),
+  // "View analytics" link on the admin Dashboard → the PostHog dashboard. Prefer an
+  // explicit project URL (VITE_ANALYTICS_URL); otherwise derive the PostHog app host
+  // from the ingestion host, but only when PostHog is actually configured.
+  analyticsUrl: pick(
+    env.VITE_ANALYTICS_URL,
+    env.VITE_POSTHOG_KEY ? pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com').replace('i.posthog.com', 'posthog.com') : '',
+  ),
 
   // ── active city (single-city deployments; multi-city still uses the bundled
   //    SEED_CITIES + city picker). Blank cityName → fall back to the seed. ──
