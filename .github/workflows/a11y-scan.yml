@@ -20,8 +20,8 @@ name: Accessibility scan
 
 on:
   workflow_dispatch:        # run manually from the Actions tab
-  # schedule:
-  #   - cron: '0 6 * * 1'   # optional: weekly, Mondays 06:00 UTC
+  schedule:
+    - cron: '0 6 * * 1'     # weekly, Mondays 06:00 UTC
 
 jobs:
   a11y:
