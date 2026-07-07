@@ -22,7 +22,7 @@
           <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
         </div>
 
-        <div style="padding: 18px 22px 26px;">
+        <div style="padding: 18px 22px calc(26px + env(safe-area-inset-bottom));">
           <p v-if="loc.caption" style="font-family: var(--font-body); font-style: italic; font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); margin: 0 0 12px;">{{ typo(loc.caption) }}</p>
           <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 27px; line-height: 1.05; letter-spacing: -0.6px; margin: 0;">{{ typo(loc.title) }}</h2>
           <p style="font-size: 13.5px; color: var(--ink-muted); margin: 7px 0 0; font-weight: 500;">{{ typo(loc.significance) }}</p>

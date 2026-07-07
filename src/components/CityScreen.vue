@@ -39,7 +39,7 @@ defineProps({ cities: { type: Array, default: () => [] } })
 defineEmits(['select'])
 const bars = theme.brandBars
 const orgName = theme.orgName
-const wrap = { position: 'absolute', inset: 0, padding: '64px 26px 30px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }
+const wrap = { position: 'absolute', inset: 0, padding: '64px 26px calc(30px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', overflowY: 'auto' }
 function cityBtn(live) {
   return {
     display: 'flex', alignItems: 'center', gap: '16px', textAlign: 'left', width: '100%',

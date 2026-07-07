@@ -1,7 +1,7 @@
 <!-- Cover / Home – mode select (BRD §9.1 screen 3). Verbatim from the prototype;
      location/tour counts now come from the database (BRD §10 "Cover / Home"). -->
 <template>
-  <div style="position: absolute; inset: 0; padding: 64px 26px 30px; display: flex; flex-direction: column;">
+  <div style="position: absolute; inset: 0; padding: 64px 26px calc(30px + env(safe-area-inset-bottom)); display: flex; flex-direction: column;">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 9px;">
       <span style="display: flex; align-items: center; gap: 9px;">
         <img v-if="logoUrl" :src="logoUrl" :alt="orgName" style="height: 24px; width: auto; display: block;" />

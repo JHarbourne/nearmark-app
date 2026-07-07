@@ -120,6 +120,10 @@ The [README](README.md) is documentation; this file is the release history.
   tests can reach it). Production always has Supabase, so a real login is always required there.
 
 ### Fixed
+- **Bottom safe-area insets** — content no longer slides under the phone's bottom system
+  bar/gesture area. The cover, splash, city-picker and completion screens, the tour "Start
+  tour" CTA, the map's bottom nav, and the story card now pad by `env(safe-area-inset-bottom)`
+  (0 where there's no inset), so the "Powered by Nearmark" footer and nav icons aren't cropped.
 - Admin sidebar: the **external-link icons** ("View live app", "Suggest an improvement") no
   longer float mid-block on a wrapped link — they now sit inline after the text.
 - **Version footer contrast** — the "· vX.Y.Z" in the "Powered by" footer used 60% opacity,
