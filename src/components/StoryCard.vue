@@ -119,7 +119,7 @@
 
           <div v-if="related.length" style="margin-top: 24px;">
             <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 1.3px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 11px;">Nearby stories</div>
-            <div style="display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; margin: 0 -22px; padding: 0 22px;">
+            <div style="display: flex; align-items: stretch; gap: 10px; overflow-x: auto; margin: 0 -22px; padding: 0 22px;">
               <button v-for="r in related" :key="r.id" @click="$emit('open-related', r.id)" :style="relCard">
                 <span :style="{ display: 'block', width: '28px', height: '28px', borderRadius: '9px', marginBottom: '9px', background: r.hue }"></span>
                 <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 14px; line-height: 1.15;">{{ r.title }}</span>
@@ -370,6 +370,8 @@ const wikiLink = {
 const relCard = {
   flexShrink: 0, width: '150px', textAlign: 'left', background: 'var(--raised)', border: '1px solid var(--line)',
   borderRadius: '14px', padding: '12px 13px', cursor: 'pointer', color: 'inherit',
+  // column so content stays top-aligned when the cards stretch to a shared height
+  display: 'flex', flexDirection: 'column',
 }
 const continueBtn = {
   width: '100%', height: '54px', marginTop: '24px', border: 'none', borderRadius: '15px', cursor: 'pointer',

@@ -67,9 +67,19 @@ body {
   margin: 0 auto;
   box-shadow: 0 30px 90px rgba(0,0,0,0.55);
 }
+.app-stage {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 80% at 50% 0%, var(--bg-glow) 0%, var(--bg-deep) 70%);
+}
 /* Real phones (incl. large ones) and the installed PWA: fill the screen edge to
-   edge – no mock phone frame, no surrounding gradient. */
+   edge – no mock phone frame, no surrounding gradient. Every layer is the app
+   cream (declared AFTER the base rules so it wins) so nothing darker peeks out
+   around the safe-area edges. */
 @media (max-width: 480px), (display-mode: standalone) {
+  html, body { background: var(--bg); }
   .phone-frame {
     width: 100vw;
     height: 100dvh;
@@ -77,13 +87,6 @@ body {
     box-shadow: none;
   }
   .app-stage { background: var(--bg); }
-}
-.app-stage {
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(120% 80% at 50% 0%, var(--bg-glow) 0%, var(--bg-deep) 70%);
 }
 
 /* Leaflet overrides so the live map matches the prototype's flat parchment look */

@@ -8,6 +8,8 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-07-07
+
 ### Added
 - **Pull-down-to-close on story cards** — drag/swipe the card down to dismiss it (in addition
   to the ✕, Esc and tapping the backdrop). It only engages from the top of the content and on a
@@ -120,6 +122,11 @@ The [README](README.md) is documentation; this file is the release history.
   tests can reach it). Production always has Supabase, so a real login is always required there.
 
 ### Fixed
+- **Cream border at the screen edge on phones** — on mobile the background layers were three
+  different creams (`body` a darker `--bg-deep`, the stage a gradient), so the darker one peeked
+  out around the safe-area edge. All layers are now the single app cream, edge to edge.
+- "Nearby stories" cards are now **all the same height** (stretched to a shared height) with
+  their colour squares and titles top-aligned, instead of varying with title length.
 - Media library: the **Replace / Upload** buttons (styled `<label>`s) no longer sit low out of
   line with the other buttons — they were inheriting the field-label margin.
 - **Bottom safe-area insets** — content no longer slides under the phone's bottom system
@@ -233,5 +240,6 @@ on this core, themed by configuration only: **Tollesbury Arts Trail** and **LGBT
 - Accessibility to **WCAG 2.1 AA**, including per-hue readable number contrast; axe-core CI.
 - **Docs**: [README](README.md) (setup) and [FSD](docs/FSD.md) (functional spec).
 
+[1.2.0]: https://github.com/JHarbourne/nearmark-app/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JHarbourne/nearmark-app/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JHarbourne/nearmark-app/releases/tag/v1.0.0

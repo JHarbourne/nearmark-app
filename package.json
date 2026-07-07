@@ -1,6 +1,6 @@
 {
   "name": "nearmark",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Nearmark — a location-aware heritage walking-tour platform (mobile PWA + admin backoffice). Deploy your own city guide.",
   "type": "module",
