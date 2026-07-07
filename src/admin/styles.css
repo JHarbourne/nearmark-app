@@ -29,6 +29,9 @@ h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
 .pagehead h1 { font-size: 26px; margin: 0; }
 
 .btn { font-family: inherit; font-weight: 600; font-size: 14px; border-radius: 9px; padding: 9px 16px; cursor: pointer; border: 1px solid transparent; }
+/* a <label> styled as a .btn (file-input triggers) must not inherit the field-label margin,
+   and should centre its content like a real button so it lines up in button rows */
+label.btn { margin: 0; display: inline-flex; align-items: center; justify-content: center; }
 .btn-primary { background: var(--violet); color: #fff; }
 .btn-primary:hover { background: #5a37c9; }
 .btn-ghost { background: #fff; border-color: var(--line); color: var(--ink); }

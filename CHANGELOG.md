@@ -120,6 +120,8 @@ The [README](README.md) is documentation; this file is the release history.
   tests can reach it). Production always has Supabase, so a real login is always required there.
 
 ### Fixed
+- Media library: the **Replace / Upload** buttons (styled `<label>`s) no longer sit low out of
+  line with the other buttons — they were inheriting the field-label margin.
 - **Bottom safe-area insets** — content no longer slides under the phone's bottom system
   bar/gesture area. The cover, splash, city-picker and completion screens, the tour "Start
   tour" CTA, the map's bottom nav, and the story card now pad by `env(safe-area-inset-bottom)`
