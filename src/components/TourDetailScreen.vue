@@ -14,7 +14,7 @@
       </div>
       <div style="position: relative; padding: 0 24px 22px;">
         <span :style="eyebrowPill">Walking Tour</span>
-        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typo(tour.title) }}</h1>
+        <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: clamp(24px, 8.3vw, 34px); line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ typo(tour.title) }}</h1>
         <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
         <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
       </div>
