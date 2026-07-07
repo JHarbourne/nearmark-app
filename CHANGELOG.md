@@ -9,6 +9,9 @@ The [README](README.md) is documentation; this file is the release history.
 ## [Unreleased]
 
 ### Added
+- **Pull-down-to-close on story cards** — drag/swipe the card down to dismiss it (in addition
+  to the ✕, Esc and tapping the backdrop). It only engages from the top of the content and on a
+  downward drag, so it never interferes with scrolling the story; a short drag springs back.
 - **Light Markdown in story text** — the body supports `**bold**`, `*italic*` and `- ` bullet
   points (a tiny, safe subset — no toolbar, no headings/links/HTML, so nothing to abuse and
   nothing to sanitise; plain text is unaffected). Paragraph spacing is baked into the render.

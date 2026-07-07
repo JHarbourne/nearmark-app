@@ -3,9 +3,9 @@
      or muted looping background video; "Read full article" opens wiki_url. -->
 <template>
   <div style="position: absolute; inset: 0; z-index: 60;">
-    <button @click="$emit('close')" :style="scrim" aria-label="Close story" tabindex="-1"></button>
-    <div :style="sheet" role="dialog" aria-modal="true" :aria-label="loc.title">
-      <div style="overflow-y: auto;">
+    <button @click="$emit('close')" :style="[scrim, scrimDrag]" aria-label="Close story" tabindex="-1"></button>
+    <div ref="sheetRef" :style="[sheet, sheetDrag]" role="dialog" aria-modal="true" :aria-label="loc.title" @touchstart="onTouchStart" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
+      <div ref="scrollRef" style="overflow-y: auto;">
         <!-- hero: a static header image (or looping video). This same image is
              the location's thumbnail. The before/after slider now lives in the
              body, after the first paragraph, so it gets its own room. -->
@@ -160,6 +160,50 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'open-related', 'continue'])
 
+// ── pull-down-to-dismiss (touch). The X, Esc and backdrop still close too. Only
+// engages when the content is scrolled to the top and the drag is downward, so it
+// never fights scrolling the body. ──
+const sheetRef = ref(null)
+const scrollRef = ref(null)
+const dragY = ref(0)
+const dragging = ref(false)
+let dragStartY = 0
+let dragEngaged = false
+let dragFromTop = true
+const sheetDrag = computed(() => ({
+  transform: `translateY(${dragY.value}px)`,
+  transition: dragging.value ? 'none' : 'transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)',
+}))
+const scrimDrag = computed(() => ({ opacity: dragY.value ? String(Math.max(0.25, 1 - dragY.value / 500)) : null }))
+function onTouchStart(e) {
+  if (e.touches.length !== 1 || dragY.value) return
+  dragStartY = e.touches[0].clientY
+  dragFromTop = !scrollRef.value || scrollRef.value.scrollTop <= 0
+  dragEngaged = false
+  dragging.value = true
+}
+function onDragMove(e) {
+  if (!dragging.value) return
+  const dy = e.touches[0].clientY - dragStartY
+  if (!dragEngaged) {
+    if (dy > 6 && dragFromTop) dragEngaged = true
+    else { if (dy < -4 || !dragFromTop) dragging.value = false; return }
+  }
+  e.preventDefault() // take over from native scroll / overscroll bounce
+  dragY.value = Math.max(0, dy)
+}
+function onTouchEnd() {
+  if (!dragging.value) return
+  dragging.value = false
+  if (dragEngaged && dragY.value > 110) {
+    dragY.value = (sheetRef.value?.offsetHeight || 700) + 40 // slide off, then close
+    window.setTimeout(() => emit('close'), 200)
+  } else {
+    dragY.value = 0 // spring back
+  }
+  dragEngaged = false
+}
+
 // ── focus management for the modal sheet (WCAG 2.1.2 / 2.4.3) ──
 const closeRef = ref(null)
 let lastFocused = null
@@ -170,9 +214,12 @@ onMounted(() => {
   // the focused button, making the card jump up then settle.
   nextTick(() => closeRef.value?.focus?.({ preventScroll: true }))
   document.addEventListener('keydown', onKeydown) // Escape closes
+  // touchmove must be non-passive so we can preventDefault while pulling down
+  sheetRef.value?.addEventListener('touchmove', onDragMove, { passive: false })
 })
 onUnmounted(() => {
   document.removeEventListener('keydown', onKeydown)
+  sheetRef.value?.removeEventListener('touchmove', onDragMove)
   if (lastFocused && lastFocused.focus) lastFocused.focus() // restore focus on close
 })
 

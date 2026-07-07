@@ -123,7 +123,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   link is ignored so it can't blank the hero), audio narration (with a collapsible **"Show
   transcript"** panel when a transcript exists — `[bracketed]` non-speech cues rendered
   muted/italic), credits (respecting the show/hide toggles), an external link (label =
-  `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories".
+  `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories". The card is a
+  bottom sheet, closed by the ✕, Esc, tapping the backdrop, or **pulling it down** (engages only
+  from the top of the content, so it doesn't fight scrolling).
 - **Map.** Leaflet + OSM tiles; hue-coloured numbered pins (dark/white number chosen per
   hue for contrast), "you are here" GPS marker, route polyline.
 - **Share.** A sheet with a brand-coloured **QR code** (primary, for in-person sharing),
