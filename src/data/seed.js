@@ -29,6 +29,19 @@ export const SEED_LOCATIONS = [
       'For centuries the guildhall was the seat of the town’s trade guilds and council. Its great timbered hall hosted markets, courts and feasts, and its cellars once stored the town’s grain.\n\nMuch altered over the years, it still anchors the high street and gives a sense of how a small town organised its affairs.',
     wikiUrl: null,
     relatedIds: ['cross', 'church'], status: 'published',
+    // Two stories → tapping this pin shows the picker list first (multi-story path).
+    stories: [
+      {
+        heading: 'The Great Hall', period: '15th century', hue: HUE.blue,
+        significance: 'Where the guilds met and feasted',
+        summary: 'The timbered great hall is the heart of the guildhall – a single soaring room where the trade guilds held their courts, feasts and ceremonies.\n\nIts roof beams and worn floor have survived centuries of town business.',
+      },
+      {
+        heading: 'The Guild Cellars', period: '15th century', hue: HUE.green,
+        significance: 'Grain stores beneath the hall',
+        summary: 'Beneath the hall, brick-vaulted cellars once held the town’s grain against a hard winter – a communal store managed by the guilds for the good of the whole town.',
+      },
+    ],
   },
   {
     id: 'wharf', tourNum: 3, lat: 51.5101, lng: -0.1205, hue: HUE.amber,

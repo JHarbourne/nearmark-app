@@ -15,55 +15,21 @@ export const supabaseConfigured = Boolean(URL && ANON)
 export const supabase = supabaseConfigured ? createClient(URL, ANON) : null
 
 // ── row ⇄ model mapping (snake_case ⇄ camelCase) ──
+// Content lives on STORIES now (Tour → Location → Story). A location holds only
+// place/identity fields; its content comes from one or more child stories.
 function rowToLocation(r) {
   return {
-    recordId: r.id,           // uuid (used for updates/deletes)
+    recordId: r.id,           // uuid (used for updates/deletes + story FK)
     id: r.slug,               // stable slug used across the app
     title: r.title || '',
     city: r.city || 'London',
-    period: r.period || '',
-    significance: r.significance || '',
-    summary: r.summary || '',
-    wikiUrl: r.wiki_url || '',
-    linkLabel: r.link_label || '', // per-location text for the external link button; blank → app default
+    address: r.address || '',
     lat: r.lat,
     lng: r.lng,
     triggerRadius: r.trigger_radius || 80,
-    heroImageUrl: r.hero_image_url || null,
-    historicImageUrl: r.historic_image_url || null,
-    sliderAfterUrl: r.slider_after_url || null, // slider "after"/today image; blank → falls back to the hero
-    sliderAfterPosition: r.slider_after_position || '50% 50%',
-    heroPosition: r.hero_position || '50% 50%',
-    historicPosition: r.historic_position || '50% 50%',
-    photoCredit: r.photo_credit || '',
-    photoCreditUrl: r.photo_credit_url || '',
-    showPhotoCredit: r.show_photo_credit !== false, // undefined (pre-migration) or true → show
-
-    historicCredit: r.historic_credit || '',
-    historicCreditUrl: r.historic_credit_url || '',
-    imageAlt: r.image_alt || '',
-    historicAlt: r.historic_alt || '',
-    imageLabel: r.image_label || '',
-    historicLabel: r.historic_label || '',
-    portraitUrl: r.portrait_url || null,   // in-body portrait (e.g. the artist)
-    portraitAlt: r.portrait_alt || '',
-    portraitCaption: r.portrait_caption || '',
-    portraitCredit: r.portrait_credit || '',
-    portraitCreditUrl: r.portrait_credit_url || '',
-    caption: r.caption || '',
-    links: r.links || '',              // raw "Label | URL" lines (edited as-is)
-    linkList: parseLinks(r.links),     // parsed [{ label, url }] for display
-    videoUrl: r.video_url || null,
-    audioUrl: r.audio_url || null,
-    audioDuration: r.audio_duration || 0,
-    transcript: r.transcript || '', // plain-text audio transcript (WCAG 1.2.1)
-    thumbnailUrl: r.thumbnail_url || null,
-    hue: r.hue || '#9B6DFF',
-    relatedIds: r.related_ids || [],
     tourNum: r.tour_num,
     status: r.status || 'draft',
-    notesInternal: r.notes_internal || '',
-    // privacy / publication (migration 011)
+    // privacy / publication (migration 011) – place-level, stays on the location
     visibility: r.visibility || 'public',
     publishFrom: r.publish_from || null,
     publishUntil: r.publish_until || null,
@@ -74,6 +40,10 @@ function rowToLocation(r) {
     consentContact: r.consent_contact || '',
     coarsePin: !!r.coarse_pin,
     guidedTourOnly: r.guided_tour_only === true, // hide from Discover mode; only show inside a guided tour
+    stories: [],              // filled by attachStories()
+    // visual convenience for the map pin / thumbnails – set from the primary story
+    hue: '#9B6DFF', heroImageUrl: null, historicImageUrl: null, thumbnailUrl: null,
+    heroPosition: '50% 50%', historicPosition: '50% 50%',
   }
 }
 function locationToRow(l) {
@@ -81,47 +51,12 @@ function locationToRow(l) {
     slug: l.id,
     title: l.title,
     city: l.city,
-    period: l.period,
-    significance: l.significance,
-    summary: l.summary,
-    wiki_url: l.wikiUrl,
-    link_label: l.linkLabel || null,
+    address: l.address || null,
     lat: l.lat,
     lng: l.lng,
     trigger_radius: Number(l.triggerRadius) || 80,
-    hero_image_url: l.heroImageUrl || null,
-    historic_image_url: l.historicImageUrl || null,
-    slider_after_url: l.sliderAfterUrl || null,
-    slider_after_position: l.sliderAfterPosition || '50% 50%',
-    hero_position: l.heroPosition || '50% 50%',
-    historic_position: l.historicPosition || '50% 50%',
-    photo_credit: l.photoCredit || null,
-    photo_credit_url: l.photoCreditUrl || null,
-    show_photo_credit: l.showPhotoCredit !== false,
-    historic_credit: l.historicCredit || null,
-    historic_credit_url: l.historicCreditUrl || null,
-    image_alt: l.imageAlt || null,
-    historic_alt: l.historicAlt || null,
-    image_label: l.imageLabel || null,
-    historic_label: l.historicLabel || null,
-    portrait_url: l.portraitUrl || null,
-    portrait_alt: l.portraitAlt || null,
-    portrait_caption: l.portraitCaption || null,
-    portrait_credit: l.portraitCredit || null,
-    portrait_credit_url: l.portraitCreditUrl || null,
-    caption: l.caption || null,
-    links: l.links || null,
-    video_url: l.videoUrl || null,
-    audio_url: l.audioUrl || null,
-    audio_duration: Number(l.audioDuration) || 0,
-    transcript: l.transcript || null,
-    thumbnail_url: l.thumbnailUrl || null,
-    hue: l.hue,
-    related_ids: l.relatedIds || [],
     tour_num: l.tourNum || null,
     status: l.status || 'draft',
-    notes_internal: l.notesInternal || null,
-    // privacy / publication (migration 011)
     visibility: l.visibility || 'public',
     publish_from: l.publishFrom || null,
     publish_until: l.publishUntil || null,
@@ -133,6 +68,112 @@ function locationToRow(l) {
     coarse_pin: !!l.coarsePin,
     guided_tour_only: l.guidedTourOnly === true,
   }
+}
+// A story carries all the content fields (the old location content). Its camelCase
+// keys deliberately match what StoryCard already reads, so the card renders a story
+// object with no component change. `title` aliases `heading` for the same reason.
+function rowToStory(r) {
+  return {
+    storyId: r.id,
+    locationId: r.location_id,
+    sortOrder: r.sort_order ?? 1,
+    heading: r.heading || '',
+    title: r.heading || '',
+    period: r.period || '',
+    significance: r.significance || '',
+    summary: r.summary || '',
+    wikiUrl: r.wiki_url || '',
+    linkLabel: r.link_label || '',
+    heroImageUrl: r.hero_image_url || null,
+    historicImageUrl: r.historic_image_url || null,
+    sliderAfterUrl: r.slider_after_url || null,
+    sliderAfterPosition: r.slider_after_position || '50% 50%',
+    heroPosition: r.hero_position || '50% 50%',
+    historicPosition: r.historic_position || '50% 50%',
+    photoCredit: r.hero_credit || '',
+    photoCreditUrl: r.hero_credit_url || '',
+    showPhotoCredit: r.show_hero_credit !== false,
+    historicCredit: r.historic_credit || '',
+    historicCreditUrl: r.historic_credit_url || '',
+    imageAlt: r.image_alt || '',
+    historicAlt: r.historic_alt || '',
+    imageLabel: r.image_label || '',
+    historicLabel: r.historic_label || '',
+    portraitUrl: r.portrait_url || null,
+    portraitAlt: r.portrait_alt || '',
+    portraitCaption: r.portrait_caption || '',
+    portraitCredit: r.portrait_credit || '',
+    portraitCreditUrl: r.portrait_credit_url || '',
+    caption: r.caption || '',
+    links: r.links || '',
+    linkList: parseLinks(r.links),
+    videoUrl: r.video_url || null,
+    audioUrl: r.audio_url || null,
+    audioDuration: r.audio_duration_secs || 0,
+    transcript: r.transcript || '',
+    thumbnailUrl: r.thumbnail_url || null,
+    hue: r.hue || '#9B6DFF',
+    relatedIds: r.related_ids || [],
+    notesInternal: r.notes_internal || '',
+  }
+}
+function storyToRow(s) {
+  return {
+    location_id: s.locationId,
+    sort_order: Number(s.sortOrder) || 1,
+    heading: s.heading || s.title || '',
+    period: s.period || null,
+    significance: s.significance || null,
+    summary: s.summary || null,
+    wiki_url: s.wikiUrl || null,
+    link_label: s.linkLabel || null,
+    hero_image_url: s.heroImageUrl || null,
+    hero_position: s.heroPosition || '50% 50%',
+    image_alt: s.imageAlt || null,
+    image_label: s.imageLabel || null,
+    hero_credit: s.photoCredit || null,
+    hero_credit_url: s.photoCreditUrl || null,
+    show_hero_credit: s.showPhotoCredit !== false,
+    historic_image_url: s.historicImageUrl || null,
+    historic_position: s.historicPosition || '50% 50%',
+    historic_alt: s.historicAlt || null,
+    historic_label: s.historicLabel || null,
+    historic_credit: s.historicCredit || null,
+    historic_credit_url: s.historicCreditUrl || null,
+    video_url: s.videoUrl || null,
+    audio_url: s.audioUrl || null,
+    audio_duration_secs: Number(s.audioDuration) || 0,
+    transcript: s.transcript || null,
+    thumbnail_url: s.thumbnailUrl || null,
+    hue: s.hue || null,
+    related_ids: s.relatedIds || [],
+    caption: s.caption || null,
+    links: s.links || null,
+    portrait_url: s.portraitUrl || null,
+    portrait_alt: s.portraitAlt || null,
+    portrait_caption: s.portraitCaption || null,
+    portrait_credit: s.portraitCredit || null,
+    portrait_credit_url: s.portraitCreditUrl || null,
+    slider_after_url: s.sliderAfterUrl || null,
+    slider_after_position: s.sliderAfterPosition || '50% 50%',
+    notes_internal: s.notesInternal || null,
+  }
+}
+// Attach each location's ordered stories and flatten the primary story's visuals
+// onto the location (so MapView's pins/thumbnails keep working unchanged).
+function attachStories(locations, stories) {
+  const byLoc = {}
+  for (const s of stories) (byLoc[s.locationId] ||= []).push(s)
+  for (const loc of locations) {
+    const list = (byLoc[loc.recordId] || []).sort((a, b) => (a.sortOrder - b.sortOrder))
+    loc.stories = list
+    const p = list[0]
+    if (p) Object.assign(loc, {
+      hue: p.hue, heroImageUrl: p.heroImageUrl, historicImageUrl: p.historicImageUrl,
+      thumbnailUrl: p.thumbnailUrl, heroPosition: p.heroPosition, historicPosition: p.historicPosition,
+    })
+  }
+  return locations
 }
 function rowToTour(r) {
   return {
@@ -297,12 +338,49 @@ export async function removeMedia(url) {
 // a privacy/window column doesn't exist yet (migration 011 not run) → fall back
 const isUndefinedColumn = (e) => e && (e.code === '42703' || /does not exist/i.test(e.message || ''))
 
+// Seed mode: turn a content-rich seed location into the place+stories shape the
+// app now expects. A seed entry may declare its own `stories: [...]` array (for a
+// multi-story example); otherwise its inline content becomes a single story.
+function seedToLocation(l) {
+  const storyFrom = (s, i) => ({
+    ...s, storyId: `${l.id}-s${i + 1}`, locationId: l.id,
+    sortOrder: s.sortOrder ?? i + 1, heading: s.heading || s.title || l.title, title: s.heading || s.title || l.title,
+    hue: s.hue || l.hue || '#9B6DFF', relatedIds: s.relatedIds || l.relatedIds || [],
+  })
+  const stories = (l.stories && l.stories.length)
+    ? l.stories.map(storyFrom)
+    : [storyFrom({ ...l }, 0)]
+  const loc = {
+    recordId: l.id, id: l.id, title: l.title, city: l.city || 'London', address: l.address || '',
+    lat: l.lat, lng: l.lng, triggerRadius: l.triggerRadius || 80, tourNum: l.tourNum,
+    status: l.status || 'draft', visibility: l.visibility || 'public', guidedTourOnly: l.guidedTourOnly === true,
+    publishFrom: null, publishUntil: null, consentGiven: false, coarsePin: false, stories,
+  }
+  const p = stories[0]
+  Object.assign(loc, {
+    hue: p.hue || '#9B6DFF', heroImageUrl: p.heroImageUrl || null, historicImageUrl: p.historicImageUrl || null,
+    thumbnailUrl: p.thumbnailUrl || null, heroPosition: p.heroPosition || '50% 50%', historicPosition: p.historicPosition || '50% 50%',
+  })
+  return loc
+}
+
+// Fetch every story (RLS returns only stories of publicly-visible locations to the
+// anon role; the admin session sees all). Ordered by sort_order for stable lists.
+export async function fetchStories() {
+  if (!supabaseConfigured) return []
+  const { data, error } = await supabase.from('stories').select('*').order('sort_order')
+  if (error) throw error
+  return data.map(rowToStory)
+}
+
 // publicView=true applies the privacy/publication window filter (used by the
 // public app); the admin calls it without the flag and sees every record. RLS
-// is the real boundary for the anon role — this is defence in depth.
+// is the real boundary for the anon role — this is defence in depth. Stories are
+// fetched alongside and attached to each location.
 export async function fetchLocations(publicView = false) {
-  if (!supabaseConfigured) return SEED_LOCATIONS.filter((l) => l.status === 'published')
+  if (!supabaseConfigured) return SEED_LOCATIONS.filter((l) => l.status === 'published').map(seedToLocation)
   const ordered = (q) => q.order('title')
+  let locs = null
   if (publicView) {
     const now = new Date().toISOString()
     const r = await ordered(
@@ -311,12 +389,15 @@ export async function fetchLocations(publicView = false) {
         .or(`publish_until.is.null,publish_until.gte.${now}`)
         .or('visibility.eq.public,consent_given.eq.true')
     )
-    if (!r.error) return r.data.map(rowToLocation)
-    if (!isUndefinedColumn(r.error)) throw r.error // pre-migration → published-only below
+    if (!r.error) locs = r.data.map(rowToLocation)
+    else if (!isUndefinedColumn(r.error)) throw r.error // pre-migration → published-only below
   }
-  const { data, error } = await ordered(supabase.from('locations').select('*'))
-  if (error) throw error
-  return data.map(rowToLocation)
+  if (!locs) {
+    const { data, error } = await ordered(supabase.from('locations').select('*'))
+    if (error) throw error
+    locs = data.map(rowToLocation)
+  }
+  return attachStories(locs, await fetchStories())
 }
 export async function fetchTours(publicView = false) {
   if (!supabaseConfigured) return SEED_TOURS.filter((t) => t.status === 'published')
@@ -344,6 +425,13 @@ export const db = {
   createLocation: (l) => run(supabase.from('locations').insert(locationToRow(l)).select()),
   updateLocation: (recordId, l) => run(supabase.from('locations').update(locationToRow(l)).eq('id', recordId).select()),
   deleteLocation: (recordId) => run(supabase.from('locations').delete().eq('id', recordId)),
+  // ── stories (content) ──
+  listStories: (locationRecordId) =>
+    run(supabase.from('stories').select('*').eq('location_id', locationRecordId).order('sort_order')).then((rows) => rows.map(rowToStory)),
+  createStory: (s) => run(supabase.from('stories').insert(storyToRow(s)).select()),
+  updateStory: (storyId, s) => run(supabase.from('stories').update(storyToRow(s)).eq('id', storyId).select()),
+  deleteStory: (storyId) => run(supabase.from('stories').delete().eq('id', storyId)),
+  setStoryOrder: (storyId, order) => run(supabase.from('stories').update({ sort_order: order }).eq('id', storyId)),
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),

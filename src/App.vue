@@ -86,10 +86,18 @@
         />
 
         <!-- overlays -->
+        <!-- location with 2+ stories: choose one first (single-story skips straight to the card) -->
+        <StoryListScreen
+          v-if="storyListLoc"
+          :location="storyListLoc"
+          @open="chooseStory"
+          @close="storyListLoc = null"
+        />
+
         <StoryCard
-          v-if="openLoc"
-          :loc="openLoc"
-          :related="relatedFor(openLoc)"
+          v-if="cardLoc"
+          :loc="cardLoc"
+          :related="relatedFor(cardLoc)"
           :audio-on="settings.audioOn"
           :show-continue="showContinue"
           :continue-label="continueLabel"
@@ -133,6 +141,7 @@ import TourDetailScreen from './components/TourDetailScreen.vue'
 import MapView from './components/MapView.vue'
 import LocationPrompt from './components/LocationPrompt.vue'
 import StoryCard from './components/StoryCard.vue'
+import StoryListScreen from './components/StoryListScreen.vue'
 import CompletionScreen from './components/CompletionScreen.vue'
 import SettingsSheet from './components/SettingsSheet.vue'
 import AppNotices from './components/AppNotices.vue'
@@ -173,7 +182,9 @@ const isMap = computed(() => screen.value === 'map')
 const activeTour = ref(null)
 const visited = ref([])
 const nextIdx = ref(0)
-const openId = ref(null)
+const openId = ref(null)           // slug of the location whose story card is open
+const openStoryKey = ref(null)     // storyId of the specific story shown in that card
+const storyListLoc = ref(null)     // location whose story-picker list is open (2+ stories)
 const proximityId = ref(null)
 const shownDiscovery = ref([])
 const settingsOpen = ref(false)
@@ -216,8 +227,9 @@ const tourStops = computed(() => {
     .map((id, i) => {
       const l = byId.value[id]
       if (!l) return null
-      const o = ov[id] // per-tour title/blurb; fall back to the location's own
-      return { ...l, tourNum: i + 1, title: o?.title || l.title, summary: o?.blurb || l.summary }
+      const s = (l.stories || [])[0] || {} // primary story supplies period/summary for the route row
+      const o = ov[id] // per-tour title/blurb; fall back to the story's own
+      return { ...l, tourNum: i + 1, period: s.period || '', title: o?.title || l.title, summary: o?.blurb || s.summary || '' }
     })
     .filter(Boolean)
 })
@@ -270,22 +282,30 @@ const nextStopDistance = computed(() => {
 })
 
 // ── story ──
-const openLoc = computed(() => {
+// Build the card view: the location's identity + the chosen story's content.
+// Story keys match what StoryCard reads, so { ...loc, ...story } renders directly.
+function cardFromStory(loc, story) {
+  return { ...loc, ...story, id: loc.id, recordId: loc.recordId, lat: loc.lat, lng: loc.lng, tourNum: loc.tourNum, stories: loc.stories }
+}
+const cardLoc = computed(() => {
   if (!openId.value) return null
   const l = byId.value[openId.value]
   if (!l) return null
+  const list = l.stories || []
+  const story = list.find((s) => s.storyId === openStoryKey.value) || list[0] || null
+  const base = story ? cardFromStory(l, story) : l
   // within a guided tour, apply that tour's per-stop title/blurb override
   const o = mapMode.value === 'guided' && activeTour.value && activeTour.value.stopOverrides?.[l.id]
-  return o ? { ...l, title: o.title || l.title, summary: o.blurb || l.summary } : l
+  return o ? { ...base, title: o.title || base.title, summary: o.blurb || base.summary } : base
 })
 const showContinue = computed(
   () =>
-    !!openLoc.value &&
+    !!cardLoc.value &&
     mapMode.value === 'guided' &&
     isMap.value &&
     nextStop.value &&
-    openLoc.value.id === nextStop.value.id &&
-    !visited.value.includes(openLoc.value.id)
+    cardLoc.value.id === nextStop.value.id &&
+    !visited.value.includes(cardLoc.value.id)
 )
 const continueLabel = computed(() =>
   nextIdx.value >= tourStops.value.length - 1 ? 'Finish tour' : 'Mark visited · next stop'
@@ -294,7 +314,7 @@ function relatedFor(loc) {
   return (loc.relatedIds || [])
     .map((id) => byId.value[id])
     .filter(Boolean)
-    .map((r) => ({ id: r.id, title: r.title, period: r.period, hue: r.hue }))
+    .map((r) => ({ id: r.id, title: r.title, period: (r.stories?.[0]?.period) || '', hue: r.hue }))
 }
 
 // ── discovery proximity ──
@@ -376,23 +396,40 @@ function beginDiscovery() {
   track('mode_selected', { mode: 'discovery' })
 }
 function exitMap() {
-  openId.value = null
+  openId.value = null; openStoryKey.value = null; storyListLoc.value = null
   screen.value = mapMode.value === 'guided' ? 'tourDetail' : 'cover'
 }
 function goCover() { resetSession(); screen.value = 'cover' }
-function goTours() { openId.value = null; screen.value = 'tourList' }
+function goTours() { openId.value = null; openStoryKey.value = null; storyListLoc.value = null; screen.value = 'tourList' }
 function resetSession() {
-  openId.value = null; visited.value = []; nextIdx.value = 0
+  openId.value = null; openStoryKey.value = null; storyListLoc.value = null; visited.value = []; nextIdx.value = 0
   proximityId.value = null; shownDiscovery.value = []; settingsOpen.value = false
 }
 
+// Tapping a location: 1 story → open its card directly (the fast path, identical
+// to before); 2+ stories → show the picker list first, then open the chosen story.
 function openStory(id) {
-  openId.value = id
-  if (proximityId.value === id) proximityId.value = null
   const l = byId.value[id]
-  track('story_viewed', { location_id: id, title: l?.title, mode: mapMode.value })
+  if (!l) return
+  const list = l.stories || []
+  if (list.length > 1) { storyListLoc.value = l; return }
+  storyListLoc.value = null
+  openId.value = id
+  openStoryKey.value = list[0]?.storyId || null
+  if (proximityId.value === id) proximityId.value = null
+  track('story_viewed', { location_id: id, title: l.title, mode: mapMode.value })
 }
-function closeStory() { openId.value = null }
+function chooseStory(storyId) {
+  const l = storyListLoc.value
+  if (!l) return
+  storyListLoc.value = null
+  openId.value = l.id
+  openStoryKey.value = storyId
+  if (proximityId.value === l.id) proximityId.value = null
+  const s = (l.stories || []).find((x) => x.storyId === storyId)
+  track('story_viewed', { location_id: l.id, story_id: storyId, title: s?.heading, mode: mapMode.value })
+}
+function closeStory() { openId.value = null; openStoryKey.value = null }
 function arriveNext() { if (nextStop.value) openStory(nextStop.value.id) }
 function continueStop() {
   const s = nextStop.value
