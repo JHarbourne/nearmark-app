@@ -64,6 +64,10 @@ tr:last-child td { border-bottom: none; }
 .badge.draft { background: #f1eef7; color: var(--muted); }
 
 label, .field-label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+/* hint text: small + muted everywhere — inside a label (inline) or as a standalone
+   <p class="hint"> (e.g. the Markdown note, "None yet."), which previously fell back
+   to the larger body size. */
+.hint { font-size: 13px; font-weight: 400; color: var(--muted); }
 label .hint, .field-label .hint { font-weight: 400; color: var(--muted); }
 input[type=text], input[type=email], input[type=password], input[type=url], input[type=number], input[type=date], select, textarea {
   width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; font-family: inherit; font-size: 14px; background: #fff; color: var(--ink);
