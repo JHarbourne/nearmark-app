@@ -14,9 +14,16 @@
 
     <div class="toolbar">
       <input type="text" v-model="q" placeholder="Search name / credit…" aria-label="Search media by name or credit" style="max-width:240px;" />
-      <select v-model="typeFilter" aria-label="Filter by media type" style="max-width:150px;">
-        <option value="">All types</option><option value="image">Images</option><option value="audio">Audio</option><option value="video">Video</option>
-      </select>
+      <div class="seg-toggle" role="group" aria-label="Filter by media type">
+        <button type="button" :class="{ on: typeFilter === '' }" @click="typeFilter = ''">All <span class="seg-n">{{ store.media.length }}</span></button>
+        <button type="button" :class="{ on: typeFilter === 'image' }" @click="typeFilter = 'image'">Images <span class="seg-n">{{ typeCounts.image }}</span></button>
+        <button type="button" :class="{ on: typeFilter === 'audio' }" @click="typeFilter = 'audio'">Audio <span class="seg-n">{{ typeCounts.audio }}</span></button>
+        <button type="button" :class="{ on: typeFilter === 'video' }" @click="typeFilter = 'video'">Video <span class="seg-n">{{ typeCounts.video }}</span></button>
+      </div>
+      <div class="seg-toggle" role="group" aria-label="Sort order">
+        <button type="button" :class="{ on: sortBy === 'newest' }" @click="sortBy = 'newest'">Newest</button>
+        <button type="button" :class="{ on: sortBy === 'name' }" @click="sortBy = 'name'">A–Z</button>
+      </div>
       <span class="muted" style="font-size:13px;">{{ filtered.length }} of {{ store.media.length }}</span>
     </div>
 
@@ -67,6 +74,7 @@ import { ref, computed, onMounted } from 'vue'
 import { store } from '../store.js'
 
 const typeFilter = ref('')
+const sortBy = ref('newest') // 'newest' (date added) | 'name' (alphabetical)
 const q = ref('')
 const loading = ref(true)
 const uploadingFile = ref(false)
@@ -88,14 +96,34 @@ onMounted(async () => {
   try { await store.loadMedia() } catch (e) { alert('Could not load media: ' + e.message) } finally { loading.value = false }
 })
 
-const filtered = computed(() => store.media.filter((m) => {
-  if (typeFilter.value && m.type !== typeFilter.value) return false
-  if (q.value) {
-    const hay = `${m.filename} ${m.photographer} ${m.license} ${m.caption}`.toLowerCase()
-    if (!hay.includes(q.value.toLowerCase())) return false
+// per-type counts for the filter buttons
+const typeCounts = computed(() => {
+  const c = { image: 0, audio: 0, video: 0 }
+  for (const m of store.media) if (c[m.type] != null) c[m.type]++
+  return c
+})
+
+const filtered = computed(() => {
+  const list = store.media.filter((m) => {
+    if (typeFilter.value && m.type !== typeFilter.value) return false
+    if (q.value) {
+      const hay = `${m.filename} ${m.photographer} ${m.license} ${m.caption}`.toLowerCase()
+      if (!hay.includes(q.value.toLowerCase())) return false
+    }
+    return true
+  })
+  if (sortBy.value === 'name') {
+    list.sort((a, b) => (a.filename || '').localeCompare(b.filename || '', undefined, { sensitivity: 'base' }))
+  } else {
+    // newest first: by date added (fall back to name when a date is missing)
+    list.sort((a, b) => {
+      const da = a.createdAt ? Date.parse(a.createdAt) : 0
+      const db = b.createdAt ? Date.parse(b.createdAt) : 0
+      return db - da || (a.filename || '').localeCompare(b.filename || '')
+    })
   }
-  return true
-}))
+  return list
+})
 
 async function upload(e) {
   const f = e.target.files[0]
@@ -165,3 +193,8 @@ function thumb(m) {
   }
 }
 </script>
+
+<style scoped>
+/* count next to each type filter, e.g. "Images 8" */
+.seg-n { opacity: 0.55; font-weight: 400; font-size: 0.85em; margin-left: 3px; }
+</style>
