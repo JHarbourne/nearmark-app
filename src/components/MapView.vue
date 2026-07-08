@@ -124,7 +124,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import L from 'leaflet'
-import { readableInk } from '../lib/tokens.js'
+import { badgeColors } from '../lib/tokens.js'
 import { config } from '../config.js'
 
 const props = defineProps({
@@ -201,7 +201,8 @@ function pinIcon(loc) {
   const isTour = !!loc.tourNum && props.guided
   const w = isTour ? (isNext ? 42 : 34) : 24
   const h = (w * 4) / 3
-  const fill = isVisited ? '#9a93a3' : loc.hue
+  const pin = badgeColors(isVisited ? '#9a93a3' : loc.hue)
+  const fill = pin.bg
   const badge = isTour ? (isVisited ? '✓' : String(loc.tourNum)) : ''
   const fontSize = isNext ? 15 : 13
   const ring = isNext
@@ -215,7 +216,7 @@ function pinIcon(loc) {
       ${ring}
       <svg viewBox="0 0 30 40" style="display:block;width:${w}px;height:${h}px;filter:drop-shadow(0 4px 5px rgba(0,0,0,0.35));">
         <path d="M15 38.5 C15 38.5 27 22 27 13.5 A12 12 0 1 0 3 13.5 C3 22 15 38.5 15 38.5 Z" fill="${fill}" stroke="#fff" stroke-width="2.5"></path>
-        <text x="15" y="14.5" text-anchor="middle" dominant-baseline="central" font-family="Bricolage Grotesque, sans-serif" font-weight="700" font-size="${fontSize}" fill="${readableInk(fill)}">${badge}</text>
+        <text x="15" y="14.5" text-anchor="middle" dominant-baseline="central" font-family="Bricolage Grotesque, sans-serif" font-weight="700" font-size="${fontSize}" fill="${pin.ink}">${badge}</text>
       </svg>
       ${label}
     </span>`
@@ -328,10 +329,11 @@ function navBtn(color) {
   return { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color, background: 'none', border: 'none', cursor: 'pointer' }
 }
 function badgeStyle(hue) {
+  const c = badgeColors(hue)
   return {
     flexShrink: 0, width: '40px', height: '40px', borderRadius: '12px', display: 'flex',
     alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 700, fontSize: '17px', color: readableInk(hue), background: hue,
+    fontWeight: 700, fontSize: '17px', color: c.ink, background: c.bg,
   }
 }
 </script>

@@ -15,7 +15,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import L from 'leaflet'
-import { readableInk } from '../../lib/tokens.js'
+import { badgeColors } from '../../lib/tokens.js'
 
 const props = defineProps({
   modelValue: { type: Object, default: null },     // { lat, lng }
@@ -34,14 +34,15 @@ let marker = null
 let routeLayer = null
 
 function dot(hue, num) {
+  const c = badgeColors(hue)
   const label = num != null
-    ? `<text x="15" y="14.5" text-anchor="middle" dominant-baseline="central" font-family="Bricolage Grotesque, sans-serif" font-weight="700" font-size="13" fill="${readableInk(hue)}">${num}</text>`
+    ? `<text x="15" y="14.5" text-anchor="middle" dominant-baseline="central" font-family="Bricolage Grotesque, sans-serif" font-weight="700" font-size="13" fill="${c.ink}">${num}</text>`
     : ''
   const w = num != null ? 26 : 22
   const h = num != null ? 34 : 30
   return L.divIcon({
     className: 'marker-pin',
-    html: `<span style="display:block;width:${w}px;height:${h}px;filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3));"><svg viewBox="0 0 30 40" width="${w}" height="${h}"><path d="M15 38.5 C15 38.5 27 22 27 13.5 A12 12 0 1 0 3 13.5 C3 22 15 38.5 15 38.5 Z" fill="${hue}" stroke="#fff" stroke-width="2.5"/>${label}</svg></span>`,
+    html: `<span style="display:block;width:${w}px;height:${h}px;filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3));"><svg viewBox="0 0 30 40" width="${w}" height="${h}"><path d="M15 38.5 C15 38.5 27 22 27 13.5 A12 12 0 1 0 3 13.5 C3 22 15 38.5 15 38.5 Z" fill="${c.bg}" stroke="#fff" stroke-width="2.5"/>${label}</svg></span>`,
     iconSize: [w, h], iconAnchor: [w / 2, h],
   })
 }

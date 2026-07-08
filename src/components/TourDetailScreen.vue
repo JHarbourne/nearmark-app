@@ -56,7 +56,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { readableInk } from '../lib/tokens.js'
+import { badgeColors } from '../lib/tokens.js'
 import { typo } from '../lib/typography.js'
 const props = defineProps({
   tour: { type: Object, required: true },
@@ -117,10 +117,11 @@ function thumb(s) {
   return { ...base, background: `linear-gradient(150deg, ${s.hue} 0%, var(--raised) 85%)` }
 }
 function badge(s) {
+  const c = badgeColors(s.hue)
   return {
     position: 'absolute', top: '-6px', left: '-6px', width: '28px', height: '28px', borderRadius: '9px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 800, fontSize: '15px', color: readableInk(s.hue), background: s.hue,
+    fontWeight: 800, fontSize: '15px', color: c.ink, background: c.bg,
     border: '2px solid var(--bg)', boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
   }
 }

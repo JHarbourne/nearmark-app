@@ -49,6 +49,41 @@ export function readableInk(hex) {
   } catch { return ON_ACCENT_INK }
 }
 
+// Numbered location badges (route lists, detail sheet, map pins, admin chips).
+// Product rule: numerals are WHITE everywhere, with DARK ink kept only on the
+// yellow/amber box (white on yellow is unreadable – ~1.4:1). White only clears
+// WCAG AA (4.5:1) on a dark-enough field, so every non-yellow hue is deepened
+// toward black just until white passes: the box keeps its colour identity but
+// the number reads cleanly. Returns { bg, ink } for background + text colour.
+const _hueAngle = (hex) => {
+  let h = String(hex).replace('#', '')
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
+  if (d === 0) return 0
+  let H = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  H *= 60
+  return H < 0 ? H + 360 : H
+}
+const _isYellow = (hex) => { const H = _hueAngle(hex); return H >= 40 && H <= 75 && _lum(hex) > 0.45 }
+const _deepenForWhite = (hex) => {
+  let h = String(hex).replace('#', '')
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  const rgb = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16))
+  for (let t = 0; t <= 1.0001; t += 0.04) {
+    const c = '#' + rgb.map((v) => Math.round(v * (1 - t)).toString(16).padStart(2, '0')).join('')
+    if (_ratio(_lum(c), 1) >= 4.6) return c // 4.6 leaves a little headroom over the 4.5 AA floor
+  }
+  return '#111111'
+}
+export function badgeColors(hue) {
+  try {
+    const h = hue || '#8a7d97'
+    if (_isYellow(h)) return { bg: h, ink: ON_ACCENT_INK }
+    return { bg: _deepenForWhite(h), ink: '#ffffff' }
+  } catch { return { bg: '#8a7d97', ink: '#ffffff' } }
+}
+
 // Active palette + fonts → CSS variables (see styles/base.css :root for the var
 // names). These are the selected theme's, re-exported so theme.js and every
 // importer keep working unchanged; switch the whole palette with VITE_THEME.
