@@ -73,8 +73,8 @@
       <!-- Stories (content) -->
       <div class="card" style="padding:18px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <h3 style="margin:0; font-size:15px;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is tapped</span></h3>
-          <button v-if="canAddStory" class="btn btn-ghost btn-sm" @click="addStory">+ Add story</button>
+          <h3 style="margin:0; font-size:15px; min-width:0;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
+          <button v-if="canAddStory" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addStory">+ Add story</button>
         </div>
         <p v-if="isNew" class="hint" style="margin:12px 0 0;">Save the location first, then add its stories here.</p>
         <p v-else-if="!stories.length" class="hint" style="margin:12px 0 0;">No stories yet — add one so this location has content.</p>

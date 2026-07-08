@@ -63,13 +63,16 @@
         </template>
 
         <!-- before/after slider -->
-        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
-          <input type="checkbox" v-model="showHistoric" />
-          <span>Add a before/after slider <span class="hint">a historic “before” photo revealed against a “today” photo</span></span>
+        <label style="display:flex; align-items:flex-start; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showHistoric" style="margin-top:3px;" />
+          <span>
+            <span style="display:block;">Add a before/after slider</span>
+            <span class="hint" style="display:block; font-weight:400;">a historic “before” photo revealed against a “today” photo</span>
+          </span>
         </label>
         <div v-if="showHistoric">
           <p class="muted" style="font-size:12.5px; margin:0 0 10px;">A reveal slider shown in the story body – these two photos are separate from the hero above.</p>
-          <div class="field-row">
+          <div class="field-row" style="align-items:end;">
             <div>
               <label for="st-historic-url">Before image <span class="hint">historic · slider LEFT</span></label>
               <div class="media-row">
@@ -159,9 +162,12 @@
         </div>
 
         <!-- second in-body photo -->
-        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
-          <input type="checkbox" v-model="showPortrait" />
-          <span>Add a second photo <span class="hint">a person or a detail, shown within the story text — separate from the hero</span></span>
+        <label style="display:flex; align-items:flex-start; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showPortrait" style="margin-top:3px;" />
+          <span>
+            <span style="display:block;">Add a second photo</span>
+            <span class="hint" style="display:block; font-weight:400;">a person or a detail, shown within the story text — separate from the hero</span>
+          </span>
         </label>
         <div v-if="showPortrait">
           <label for="st-portrait-url">Second photo</label>
@@ -205,9 +211,12 @@
         </div>
 
         <!-- audio + video -->
-        <label style="display:flex; align-items:center; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
-          <input type="checkbox" v-model="showMedia" />
-          <span>Add audio or video <span class="hint">narration, a video clip, or a YouTube link</span></span>
+        <label style="display:flex; align-items:flex-start; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="showMedia" style="margin-top:3px;" />
+          <span>
+            <span style="display:block;">Add audio or video</span>
+            <span class="hint" style="display:block; font-weight:400;">narration, a video clip, or a YouTube link</span>
+          </span>
         </label>
         <div v-if="showMedia">
           <label for="st-audio">Audio narration <span class="hint">mp3/m4a</span></label>
