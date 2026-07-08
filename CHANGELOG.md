@@ -8,6 +8,31 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-07-08
+
+### Added
+- **Stories layer (Tour → Location → Story).** A location now holds only place/identity
+  (title, map position, address, privacy, status); its content moves to a new **`stories`**
+  table, and a location can hold **several stories**. Tapping a pin opens the story directly
+  when there's one (unchanged for the single-story case); with two or more, a **story picker**
+  list shows first. This lets a single venue — e.g. the arts-trail hub — list every exhibiting
+  artist. (Migrations 025–027; existing content backfilled one-story-per-location.)
+- **Address geocoding in the location editor.** Type an address and "Find on map" (or Enter)
+  drops the pin and fills lat/lng via OpenStreetMap Nominatim (debounced, single-flight;
+  "Address not found" inline error).
+- **Story editor** — a dedicated content form per story, fields ordered to match the story
+  card top-to-bottom.
+
+### Changed
+- **Location editor** slimmed to place fields + a **Stories** section (list, reorder, add/edit/
+  delete); the right column is the address + map, with Stories and Save under the place fields.
+- Content field renames carried by the migration: `photo_credit` → `hero_credit`,
+  `audio_duration` → `audio_duration_secs`, plus a new `heading` (story title).
+
+### Docs
+- New `docs/staging-runbook.md` (staging setup + expand→deploy→contract release checklist) and
+  `docs/backoffice-permissions-spec.md` (RBAC design; drafted migrations 022–024, parked).
+
 ## [1.2.0] — 2026-07-07
 
 ### Added

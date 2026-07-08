@@ -1,6 +1,9 @@
 <!-- Story editor – the content form for one story (Tour → Location → Story).
      A location can hold several stories; this edits one of them. All content
-     fields live here; the location holds only place/identity. -->
+     fields live here; the location holds only place/identity.
+     Field order roughly follows the story card top-to-bottom: heading →
+     period → significance → hero → text → (in-body: slider, 2nd photo,
+     audio/video) → links → related. -->
 <template>
   <div>
     <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -23,6 +26,9 @@
 
         <label for="st-period">Period / date <span class="hint">free text</span></label>
         <input id="st-period" type="text" v-model="form.period" placeholder="1890s · 1967 · c. 1985" />
+
+        <label for="st-significance">Historical significance <span class="hint">one-line subtitle</span></label>
+        <input id="st-significance" type="text" v-model="form.significance" />
 
         <!-- Hero image -->
         <p class="muted" style="font-size:12px; margin:14px 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
@@ -62,7 +68,11 @@
           <input id="st-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
         </template>
 
-        <!-- before/after slider -->
+        <label for="st-summary">Text <span class="hint">~80–100 words</span></label>
+        <textarea id="st-summary" v-model="form.summary" rows="9"></textarea>
+        <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph.</p>
+
+        <!-- before/after slider — appears in the story body, after the text -->
         <label style="display:flex; align-items:flex-start; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
           <input type="checkbox" v-model="showHistoric" style="margin-top:3px;" />
           <span>
@@ -136,29 +146,6 @@
           <input id="st-historic-credit" type="text" v-model="form.historicCredit" placeholder="Archive / source" />
           <label for="st-historic-credit-link">Credit link <span class="hint">optional</span></label>
           <input id="st-historic-credit-link" type="url" v-model="form.historicCreditUrl" placeholder="https://…" />
-        </div>
-
-        <label for="st-significance">Historical significance <span class="hint">one-line subtitle</span></label>
-        <input id="st-significance" type="text" v-model="form.significance" />
-
-        <label for="st-summary">Text <span class="hint">~80–100 words</span></label>
-        <textarea id="st-summary" v-model="form.summary" rows="9"></textarea>
-        <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph.</p>
-
-        <label for="st-wiki">URL to more information <span class="hint">optional</span></label>
-        <input id="st-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
-        <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
-        <template v-if="form.wikiUrl">
-          <label for="st-link-label">Link button text <span class="hint">optional · blank shows the web address</span></label>
-          <input id="st-link-label" type="text" v-model="form.linkLabel" :placeholder="linkUrlLabel || 'e.g. Visit the church website'" maxlength="60" />
-        </template>
-
-        <label for="st-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
-        <textarea id="st-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
-
-        <span class="field-label" id="st-hue-label">Accent colour</span>
-        <div role="group" aria-labelledby="st-hue-label" style="display:flex; gap:8px;">
-          <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
         <!-- second in-body photo -->
@@ -254,6 +241,22 @@
               <span>No transcript — audio without a transcript fails WCAG 1.2.1.</span>
             </p>
           </template>
+        </div>
+
+        <label for="st-wiki">URL to more information <span class="hint">optional</span></label>
+        <input id="st-wiki" type="url" v-model="form.wikiUrl" :placeholder="wikiPlaceholder" />
+        <p v-if="form.wikiUrl && !validWiki" style="color:var(--amber); font-size:12px; margin:6px 0 0;">Should be a {{ wikiDomain }} URL.</p>
+        <template v-if="form.wikiUrl">
+          <label for="st-link-label">Link button text <span class="hint">optional · blank shows the web address</span></label>
+          <input id="st-link-label" type="text" v-model="form.linkLabel" :placeholder="linkUrlLabel || 'e.g. Visit the church website'" maxlength="60" />
+        </template>
+
+        <label for="st-links">Further reading / sources <span class="hint">one per line: Label | https://url</span></label>
+        <textarea id="st-links" v-model="form.links" rows="3" placeholder="Colony Room gallery | https://www.theguardian.com/..."></textarea>
+
+        <span class="field-label" id="st-hue-label">Accent colour</span>
+        <div role="group" aria-labelledby="st-hue-label" style="display:flex; gap:8px;">
+          <button v-for="o in hues" :key="o.value" type="button" class="swatch" :class="{ sel: form.hue === o.value }" :style="{ background: o.value }" @click="form.hue = o.value" :aria-label="o.name" :aria-pressed="form.hue === o.value" :title="o.name"></button>
         </div>
 
         <span class="field-label">Related locations <span class="hint">shown as “Nearby stories” at the foot of this card</span></span>

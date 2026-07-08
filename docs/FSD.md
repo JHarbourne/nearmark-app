@@ -50,19 +50,27 @@ and PostHog.
 
 ## 3. Data model
 
-Per-client Postgres on Supabase, guarded by Row-Level Security. Three core tables.
+Per-client Postgres on Supabase, guarded by Row-Level Security. Content hierarchy is
+**Tour → Location → Story**: a location is a place on the map; its content lives in one or
+more child stories.
 
 ### `locations`
-A place on the map with its story. Keyed by a stable `slug` (used as the app-level `id`).
-Notable fields: `title`, `city`, `period`, `significance`, `summary`, `hue` (accent),
-`lat`/`lng`, `trigger_radius`; imagery (`hero_image_url` = the lead photo; the before/after
-slider's own pair `historic_image_url` + `slider_after_url`, the latter falling back to the
-hero; `portrait_url`; focal `*_position`; alt text; slider labels; `caption`); credits
-(`photo_credit`, `historic_credit`, + `show_photo_credit` toggle); `wiki_url` +
-`link_label` (per-location CTA label); `audio_url`/`audio_duration` + `transcript`
-(plain-text audio transcript, WCAG 1.2.1), `video_url`;
-`related_ids`; `status` (draft/published); privacy (`visibility`, consent fields,
-`publish_from`/`publish_until`); `guided_tour_only`.
+A place on the map. Keyed by a stable `slug` (used as the app-level `id`). Holds only
+place/identity: `title` (the pin/list name), `city`, `address` (from geocoding), `lat`/`lng`,
+`trigger_radius`, `tour_num`, `status` (draft/published); privacy (`visibility`, consent
+fields, `publish_from`/`publish_until`, `coarse_pin`); `guided_tour_only`. **All content
+lives on its stories.**
+
+### `stories`
+The content shown when a pin is tapped. FK `location_id`, ordered by `sort_order`. Fields:
+`heading` (card title), `period`, `significance` (subtitle), `summary` (body, Markdown
+subset); imagery (`hero_image_url` = lead photo; before/after pair `historic_image_url` +
+`slider_after_url`, the latter falling back to the hero; `portrait_url`; focal `*_position`;
+alt text; slider labels; `caption`); credits (`hero_credit`, `historic_credit`, +
+`show_hero_credit` toggle); `wiki_url` + `link_label`; `audio_url`/`audio_duration_secs` +
+`transcript` (WCAG 1.2.1), `video_url`; `related_ids`; `hue` (accent); `notes_internal`.
+A location with **one** story opens it directly; **two or more** show a picker list first
+(e.g. an arts-trail hub listing every exhibiting artist).
 
 ### `tours`
 An ordered collection of stops. Keyed by `slug`. Fields: `title`, `city`, `theme`,
@@ -101,6 +109,10 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 019 | per-location audio `transcript` (WCAG 1.2.1) |
 | 020 | slider `after` image (`slider_after_url`), separate from the hero |
 | 021 | second-photo credit (`portrait_credit`, `portrait_credit_url`) |
+| 022–024 | back-office permissions (RBAC/ownership, notifications, deletion workflow) — **drafted, not run** (parked; see `docs/backoffice-permissions-spec.md`) |
+| 025 | **`stories`** table + one-per-location backfill + shared `location_visible_to_anon()` visibility helper (Tour→Location→Story) |
+| 026 | drop the moved content columns from `locations` (run after the app switch-over) |
+| 027 | location `address` (for geocoding) |
 
 ---
 
@@ -114,6 +126,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
     a story on GPS arrival within `trigger_radius`.
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
+- **Stories.** Tapping a pin opens its story card **directly** when the location has a single
+  story (the common case — identical to before). With **two or more**, a **story picker** list
+  shows first (heading + thumbnail), then the chosen card opens.
 - **Story card.** Hero photo (with focal point), category/period tag, title, narrative (a safe
   **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets — rendered with fixed paragraph
   spacing; plain text is unaffected), an
@@ -149,12 +164,17 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **Locations list.** Grouped by tour, searchable/filterable; hero **thumbnail** column
   (ghost box when none) so missing photos are obvious; row actions Edit · Preview ·
   Duplicate · Delete.
-- **Location editor.** Full content form; click-to-place map pin; accent picker; image
-  fields with compact **upload** + **media-library picker** icons (photos shown whole in a
-  masonry grid), in-place replace, focal point, alt/caption/credits + credit toggle; audio
-  (with a **transcript** field + a missing-transcript accessibility warning when audio is
-  present); related locations; visibility/consent; `guided_tour_only`; live story-card
-  preview. Tour titles are capped at 21 characters so the hero title stays on one line.
+- **Location editor.** Place fields only — title, city, **address with one-click geocoding**
+  ("Find on map" / Enter → OpenStreetMap Nominatim drops the pin and fills lat/lng),
+  click-to-place map pin, trigger radius, visibility/consent, `guided_tour_only`,
+  draft/publish — plus a **Stories** section (list with up/down reorder, edit, delete,
+  "+ Add story").
+- **Story editor.** The content form for a single story, fields in roughly the card's
+  top-to-bottom order (heading → period → significance → hero → text → before/after slider →
+  second photo → audio/video → links → related); compact **upload** + **media-library picker**
+  icons, in-place replace, focal point, alt/caption/credits + credit toggle; audio with a
+  **transcript** field + missing-transcript accessibility warning; accent picker; live
+  story-card preview. Tour titles are capped at 21 characters so the hero title stays on one line.
 - **Tours list & editor.** Drag-to-reorder tours; editor with cover image (same icon
   controls), drag/keyboard stop reordering, per-stop tour overrides, **Calculate walking
   route** button + numbered route preview, collapsible event window.
