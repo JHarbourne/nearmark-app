@@ -9,7 +9,8 @@
     </div>
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:start;">
-      <!-- left: place fields -->
+      <!-- left: place fields + stories + save -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
       <div class="card" style="padding:22px;">
         <label for="loc-title">Title <span class="hint">the place name (shown on the map pin + list)</span></label>
         <input id="loc-title" type="text" v-model="form.title" placeholder="e.g. St Mary’s Church" />
@@ -67,19 +68,41 @@
 
         <label for="loc-radius">Trigger radius <span class="hint">metres · how close before a story unlocks</span></label>
         <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
-
-        <div style="display:flex; align-items:center; gap:12px; margin-top:22px; flex-wrap:wrap;">
-          <div class="seg-toggle" role="group" aria-label="Visibility">
-            <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
-            <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
-          </div>
-          <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
-          <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
-          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
-        </div>
       </div>
 
-      <!-- right: address + map + stories -->
+      <!-- Stories (content) -->
+      <div class="card" style="padding:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <h3 style="margin:0; font-size:15px;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is tapped</span></h3>
+          <button v-if="canAddStory" class="btn btn-ghost btn-sm" @click="addStory">+ Add story</button>
+        </div>
+        <p v-if="isNew" class="hint" style="margin:12px 0 0;">Save the location first, then add its stories here.</p>
+        <p v-else-if="!stories.length" class="hint" style="margin:12px 0 0;">No stories yet — add one so this location has content.</p>
+        <ul v-else style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
+          <li v-for="(s, i) in stories" :key="s.storyId" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px;">
+            <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97' }"></span>
+            <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}</span>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="move(i, -1)" aria-label="Move up">▲</button>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click="move(i, 1)" aria-label="Move down">▼</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="editStory(s)">Edit</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="removeStory(s)" aria-label="Delete story">✕</button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- save -->
+      <div class="card" style="padding:18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="seg-toggle" role="group" aria-label="Visibility">
+          <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
+          <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
+        </div>
+        <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+        <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
+      </div>
+      </div>
+
+      <!-- right: address + map -->
       <div style="display:flex; flex-direction:column; gap:20px;">
         <div class="card" style="padding:18px;">
           <label for="loc-address">Address <span class="hint">type an address, then “Find on map” to drop the pin</span></label>
@@ -93,28 +116,6 @@
           <PlaceMap v-model="coords" :hue="hue" :center="mapCenter" />
           <label for="loc-coords" style="margin-top:10px;">Paste coordinates <span class="hint">lat, lng – e.g. copied from Google Maps</span></label>
           <input id="loc-coords" type="text" :value="coordsText" @change="pasteCoords($event.target.value)" placeholder="51.7607, 0.8369" />
-        </div>
-
-        <!-- Stories -->
-        <div class="card" style="padding:18px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <h3 style="margin:0; font-size:15px;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is tapped</span></h3>
-            <button v-if="canAddStory" class="btn btn-ghost btn-sm" @click="addStory">+ Add story</button>
-          </div>
-
-          <p v-if="isNew" class="hint" style="margin:12px 0 0;">Save the location first, then add its stories here.</p>
-          <p v-else-if="!stories.length" class="hint" style="margin:12px 0 0;">No stories yet — add one so this location has content.</p>
-
-          <ul v-else style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
-            <li v-for="(s, i) in stories" :key="s.storyId" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px;">
-              <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97' }"></span>
-              <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}</span>
-              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="move(i, -1)" aria-label="Move up">▲</button>
-              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click="move(i, 1)" aria-label="Move down">▼</button>
-              <button type="button" class="btn btn-ghost btn-sm" @click="editStory(s)">Edit</button>
-              <button type="button" class="btn btn-ghost btn-sm" @click="removeStory(s)" aria-label="Delete story">✕</button>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
