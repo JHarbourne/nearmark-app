@@ -204,6 +204,26 @@ export const store = reactive({
     this.logActivity('Deleted location', loc.title)
     await this.load()
   },
+  // ── stories (content) ──
+  async saveStory(story) {
+    let saved
+    if (story.storyId) saved = await db.updateStory(story.storyId, story)
+    else saved = await db.createStory(story)
+    this.logActivity(story.storyId ? 'Updated story' : 'Created story', story.heading)
+    await this.load()
+    return Array.isArray(saved) ? saved[0] : saved
+  },
+  async deleteStory(story) {
+    if (story.storyId) await db.deleteStory(story.storyId)
+    this.logActivity('Deleted story', story.heading)
+    await this.load()
+  },
+  // persist the given order as sort_order (1-based; lower = higher up)
+  async reorderStories(stories) {
+    await Promise.all(stories.map((s, i) => (s.storyId ? db.setStoryOrder(s.storyId, i + 1) : null)))
+    this.logActivity('Reordered stories', '')
+    await this.load()
+  },
   async saveTour(tour) {
     if (tour.recordId) await db.updateTour(tour.recordId, tour)
     else await db.createTour(tour)

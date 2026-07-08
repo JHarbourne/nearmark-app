@@ -57,6 +57,7 @@ import SetPassword from './views/SetPassword.vue'
 import Dashboard from './views/Dashboard.vue'
 import LocationsList from './views/LocationsList.vue'
 import LocationEditor from './views/LocationEditor.vue'
+import StoryEditor from './views/StoryEditor.vue'
 import ToursList from './views/ToursList.vue'
 import TourEditor from './views/TourEditor.vue'
 import MediaLibrary from './views/MediaLibrary.vue'
@@ -73,7 +74,7 @@ const nav = [
   { route: 'media', label: 'Media library' },
   { route: 'users', label: 'User management' },
 ]
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, users: UserManagement }
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, users: UserManagement }
 const view = computed(() => views[store.route] || Dashboard)
 
 // mobile drawer
