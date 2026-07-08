@@ -79,8 +79,15 @@ onBeforeUnmount(() => {
   padding: 8px 14px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 600;
   text-align: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
 }
+/* The topmost banner extends up behind the status bar and insets its own content
+   by the safe-area, so it never covers the phone's clock/battery. In a normal
+   browser tab env(safe-area-inset-top) is 0, so this is a no-op there. */
+.app-notice:first-child { padding-top: calc(8px + env(safe-area-inset-top)); }
 .app-notice--offline { background: var(--ink); color: var(--bg); }
 .app-notice--update { background: var(--accent); color: #fff; display: flex; align-items: center; gap: 8px; padding: 0; }
+/* The update bar's height comes from its buttons (padding: 0 here), so when it's
+   the topmost banner only the safe-area inset goes on top; the buttons sit below it. */
+.app-notice--update:first-child { padding-top: env(safe-area-inset-top); }
 .update-main { flex: 1; background: none; border: none; color: inherit; font: inherit; padding: 8px 14px; cursor: pointer; text-align: center; }
 .update-x { background: none; border: none; color: inherit; font-size: 13px; cursor: pointer; padding: 8px 12px; opacity: 0.85; }
 </style>
