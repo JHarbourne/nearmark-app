@@ -55,11 +55,24 @@ Now **any branch that isn't `main`** deploys to a Vercel **Preview URL that talk
 
 > Optional nicety: in Vercel → Settings → Domains, alias a branch (e.g. `staging`) to a stable URL like `nearmark-staging.vercel.app` so the link never changes.
 
+### A4b. (Recommended) A dedicated staging *project* with a stable URL
+
+A4 reuses the Tollesbury project's Preview slot — quickest, but the URL changes per branch and staging shares the production project's settings. For a stable link you can hand testers, and a clean separation from the live projects, give staging its **own** Vercel project:
+
+1. Vercel → **Add New → Project** → import `JHarbourne/nearmark-app` again. (One repo can back many projects — that's how the whitelabel setup already works.)
+2. Name it `nearmark-staging`. Under **Settings → Git**, set the **Production Branch** to `staging` (not `main`). This project now only ever builds the `staging` branch, so your real Tollesbury/LGBT projects are never affected by staging work.
+3. **Environment Variables** → add the `VITE_*` set pointing at the **staging Supabase** (A1), and copy the branding/map vars from Tollesbury so it looks real. Set `VITE_APP_NAME` to something like `Tollesbury (STAGING)` so nobody ever mistakes staging for the live app.
+4. **Domains** → add a stable alias such as `staging.nearmark.app` (add the DNS record Vercel shows you), or just use the free `nearmark-staging.vercel.app`.
+
+The `staging` branch already exists in the repo. The release flow becomes: work on a feature branch → **merge into `staging`** (auto-deploys to the staging URL) → verify there → **merge `staging` into `main`** (releases to production). Nothing reaches a live app without passing through the staging URL first.
+
 ---
 
 ## Part B — the release checklist (use this for every structural change)
 
 This is the part that prevents another 026. The rule: **expand → deploy → contract**, each step proven on staging first.
+
+> **Front-end-only changes** — those that touch no database schema (e.g. the Leaflet→MapLibre map rewrite, a component or styling change) — skip the migration steps entirely. For those the flow is just: branch → merge to `staging` → verify on the staging URL (ideally on a real phone) → merge to `main`. Parts A1–A3 and steps 2–3, 6, 8 below apply **only** when a change touches the database.
 
 1. **Branch:** `git checkout -b feature/xyz` off `main`.
 2. **Write the additive migration** (new tables/columns, backfill, RLS) — never drop anything yet.
