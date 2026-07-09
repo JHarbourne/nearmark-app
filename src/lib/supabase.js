@@ -115,6 +115,7 @@ function rowToStory(r) {
     hue: r.hue || '#9B6DFF',
     relatedIds: r.related_ids || [],
     notesInternal: r.notes_internal || '',
+    status: r.status || 'published', // per-story draft/published (migration 028)
   }
 }
 function storyToRow(s) {
@@ -157,6 +158,7 @@ function storyToRow(s) {
     slider_after_url: s.sliderAfterUrl || null,
     slider_after_position: s.sliderAfterPosition || '50% 50%',
     notes_internal: s.notesInternal || null,
+    status: s.status || 'published',
   }
 }
 // Attach each location's ordered stories and flatten the primary story's visuals
@@ -345,7 +347,7 @@ function seedToLocation(l) {
   const storyFrom = (s, i) => ({
     ...s, storyId: `${l.id}-s${i + 1}`, locationId: l.id,
     sortOrder: s.sortOrder ?? i + 1, heading: s.heading || s.title || l.title, title: s.heading || s.title || l.title,
-    hue: s.hue || l.hue || '#9B6DFF', relatedIds: s.relatedIds || l.relatedIds || [],
+    hue: s.hue || l.hue || '#9B6DFF', relatedIds: s.relatedIds || l.relatedIds || [], status: s.status || 'published',
   })
   const stories = (l.stories && l.stories.length)
     ? l.stories.map(storyFrom)
@@ -378,7 +380,18 @@ export async function fetchStories() {
 // is the real boundary for the anon role — this is defence in depth. Stories are
 // fetched alongside and attached to each location.
 export async function fetchLocations(publicView = false) {
-  if (!supabaseConfigured) return SEED_LOCATIONS.filter((l) => l.status === 'published').map(seedToLocation)
+  if (!supabaseConfigured) {
+    let locs = SEED_LOCATIONS.filter((l) => l.status === 'published').map(seedToLocation)
+    if (publicView) {
+      // mirror prod: hide draft stories (and any location left with none)
+      locs = locs.map((l) => {
+        const vis = l.stories.filter((s) => s.status !== 'draft')
+        const p = vis[0]
+        return { ...l, stories: vis, ...(p ? { hue: p.hue, heroImageUrl: p.heroImageUrl, thumbnailUrl: p.thumbnailUrl, historicImageUrl: p.historicImageUrl, heroPosition: p.heroPosition, historicPosition: p.historicPosition } : {}) }
+      }).filter((l) => l.stories.length)
+    }
+    return locs
+  }
   const ordered = (q) => q.order('title')
   let locs = null
   if (publicView) {
@@ -397,7 +410,10 @@ export async function fetchLocations(publicView = false) {
     if (error) throw error
     locs = data.map(rowToLocation)
   }
-  return attachStories(locs, await fetchStories())
+  const withStories = attachStories(locs, await fetchStories())
+  // Public app: hide a location that has no visible story (e.g. all its stories are
+  // draft) so there's never a blank pin. The admin (publicView=false) sees them all.
+  return publicView ? withStories.filter((l) => l.stories.length) : withStories
 }
 export async function fetchTours(publicView = false) {
   if (!supabaseConfigured) return SEED_TOURS.filter((t) => t.status === 'published')

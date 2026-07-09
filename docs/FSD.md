@@ -68,7 +68,9 @@ subset); imagery (`hero_image_url` = lead photo; before/after pair `historic_ima
 `slider_after_url`, the latter falling back to the hero; `portrait_url`; focal `*_position`;
 alt text; slider labels; `caption`); credits (`hero_credit`, `historic_credit`, +
 `show_hero_credit` toggle); `wiki_url` + `link_label`; `audio_url`/`audio_duration_secs` +
-`transcript` (WCAG 1.2.1), `video_url`; `related_ids`; `hue` (accent); `notes_internal`.
+`transcript` (WCAG 1.2.1), `video_url`; `related_ids`; `hue` (accent); `notes_internal`;
+`status` (draft/published — a story can be hidden independently; a story is public only
+when published *and* its parent location is publicly visible).
 A location with **one** story opens it directly; **two or more** show a picker list first
 (e.g. an arts-trail hub listing every exhibiting artist).
 
@@ -113,6 +115,7 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 025 | **`stories`** table + one-per-location backfill + shared `location_visible_to_anon()` visibility helper (Tour→Location→Story) |
 | 026 | drop the moved content columns from `locations` (run after the app switch-over) |
 | 027 | location `address` (for geocoding) |
+| 028 | per-story `status` (draft/published) — hide an individual story |
 
 ---
 

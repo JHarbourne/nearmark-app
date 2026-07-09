@@ -79,13 +79,16 @@
         <p v-if="isNew" class="hint" style="margin:12px 0 0;">Save the location first, then add its stories here.</p>
         <p v-else-if="!stories.length" class="hint" style="margin:12px 0 0;">No stories yet — add one so this location has content.</p>
         <ul v-else style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
-          <li v-for="(s, i) in stories" :key="s.storyId" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px;">
-            <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97' }"></span>
-            <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}</span>
-            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="move(i, -1)" aria-label="Move up">▲</button>
-            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click="move(i, 1)" aria-label="Move down">▼</button>
-            <button type="button" class="btn btn-ghost btn-sm" @click="editStory(s)">Edit</button>
-            <button type="button" class="btn btn-ghost btn-sm" @click="removeStory(s)" aria-label="Delete story">✕</button>
+          <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
+          <li v-for="(s, i) in stories" :key="s.storyId" class="story-row" @click="editStory(s)" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer;">
+            <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97', opacity: s.status === 'draft' ? 0.4 : 1 }"></span>
+            <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}<span v-if="s.status === 'draft'" class="badge draft" style="margin-left:8px; font-weight:600;">Hidden</span></span>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" aria-label="Move up">▲</button>
+            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click.stop="move(i, 1)" aria-label="Move down">▼</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click.stop="editStory(s)">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm" @click.stop="removeStory(s)" aria-label="Delete story" title="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
+            </button>
           </li>
         </ul>
       </div>
@@ -259,3 +262,8 @@ async function move(i, dir) {
   try { await store.reorderStories(list) } catch (e) { alert('Reorder failed: ' + e.message) }
 }
 </script>
+
+<style scoped>
+/* the whole story row is clickable to edit; give it a hover cue */
+.story-row:hover { background: var(--bg); border-color: var(--violet); }
+</style>

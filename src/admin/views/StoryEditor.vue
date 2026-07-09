@@ -276,6 +276,10 @@
         <textarea id="st-notes" v-model="form.notesInternal" rows="2"></textarea>
 
         <div style="display:flex; align-items:center; gap:12px; margin-top:22px; flex-wrap:wrap;">
+          <div class="seg-toggle" role="group" aria-label="Visibility">
+            <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
+            <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
+          </div>
           <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save story' }}</button>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to location</button>
@@ -332,10 +336,11 @@ const blank = {
   imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true,
   historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', portraitCredit: '', portraitCreditUrl: '',
   audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '', caption: '', links: '',
-  hue: HUE_OPTIONS[0].value, relatedIds: [], notesInternal: '',
+  hue: HUE_OPTIONS[0].value, relatedIds: [], notesInternal: '', status: 'published',
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
 if (form.showPhotoCredit === undefined) form.showPhotoCredit = true
+if (!form.status) form.status = 'published' // pre-028 stories default to published
 form.locationId = store.params.locationId // always bind to the parent
 
 const showHistoric = ref(!!form.historicImageUrl)

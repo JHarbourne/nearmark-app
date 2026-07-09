@@ -37,7 +37,7 @@ export const SEED_LOCATIONS = [
         summary: 'The timbered great hall is the heart of the guildhall – a single soaring room where the trade guilds held their courts, feasts and ceremonies.\n\nIts roof beams and worn floor have survived centuries of town business.',
       },
       {
-        heading: 'The Guild Cellars', period: '15th century', hue: HUE.green,
+        heading: 'The Guild Cellars', period: '15th century', hue: HUE.green, status: 'draft',
         significance: 'Grain stores beneath the hall',
         summary: 'Beneath the hall, brick-vaulted cellars once held the town’s grain against a hard winter – a communal store managed by the guilds for the good of the whole town.',
       },
