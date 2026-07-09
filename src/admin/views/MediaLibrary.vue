@@ -175,9 +175,13 @@ async function remove(m) {
 }
 
 function usedBy(m) {
-  const locs = store.locations.filter((l) => [l.heroImageUrl, l.historicImageUrl, l.audioUrl, l.videoUrl].includes(m.url)).map((l) => l.title)
+  // media now lives on stories (a location can have several) – check them all
+  const storyMedia = (s) => [s.heroImageUrl, s.historicImageUrl, s.sliderAfterUrl, s.portraitUrl, s.audioUrl, s.videoUrl]
+  const locs = store.locations
+    .filter((l) => (l.stories || []).some((s) => storyMedia(s).includes(m.url)))
+    .map((l) => l.title)
   const tours = store.tours.filter((t) => t.coverImageUrl === m.url).map((t) => t.title)
-  const all = [...locs, ...tours]
+  const all = [...new Set([...locs, ...tours])]
   return all.length ? all.join(', ') : '–'
 }
 function sizeLabel(m) {

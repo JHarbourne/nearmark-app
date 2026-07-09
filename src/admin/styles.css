@@ -104,8 +104,27 @@ tr.row-clickable:hover { background: var(--line); }
   /* collapse the editor two-column grids and field pairs to one column */
   .editor-cols { grid-template-columns: 1fr !important; }
   .field-row { grid-template-columns: 1fr !important; }
-  /* let wide list tables scroll horizontally instead of overflowing the page */
-  .card > table { display: block; overflow-x: auto; white-space: nowrap; }
+  /* Narrow screens: a multi-column table can't fit a phone, so stack each row
+     into a labelled card (label ← value) instead of a horizontal scroll that
+     hides the right-hand columns off-screen. Each <td> carries a data-label. */
+  .card > table, .card > table tbody, .card > table tr, .card > table td { display: block; width: auto; }
+  .card > table thead { display: none; }
+  .card > table tr { border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; margin-bottom: 10px; }
+  .card > table td {
+    display: block; padding: 6px 0; border: none !important; text-align: left !important; white-space: normal !important;
+  }
+  .card > table td::before {
+    content: attr(data-label); display: block; margin-bottom: 3px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--muted);
+  }
+  .card > table td[data-label="Email"] { overflow-wrap: anywhere; } /* long addresses break to fit */
+  .card > table td:empty { display: none; } /* skip empty cells (e.g. no period) */
+  /* group headings (Locations list, grouped by tour) stay as plain dividers */
+  .card > table tr.group-head { border: none; padding: 0; margin: 16px 0 6px; }
+  .card > table tr.group-head th { display: block; }
+  /* full-width "no results" message: no label column */
+  .card > table td[colspan] { display: block; }
+  .card > table td[colspan]::before { content: none; }
 }
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .demo-banner { background: #fff7e6; border: 1px solid #f3d98a; color: #8a6400; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }

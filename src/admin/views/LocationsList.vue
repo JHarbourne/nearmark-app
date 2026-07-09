@@ -43,19 +43,19 @@
           <template v-if="!collapsed[g.key]">
             <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
             <tr v-for="l in g.locations" :key="g.key + '|' + l.id" class="row-clickable" @click="store.go('locationEditor', { id: l.id })">
-              <td style="width:56px;">
+              <td style="width:56px;" data-label="Photo">
                 <img v-if="l.heroImageUrl" :src="l.heroImageUrl" alt="" loading="lazy" style="width:48px; height:34px; object-fit:cover; border-radius:5px; display:block; background:var(--bg);" />
                 <span v-else title="No photo yet" style="display:block; width:48px; height:34px; border-radius:5px; background:var(--bg); border:1px dashed var(--line);"></span>
               </td>
-              <td style="font-weight:600;">
+              <td style="font-weight:600;" data-label="Title">
                 <span class="swatch" :style="{ background: l.hue, display:'inline-block', width:'14px', height:'14px', verticalAlign:'middle', marginRight:'8px' }"></span>
                 {{ l.title }}
                 <span v-if="l.guidedTourOnly" class="badge" style="margin-left:8px; font-weight:600; font-size:10px; letter-spacing:.3px; background:#efe9fb; color:#5b3ea8;" title="Guided tour only – hidden from Discover mode, shown only inside a guided tour">🔒 Tour only</span>
               </td>
-              <td>{{ l.city }}</td>
-              <td class="muted">{{ l.period }}</td>
-              <td><span class="badge" :class="l.status">{{ l.status }}</span></td>
-              <td class="right" style="white-space:nowrap;">
+              <td data-label="City">{{ l.city }}</td>
+              <td class="muted" data-label="Period">{{ l.period }}</td>
+              <td data-label="Status"><span class="badge" :class="l.status">{{ l.status }}</span></td>
+              <td class="right" style="white-space:nowrap;" data-label="Actions">
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>

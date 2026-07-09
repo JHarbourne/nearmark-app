@@ -19,14 +19,14 @@
             @click="store.go('tourEditor', { id: t.id })"
             @dragstart="dragIdx = i" @dragover.prevent @drop="drop(i)" @dragend="dragIdx = null"
             :style="{ opacity: dragIdx === i ? 0.4 : 1 }">
-            <td style="color:var(--muted); cursor:grab; width:24px; text-align:center;" title="Drag to reorder">⠿</td>
-            <td style="font-weight:600;">{{ t.title }}</td>
-            <td>{{ t.city }}</td>
-            <td>{{ t.stopIds.length }}</td>
-            <td class="muted">{{ t.distanceLabel }}</td>
-            <td class="muted">{{ t.durationLabel }}</td>
-            <td><span class="badge" :class="t.status">{{ t.status }}</span></td>
-            <td class="right" style="white-space:nowrap;">
+            <td style="color:var(--muted); cursor:grab; width:24px; text-align:center;" title="Drag to reorder" data-label="Order">⠿</td>
+            <td style="font-weight:600;" data-label="Tour">{{ t.title }}</td>
+            <td data-label="City">{{ t.city }}</td>
+            <td data-label="Stops">{{ t.stopIds.length }}</td>
+            <td class="muted" data-label="Distance">{{ t.distanceLabel }}</td>
+            <td class="muted" data-label="Duration">{{ t.durationLabel }}</td>
+            <td data-label="Status"><span class="badge" :class="t.status">{{ t.status }}</span></td>
+            <td class="right" style="white-space:nowrap;" data-label="Actions">
               <button class="btn btn-ghost btn-sm" @click.stop="store.go('tourEditor', { id: t.id })">Edit</button>
               <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview</button>
               <button class="btn btn-ghost btn-sm" @click.stop="duplicate(t)">Duplicate</button>
