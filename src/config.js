@@ -100,6 +100,10 @@ export const config = {
     lng: Number(pick(env.VITE_MAP_CENTER_LNG, -0.1276)),
   },
   mapZoom: Number(pick(env.VITE_MAP_ZOOM, 15)),
+  // Offline-capable vector basemap: a per-deployment Protomaps .pmtiles file
+  // (hosted anywhere that serves HTTP range requests, e.g. Supabase Storage).
+  // Blank → the map falls back to raster OpenStreetMap tiles (online-only).
+  mapPmtilesUrl: pick(env.VITE_MAP_PMTILES_URL, ''),
 }
 
 // Domain of the configured content wiki, used to validate article URLs in the

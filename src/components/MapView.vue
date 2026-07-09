@@ -1,14 +1,15 @@
 <!--
   Map view (BRD §9.1 screen 6, §6.4 steps 1 & 3, §10 "Map View").
-  Replaces the prototype's SVG street canvas with a live Leaflet.js map on
-  OpenStreetMap tiles. Custom teardrop pin markers reuse the prototype's SVG
-  path and hue colours; route polyline for guided mode; real GPS "you are here"
-  dot fed from navigator.geolocation. All overlay chrome (top bar, next-stop
+  Live MapLibre GL map. The basemap is an offline-capable Protomaps vector tileset
+  (a per-deployment .pmtiles file via VITE_MAP_PMTILES_URL); with none set it falls
+  back to raster OpenStreetMap. Custom teardrop pin markers reuse the prototype's
+  SVG path and hue colours; a GeoJSON route line for guided mode; real GPS "you are
+  here" dot fed from navigator.geolocation. All overlay chrome (top bar, next-stop
   card, proximity banner, bottom nav) is kept verbatim from the prototype.
 -->
 <template>
   <div style="position: absolute; inset: 0;">
-    <!-- live map canvas (z-index:0 confines Leaflet's internal panes/controls to
+    <!-- live map canvas (z-index:0 confines the map's internal panes/controls to
          their own stacking context so the overlay chrome below sits on top) -->
     <div ref="mapEl" style="position: absolute; inset: 0; z-index: 0;"></div>
 
@@ -123,14 +124,21 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import L from 'leaflet'
+import maplibregl from 'maplibre-gl'
+import { Protocol } from 'pmtiles'
+import { layers, LIGHT } from '@protomaps/basemaps'
 import { badgeColors } from '../lib/tokens.js'
 import { config } from '../config.js'
+
+// Register the pmtiles:// protocol once so MapLibre can read a single-file vector
+// basemap over HTTP range requests (offline-cacheable). Registering again under
+// HMR is harmless.
+maplibregl.addProtocol('pmtiles', new Protocol().tile)
 
 const props = defineProps({
   guided: { type: Boolean, default: true },
   locations: { type: Array, default: () => [] },   // markers to show in current mode
-  tourStops: { type: Array, default: () => [] },    // ordered, for the route polyline
+  tourStops: { type: Array, default: () => [] },    // ordered, for the route line
   routeGeometry: { type: Array, default: () => [] }, // [[lat,lng],…] road-following path; empty → straight lines
   visitedIds: { type: Array, default: () => [] },
   nextStop: { type: Object, default: null },
@@ -189,13 +197,43 @@ function listDot(loc) {
 }
 
 let map = null
-let markerLayer = null
-let routeLine = null
+let mapLoaded = false
+let markers = []
 let userMarker = null
 let didFit = false
 
-// teardrop pin matching the prototype SVG, as a Leaflet divIcon
-function pinIcon(loc) {
+// The public map is a light basemap under the app's dark chrome (matching the
+// previous OSM look). A deployment supplies its own offline vector tiles via
+// VITE_MAP_PMTILES_URL; without one we fall back to raster OpenStreetMap (online).
+function buildStyle() {
+  const url = config.mapPmtilesUrl
+  if (url) {
+    return {
+      version: 8,
+      glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
+      sprite: 'https://protomaps.github.io/basemaps-assets/sprites/v4/light',
+      sources: {
+        protomaps: { type: 'vector', url: `pmtiles://${url}`, attribution: '© OpenStreetMap' },
+      },
+      layers: layers('protomaps', LIGHT, { lang: 'en' }),
+    }
+  }
+  return {
+    version: 8,
+    sources: {
+      osm: {
+        type: 'raster',
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors',
+      },
+    },
+    layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+  }
+}
+
+// teardrop pin matching the prototype SVG (markup reused verbatim; rendered into a
+// DOM element for a MapLibre marker rather than a Leaflet divIcon)
+function pinHtml(loc) {
   const isVisited = props.visitedIds.includes(loc.id)
   const isNext = props.guided && props.nextStop && props.nextStop.id === loc.id
   const isTour = !!loc.tourNum && props.guided
@@ -211,7 +249,7 @@ function pinIcon(loc) {
   const label = isTour
     ? `<span style="position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:1px;padding:2px 7px;border-radius:7px;background:#fff;color:#1c1526;font-size:10px;font-weight:700;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,0.28);font-family:var(--font-ui),sans-serif;">${loc.title}</span>`
     : ''
-  const html = `
+  return `
     <span style="position:relative;width:${w}px;height:${h}px;display:block;">
       ${ring}
       <svg viewBox="0 0 30 40" style="display:block;width:${w}px;height:${h}px;filter:drop-shadow(0 4px 5px rgba(0,0,0,0.35));">
@@ -220,87 +258,108 @@ function pinIcon(loc) {
       </svg>
       ${label}
     </span>`
-  return L.divIcon({
-    className: 'marker-pin',
-    html,
-    iconSize: [w, h],
-    iconAnchor: [w / 2, h],
-    popupAnchor: [0, -h],
-  })
 }
 
-function userIcon() {
-  const html = `
+function pinEl(loc) {
+  const el = document.createElement('div')
+  el.className = 'marker-pin'
+  el.style.cursor = 'pointer'
+  el.innerHTML = pinHtml(loc)
+  const open = () => emit('open-story', loc.id)
+  el.addEventListener('click', open)
+  // keep the pins keyboard-reachable (parity with Leaflet's keyboard markers; the
+  // accessible list panel is the primary path, this is the secondary one)
+  el.tabIndex = 0
+  el.setAttribute('role', 'button')
+  el.setAttribute('aria-label', (loc.tourNum && props.guided ? `Stop ${loc.tourNum}: ` : '') + loc.title)
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() }
+  })
+  return el
+}
+
+function userEl() {
+  const el = document.createElement('div')
+  el.className = 'marker-pin'
+  el.style.pointerEvents = 'none'
+  el.innerHTML = `
     <span style="position:relative;display:block;">
       <span style="position:absolute;left:50%;top:50%;width:62px;height:62px;border-radius:50%;background:rgba(46,124,246,0.15);transform:translate(-50%,-50%);"></span>
       <span style="position:absolute;left:50%;top:50%;width:24px;height:24px;border-radius:50%;background:#2E7CF6;transform:translate(-50%,-50%);animation:pulsedot 2.2s ease-out infinite;"></span>
       <span style="position:relative;display:block;width:17px;height:17px;border-radius:50%;background:#2E7CF6;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.35);"></span>
     </span>`
-  return L.divIcon({ className: 'marker-pin', html, iconSize: [17, 17], iconAnchor: [8.5, 8.5] })
+  return el
+}
+
+// guided route: a GeoJSON line drawn as a halo + line pair beneath the markers
+function renderRoute() {
+  if (!map || !mapLoaded) return
+  for (const id of ['route-line', 'route-halo']) if (map.getLayer(id)) map.removeLayer(id)
+  if (map.getSource('route')) map.removeSource('route')
+  if (!(props.guided && props.tourStops.length > 1)) return
+  // prefer the stored road-following geometry; fall back to straight lines
+  const latlng = (props.routeGeometry && props.routeGeometry.length > 1)
+    ? props.routeGeometry
+    : props.tourStops.filter((s) => s.lat != null).map((s) => [s.lat, s.lng])
+  const coordinates = latlng.map(([lat, lng]) => [lng, lat]) // GeoJSON is [lng, lat]
+  map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates } } })
+  map.addLayer({ id: 'route-halo', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#1f6fe0', 'line-width': 8, 'line-opacity': 0.18 } })
+  map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#2E7CF6', 'line-width': 4.5, 'line-opacity': 0.9 } })
 }
 
 function renderMarkers() {
-  if (!map) return
-  // guided route polyline first, so markers sit on top of it
-  if (routeLine) { routeLine.remove(); routeLine = null }
-  if (props.guided && props.tourStops.length > 1) {
-    // prefer the stored road-following geometry; fall back to straight lines
-    const line = (props.routeGeometry && props.routeGeometry.length > 1)
-      ? props.routeGeometry
-      : props.tourStops.filter((s) => s.lat != null).map((s) => [s.lat, s.lng])
-    routeLine = L.layerGroup([
-      L.polyline(line, { color: '#1f6fe0', weight: 8, opacity: 0.18 }),
-      L.polyline(line, { color: '#2E7CF6', weight: 4.5, opacity: 0.9 }),
-    ]).addTo(map)
-  }
-
-  if (markerLayer) markerLayer.remove()
-  markerLayer = L.layerGroup().addTo(map)
+  if (!map || !mapLoaded) return
+  renderRoute()
+  markers.forEach((m) => m.remove())
+  markers = []
   const pts = []
   props.locations.forEach((loc) => {
     if (loc.lat == null || loc.lng == null) return
-    const m = L.marker([loc.lat, loc.lng], { icon: pinIcon(loc), keyboard: true, zIndexOffset: props.guided && props.nextStop && props.nextStop.id === loc.id ? 1000 : 0 })
-    m.on('click', () => emit('open-story', loc.id))
-    m.addTo(markerLayer)
-    // accessible name + role on the focusable marker element (Leaflet keyboard:true)
-    const el = m.getElement()
-    if (el) {
-      el.setAttribute('role', 'button')
-      el.setAttribute('aria-label', (loc.tourNum && props.guided ? `Stop ${loc.tourNum}: ` : '') + loc.title)
-    }
-    pts.push([loc.lat, loc.lng])
+    const m = new maplibregl.Marker({ element: pinEl(loc), anchor: 'bottom' })
+      .setLngLat([loc.lng, loc.lat]).addTo(map)
+    markers.push(m)
+    pts.push([loc.lng, loc.lat])
   })
-
   if (!didFit && pts.length) {
-    map.fitBounds(L.latLngBounds(pts).pad(0.35), { animate: false })
+    const b = new maplibregl.LngLatBounds()
+    pts.forEach((p) => b.extend(p))
+    map.fitBounds(b, { padding: 64, maxZoom: 17, animate: false })
     didFit = true
   }
 }
 
 function renderUser() {
-  if (!map) return
+  if (!map || !mapLoaded) return
   if (!props.userPosition) { if (userMarker) { userMarker.remove(); userMarker = null } return }
-  const ll = [props.userPosition.lat, props.userPosition.lng]
-  if (userMarker) userMarker.setLatLng(ll)
-  else userMarker = L.marker(ll, { icon: userIcon(), zIndexOffset: 500, interactive: false }).addTo(map)
+  const ll = [props.userPosition.lng, props.userPosition.lat]
+  if (userMarker) userMarker.setLngLat(ll)
+  else userMarker = new maplibregl.Marker({ element: userEl(), anchor: 'center' }).setLngLat(ll).addTo(map)
 }
 
 onMounted(() => {
-  map = L.map(mapEl.value, { zoomControl: false, attributionControl: true })
-    .setView([props.center.lat, props.center.lng], props.zoom)
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  map = new maplibregl.Map({
+    container: mapEl.value,
+    style: buildStyle(),
+    center: [props.center.lng, props.center.lat],
+    zoom: props.zoom,
     maxZoom: 19,
-    attribution: '© OpenStreetMap contributors',
-  }).addTo(map)
-  L.control.zoom({ position: 'bottomright' }).addTo(map)
-  renderMarkers()
-  renderUser()
+    attributionControl: false,
+    dragRotate: false, // a walking map doesn't rotate
+  })
+  map.touchZoomRotate.disableRotation()
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right')
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }), 'bottom-right')
+  map.on('load', () => {
+    mapLoaded = true
+    renderMarkers()
+    renderUser()
+  })
   document.addEventListener('keydown', onDocKeydown)
 })
 
 onUnmounted(() => {
   document.removeEventListener('keydown', onDocKeydown)
-  if (map) map.remove()
+  if (map) { map.remove(); map = null }
 })
 
 watch(() => [props.locations, props.guided, props.nextStop, props.visitedIds], renderMarkers, { deep: true })
