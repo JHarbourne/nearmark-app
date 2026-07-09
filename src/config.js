@@ -71,6 +71,10 @@ export const config = {
     env.VITE_ANALYTICS_URL,
     env.VITE_POSTHOG_KEY ? pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com').replace('i.posthog.com', 'posthog.com') : '',
   ),
+  // Optional: a PostHog shared-dashboard EMBED url (Dashboard → Share → Embed) to
+  // show analytics inside the admin Analytics screen. Blank → the screen just
+  // links out to PostHog instead.
+  analyticsEmbedUrl: pick(env.VITE_ANALYTICS_EMBED_URL, ''),
 
   // ── active city (single-city deployments; multi-city still uses the bundled
   //    SEED_CITIES + city picker). Blank cityName → fall back to the seed. ──

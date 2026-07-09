@@ -61,6 +61,7 @@ import StoryEditor from './views/StoryEditor.vue'
 import ToursList from './views/ToursList.vue'
 import TourEditor from './views/TourEditor.vue'
 import MediaLibrary from './views/MediaLibrary.vue'
+import Analytics from './views/Analytics.vue'
 import UserManagement from './views/UserManagement.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
@@ -72,9 +73,10 @@ const nav = [
   { route: 'locations', label: 'Locations' },
   { route: 'tours', label: 'Tours' },
   { route: 'media', label: 'Media library' },
+  { route: 'analytics', label: 'Analytics' },
   { route: 'users', label: 'User management' },
 ]
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, users: UserManagement }
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement }
 const view = computed(() => views[store.route] || Dashboard)
 
 // mobile drawer
