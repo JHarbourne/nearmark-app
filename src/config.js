@@ -21,6 +21,18 @@ const nl = (val, fallback) => String(pick(val, fallback)).replaceAll('\\n', '\n'
 const cityNameVal = pick(env.VITE_CITY_NAME, '')
 const cityList = pick(env.VITE_CITIES, '').split(',').map((s) => s.trim()).filter(Boolean)
 
+// PostHog project analytics. The project key is PUBLIC + write-only (safe to ship
+// in the bundle), so the Nearmark-hosted apps fall back to a baked-in default
+// rather than a per-deployment env var — but ONLY on our own production domains.
+// A fork on any other host sends nothing unless it sets its own VITE_POSTHOG_KEY.
+// VITE_POSTHOG_KEY always overrides this default.
+const NEARMARK_POSTHOG_KEY = 'phc_uqAScdCwb76XjzMV4NAMQUi9RZ7RRcTtYGysusvL7NSP'
+const NEARMARK_ANALYTICS_URL = 'https://eu.posthog.com/project/219590'
+const analyticsHostname = typeof window !== 'undefined' ? window.location.hostname : ''
+const onNearmarkHost = /(^|\.)(nearmark\.app|tollesbury\.app|lgbthistoryuk\.org)$/.test(analyticsHostname)
+const posthogKey = pick(env.VITE_POSTHOG_KEY, onNearmarkHost ? NEARMARK_POSTHOG_KEY : '')
+const posthogHost = pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com')
+
 export const config = {
   // ── identity ──
   appName: pick(env.VITE_APP_NAME, 'Nearmark'),            // product name (page title)
@@ -62,14 +74,14 @@ export const config = {
   // ── integrations ──
   supabaseUrl: pick(env.VITE_SUPABASE_URL, ''),
   supabaseAnonKey: pick(env.VITE_SUPABASE_ANON_KEY, ''),
-  posthogKey: pick(env.VITE_POSTHOG_KEY, ''),
-  posthogHost: pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com'),
-  // "View analytics" link on the admin Dashboard → the PostHog dashboard. Prefer an
-  // explicit project URL (VITE_ANALYTICS_URL); otherwise derive the PostHog app host
-  // from the ingestion host, but only when PostHog is actually configured.
+  posthogKey,
+  posthogHost,
+  // "View analytics" link on the admin Dashboard/Analytics screen → the PostHog
+  // dashboard. Prefer an explicit project URL (VITE_ANALYTICS_URL); on our own
+  // hosts fall back to the Nearmark project; otherwise derive the PostHog app host.
   analyticsUrl: pick(
     env.VITE_ANALYTICS_URL,
-    env.VITE_POSTHOG_KEY ? pick(env.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com').replace('i.posthog.com', 'posthog.com') : '',
+    posthogKey ? (onNearmarkHost ? NEARMARK_ANALYTICS_URL : posthogHost.replace('i.posthog.com', 'posthog.com')) : '',
   ),
   // Optional: a PostHog shared-dashboard EMBED url (Dashboard → Share → Embed) to
   // show analytics inside the admin Analytics screen. Blank → the screen just
