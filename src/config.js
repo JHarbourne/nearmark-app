@@ -26,8 +26,8 @@ const cityList = pick(env.VITE_CITIES, '').split(',').map((s) => s.trim()).filte
 // rather than a per-deployment env var — but ONLY on our own production domains.
 // A fork on any other host sends nothing unless it sets its own VITE_POSTHOG_KEY.
 // VITE_POSTHOG_KEY always overrides this default.
-const NEARMARK_POSTHOG_KEY = 'phc_uqAScdCwb76XjzMV4NAMQUi9RZ7RRcTtYGysusvL7NSP'
-const NEARMARK_ANALYTICS_URL = 'https://eu.posthog.com/project/219590'
+const NEARMARK_POSTHOG_KEY = 'phc_mLQNDrwid32CesrU5pD59XEDF5RHzpNNHJzmyK3wWY5E'
+const NEARMARK_ANALYTICS_URL = 'https://eu.posthog.com/project/209983'
 const analyticsHostname = typeof window !== 'undefined' ? window.location.hostname : ''
 const onNearmarkHost = /(^|\.)(nearmark\.app|tollesbury\.app|lgbthistoryuk\.org)$/.test(analyticsHostname)
 const posthogKey = pick(env.VITE_POSTHOG_KEY, onNearmarkHost ? NEARMARK_POSTHOG_KEY : '')
