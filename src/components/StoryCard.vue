@@ -212,7 +212,7 @@ onMounted(() => {
   lastFocused = document.activeElement           // remember what opened the sheet
   // preventScroll: Safari otherwise scrolls the still-animating sheet to reveal
   // the focused button, making the card jump up then settle.
-  nextTick(() => closeRef.value?.focus?.({ preventScroll: true }))
+  nextTick(() => { if (scrollRef.value) scrollRef.value.scrollTop = 0; closeRef.value?.focus?.({ preventScroll: true }) })
   document.addEventListener('keydown', onKeydown) // Escape closes
   // touchmove must be non-passive so we can preventDefault while pulling down
   sheetRef.value?.addEventListener('touchmove', onDragMove, { passive: false })
@@ -251,7 +251,14 @@ const transcriptParas = computed(() => {
     line.split(/(\[[^\]]*\])/).filter(Boolean).map((s) => ({ sound: /^\[[^\]]*\]$/.test(s), text: s })),
   )
 })
-watch(() => props.loc.id, () => { transcriptOpen.value = false }) // collapse when the card changes
+// When the card's content changes — a different pin, a "nearby story", or another
+// story of the same location — reset it to the top and clear drag/transcript state,
+// so it never opens scrolled to wherever the previous card was left.
+watch(() => [props.loc.id, props.loc.title], () => {
+  transcriptOpen.value = false
+  dragY.value = 0
+  nextTick(() => { if (scrollRef.value) scrollRef.value.scrollTop = 0 })
+})
 const transcriptToggle = {
   display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 2px',
   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-warm)',
