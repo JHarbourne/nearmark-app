@@ -21,8 +21,10 @@ Leaflet.
   glyphs proactively so a never-viewed area still labels offline.
 - 🎨 **Branding on staging** still shows the "London / Nearmark" demo defaults — cosmetic
   (see "Env var gotchas" below); does not affect the map.
-- 🚢 **Not shipped to production.** Lives on `feature/maplibre-offline-maps`, merged into
-  `staging` only. `main` is still Leaflet.
+- 🚢 **Shipped to production (v1.4.0, 2026-07-10).** Merged `feature/maplibre-offline-maps`
+  → `staging` → `main`; `tollesbury-app` and `lgbt` auto-deploy from `main`. Tollesbury runs
+  the vector basemap + offline caching live. **LGBT** still needs its own London `.pmtiles`
+  extract before its post-cutover launch (until then it falls back to raster OSM).
 
 ## What changed
 

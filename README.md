@@ -211,11 +211,14 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_SUPABASE_ANON_KEY` | Supabase publishable/anon key (safe in the client) |
 | `VITE_POSTHOG_KEY` | PostHog project token for analytics (blank disables) |
 | `VITE_POSTHOG_HOST` | PostHog host (default EU cloud) |
+| `VITE_ANALYTICS_URL` | PostHog project URL for the admin "Open in PostHog" link (blank = derived from the host) |
+| `VITE_ANALYTICS_EMBED_URL` | PostHog shared-dashboard **Embed** URL to show analytics inside the admin (blank = link out only) |
 | `VITE_CITY_NAME` | Active city label, e.g. `Tollesbury` (blank = bundled seed city) |
 | `VITE_CITY_AREA` | City sub-label, e.g. `Essex` |
 | `VITE_CITIES` | Admin city options, comma-separated (e.g. `London,Brighton`); blank = just `VITE_CITY_NAME` (single-city sites skip the public city picker) |
 | `VITE_MAP_CENTER_LAT` / `VITE_MAP_CENTER_LNG` | Initial map centre |
 | `VITE_MAP_ZOOM` | Initial map zoom level |
+| `VITE_MAP_PMTILES_URL` | Offline vector basemap: a per-deployment Protomaps `.pmtiles` file URL (served with HTTP range support, e.g. Supabase Storage). Blank → online-only raster OSM. See `docs/maplibre-migration.md` |
 
 **App icons & logo (white-label).** The icons shipped in `public/`
 (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-48.png`) are
