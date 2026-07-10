@@ -8,6 +8,13 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-07-10
+
+### Fixed
+- The admin **"Open in PostHog"** link now points at the correct PostHog project
+  (219590), not the previous incorrect project ID — so it lands on the dashboard
+  that actually holds the app's analytics.
+
 ## [1.4.0] — 2026-07-10
 
 ### Added
