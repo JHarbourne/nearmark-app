@@ -21,8 +21,8 @@ Two front-ends share one build:
 | `admin.html` | `/admin` | Content-management backoffice |
 
 **Stack:** Vue 3 (`<script setup>`) + Vite · Supabase (Postgres + Auth + Storage + Edge
-Functions) · Leaflet + OpenStreetMap tiles · hosted on Vercel · optional OpenRouteService
-and PostHog.
+Functions) · MapLibre GL + self-hosted Protomaps/PMTiles vector basemap (public map; the
+admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and PostHog.
 
 ---
 
@@ -144,8 +144,12 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories". The card is a
   bottom sheet, closed by the ✕, Esc, tapping the backdrop, or **pulling it down** (engages only
   from the top of the content, so it doesn't fight scrolling).
-- **Map.** Leaflet + OSM tiles; hue-coloured numbered pins (dark/white number chosen per
-  hue for contrast), "you are here" GPS marker, route polyline.
+- **Map.** MapLibre GL rendering a self-hosted **Protomaps vector basemap** — a
+  per-deployment `.pmtiles` file set via `VITE_MAP_PMTILES_URL` and read through the
+  `pmtiles://` protocol (HTTP range requests; offline-cacheable). If the var is unset it
+  falls back to raster OpenStreetMap (online-only), so a deployment renders either way.
+  Hue-coloured numbered pins (dark/white number chosen per hue for contrast), "you are
+  here" GPS marker, GeoJSON route line. See `docs/maplibre-migration.md`.
 - **Share.** A sheet with a brand-coloured **QR code** (primary, for in-person sharing),
   copy-link, and a native "Share…" button where supported. URL = `VITE_PUBLIC_URL`.
 - **Deep links.** `?story=<slug>` opens a story; `?tour=<slug>` opens a tour detail —
@@ -201,7 +205,10 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **OpenRouteService** (optional) — `compute-route` Edge Function calls the `foot-walking`
   directions API with a server-side `ORS_KEY` secret; result stored on the tour and drawn
   offline. See README → Optional features.
-- **OpenStreetMap** — base map tiles; map labels/POIs are OSM data (fix via osm.org).
+- **OpenStreetMap** — the public basemap is a self-hosted **Protomaps vector extract of OSM
+  data** (a `.pmtiles` file per deployment; label glyphs from Protomaps' asset CDN). The
+  admin map + geocoding still use OSM raster tiles / Nominatim. Map labels/POIs are OSM data
+  (fix via osm.org).
 - **PostHog** (optional) — privacy-light analytics; disabled when `VITE_POSTHOG_KEY` is
   blank.
 

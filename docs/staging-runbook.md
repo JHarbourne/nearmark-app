@@ -64,6 +64,8 @@ A4 reuses the Tollesbury project's Preview slot — quickest, but the URL change
 3. **Environment Variables** → add the `VITE_*` set pointing at the **staging Supabase** (A1), and copy the branding/map vars from Tollesbury so it looks real. Set `VITE_APP_NAME` to something like `Tollesbury (STAGING)` so nobody ever mistakes staging for the live app.
 4. **Domains** → add a stable alias such as `staging.nearmark.app` (add the DNS record Vercel shows you), or just use the free `nearmark-staging.vercel.app`.
 
+> ⚠️ **Env var gotcha:** don't bulk-paste a `vercel env pull` file into the staging project — `vercel env pull` returns **blank** values for any "Sensitive" variable, so you'd set everything to empty strings (empty Supabase creds → the app silently falls back to demo/seed data). Type the values you need by hand, keep `VITE_*` **non-sensitive** (they're public anyway), and remember env changes need a **redeploy**. Full write-up in `docs/maplibre-migration.md`.
+
 The `staging` branch already exists in the repo. The release flow becomes: work on a feature branch → **merge into `staging`** (auto-deploys to the staging URL) → verify there → **merge `staging` into `main`** (releases to production). Nothing reaches a live app without passing through the staging URL first.
 
 ---
