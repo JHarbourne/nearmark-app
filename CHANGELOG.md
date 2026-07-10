@@ -8,6 +8,26 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-07-10
+
+### Added
+- **Offline vector maps.** The public map moves from Leaflet + raster OpenStreetMap to
+  **MapLibre GL rendering a self-hosted Protomaps vector basemap** (a per-deployment
+  `.pmtiles` file via `VITE_MAP_PMTILES_URL`). The basemap file and font glyphs are cached,
+  and the app pre-fetches the basemap on load, so the **map works with no signal** in the
+  field — the point of the migration. This also takes the app off the OpenStreetMap tile
+  server (whose policy forbids the offline prefetch we needed). A deployment without a tile
+  file falls back to raster OSM (online-only). See `docs/maplibre-migration.md`.
+- **Admin Analytics screen** — embeds the PostHog dashboard, or links out.
+- **Per-story draft/published** status (an individual story can be hidden).
+- **Media library** — visible type filters and sort by date/name.
+
+### Fixed
+- The offline / "new version" notices no longer overlap the device status bar.
+- Admin dashboard fills the viewport; the activity log scrolls within its own panel.
+- Media "Used by" now accounts for stories; admin list tables stack on mobile.
+- Story card resets scroll to the top when opened.
+
 ## [1.3.0] — 2026-07-08
 
 ### Added
