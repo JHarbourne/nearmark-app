@@ -38,11 +38,15 @@ admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and
   `transformIndexHtml` plugin injects the themed `<title>` and favicon/apple-touch icon
   (`VITE_ICON_URL`) into **both** HTML entry points. Pushes to `main` auto-deploy on Vercel.
 - **Offline (PWA).** `vite-plugin-pwa` (Workbox, `autoUpdate`) precaches the app shell and
-  adds runtime caching: OSM tiles (CacheFirst), Supabase REST (NetworkFirst), Supabase
-  Storage media (CacheFirst) and Google Fonts. On top of that lazy caching, **opening a tour
-  pre-fetches every stop's images + audio** (`src/lib/precache.js`) so a guided walk is fully
-  cached before the walker loses signal — best-effort, and skipped when offline or under Data
-  Saver. The admin is excluded from the offline shell (online-only).
+  adds runtime caching: the **vector basemap** (`.pmtiles`, CacheFirst with `rangeRequests`),
+  Protomaps font glyphs (CacheFirst), Supabase REST (NetworkFirst), Supabase Storage media
+  (CacheFirst) and Google Fonts. On top of that lazy caching, on load the app **pre-fetches
+  the whole basemap file** and, on opening a tour, **every stop's images + audio**
+  (`src/lib/precache.js`) — so the map *and* a guided walk are fully cached before the walker
+  loses signal. Best-effort, and skipped when offline or under Data Saver. The map reads the
+  `.pmtiles` via HTTP range requests; `rangeRequests` serves those byte-ranges out of the one
+  cached full file, so the map renders with no network. The admin is excluded from the offline
+  shell (online-only).
 - **Canonical host.** A tiny inline guard in each HTML entry redirects `www.` → apex in
   normal browser tabs (installed PWAs excepted), backing up the server 308.
 

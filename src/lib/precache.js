@@ -10,6 +10,8 @@
 // user's data on files that won't be cached), skips when offline, and honours the
 // browser's Data Saver preference.
 
+import { config } from '../config.js'
+
 // The SW only runtime-caches Supabase Storage public objects; this marker is how
 // we tell those apart from external image URLs an editor may have pasted in.
 const STORAGE_MARKER = '/storage/v1/object/public/'
@@ -54,4 +56,24 @@ export function precacheTourMedia(tour, stops) {
     [tour.coverImageUrl, ...(stops || []).flatMap(mediaUrlsForStop)].filter(isCacheable),
   )]
   if (urls.length) fetchAll(urls)
+}
+
+// Warm the vector basemap for offline use. MapLibre reads the .pmtiles file with
+// HTTP range requests, which don't populate a cache on their own — so we fetch the
+// WHOLE file once with a plain GET. The SW's 'map-basemap' rule (rangeRequests:
+// true) stores that full response and slices byte-ranges out of it thereafter, so
+// the map renders with no network. Best-effort; skipped offline / under Data Saver.
+let basemapWarmed = false
+export function precacheBasemap() {
+  const url = config.mapPmtilesUrl
+  if (!url || basemapWarmed) return
+  if (typeof navigator !== 'undefined') {
+    if (navigator.onLine === false) return
+    if (navigator.connection?.saveData === true) return
+  }
+  basemapWarmed = true
+  // Plain (cors) GET, NOT no-cors: rangeRequests can only slice a readable 200
+  // response — an opaque no-cors body can't be sliced. Supabase Storage sends the
+  // CORS headers that make this a readable response.
+  fetch(url, { credentials: 'omit' }).catch(() => { /* offline/blocked — best-effort */ })
 }

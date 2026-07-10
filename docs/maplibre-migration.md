@@ -12,9 +12,13 @@ Leaflet.
   road-following GeoJSON route line, GPS marker, fit-to-bounds, zoom control and all
   overlay chrome work. Confirmed on the staging URL with real Tollesbury data + a
   Tollesbury tile extract (2.4 MB). Off the OSM tile server → policy issue resolved.
-- ⏳ **Offline caching — NOT done yet.** The map currently works **online only**. The
-  next stage is pre-caching the `.pmtiles` file + font glyphs in the service worker so
-  the map works in airplane mode / poor signal (the original reason for the migration).
+- ✅ **Offline caching — implemented (needs a device airplane-mode test).** On load the
+  app pre-fetches the whole `.pmtiles` file (`precacheBasemap()`); the SW's `map-basemap`
+  rule (CacheFirst + `rangeRequests`, `cacheableResponse: [200]` so partial 206s never
+  pollute the cache) slices byte-ranges out of that cached full file, so the map renders
+  offline. Font glyphs (`map-fonts`, `protomaps.github.io/basemaps-assets`) cache on first
+  use — **so view the map online once before going offline** to warm the labels. Still to
+  do: confirm on a real device in airplane mode; optionally pre-warm glyphs proactively.
 - 🎨 **Branding on staging** still shows the "London / Nearmark" demo defaults — cosmetic
   (see "Env var gotchas" below); does not affect the map.
 - 🚢 **Not shipped to production.** Lives on `feature/maplibre-offline-maps`, merged into

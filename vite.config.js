@@ -92,6 +92,32 @@ export default defineConfig(({ mode }) => {
           navigateFallbackDenylist: [/^\/admin/], // admin is online-only, not the public shell
           runtimeCaching: [
             {
+              // Offline vector basemap: the per-deployment .pmtiles file. MapLibre
+              // reads it via HTTP range requests, so lib/precache.js pre-fetches the
+              // WHOLE file (a plain GET) and rangeRequests slices byte-ranges out of
+              // that cached full response — the map then works with no network. Must
+              // come before the generic Supabase-storage rule so it wins the match.
+              urlPattern: /\.pmtiles(\?|$)/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'map-basemap',
+                rangeRequests: true,
+                expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [200] }, // must be a readable 200 to slice
+              },
+            },
+            {
+              // Protomaps basemap font glyphs + sprite — cached on first use, so map
+              // labels render offline once the map has been viewed online.
+              urlPattern: /^https:\/\/protomaps\.github\.io\/basemaps-assets\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'map-fonts',
+                expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
               // OpenStreetMap tiles — cache tiles the user has already panned over
               urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
               handler: 'CacheFirst',

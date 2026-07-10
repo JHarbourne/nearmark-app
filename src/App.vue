@@ -147,7 +147,7 @@ import SettingsSheet from './components/SettingsSheet.vue'
 import AppNotices from './components/AppNotices.vue'
 
 import { fetchLocations, fetchTours } from './lib/supabase.js'
-import { precacheTourMedia } from './lib/precache.js'
+import { precacheTourMedia, precacheBasemap } from './lib/precache.js'
 import { config } from './config.js'
 import { theme } from './theme.js'
 import { track } from './lib/analytics.js'
@@ -199,6 +199,8 @@ const mapZoom = ref(config.mapZoom)
 
 onMounted(async () => {
   geo.refreshPermission()
+  // Warm the vector basemap for offline use (fire-and-forget; see lib/precache.js).
+  precacheBasemap()
   try {
     const [locs, trs] = await Promise.all([fetchLocations(true), fetchTours(true)])
     locations.value = locs
