@@ -12,13 +12,13 @@ Leaflet.
   road-following GeoJSON route line, GPS marker, fit-to-bounds, zoom control and all
   overlay chrome work. Confirmed on the staging URL with real Tollesbury data + a
   Tollesbury tile extract (2.4 MB). Off the OSM tile server → policy issue resolved.
-- ✅ **Offline caching — implemented (needs a device airplane-mode test).** On load the
-  app pre-fetches the whole `.pmtiles` file (`precacheBasemap()`); the SW's `map-basemap`
-  rule (CacheFirst + `rangeRequests`, `cacheableResponse: [200]` so partial 206s never
-  pollute the cache) slices byte-ranges out of that cached full file, so the map renders
-  offline. Font glyphs (`map-fonts`, `protomaps.github.io/basemaps-assets`) cache on first
-  use — **so view the map online once before going offline** to warm the labels. Still to
-  do: confirm on a real device in airplane mode; optionally pre-warm glyphs proactively.
+- ✅ **Offline caching — done & verified on a device** (airplane mode: streets + labels
+  render). On load the app pre-fetches the whole `.pmtiles` file (`precacheBasemap()`); the
+  SW's `map-basemap` rule (CacheFirst + `rangeRequests`, `cacheableResponse: [200]` so
+  partial 206s never pollute the cache) slices byte-ranges out of that cached full file. Font
+  glyphs (`map-fonts`, `protomaps.github.io/basemaps-assets`) cache on first use — **so view
+  the map online once before going offline** to warm the labels. Optional later: pre-warm
+  glyphs proactively so a never-viewed area still labels offline.
 - 🎨 **Branding on staging** still shows the "London / Nearmark" demo defaults — cosmetic
   (see "Env var gotchas" below); does not affect the map.
 - 🚢 **Not shipped to production.** Lives on `feature/maplibre-offline-maps`, merged into
@@ -55,12 +55,14 @@ requests** are served (Supabase Storage `media` bucket works) and set the public
 
 ## Remaining work
 
-1. **Offline stage** — pre-cache the `.pmtiles` + Protomaps glyphs so the map works
-   offline; add a SW runtime-cache rule for the tile host + glyph CDN; verify on a device
-   in airplane mode. (Also lazy-load MapLibre — it added ~800 KB to the bundle.)
-2. **Ship** — merge `feature/maplibre-offline-maps` → `staging` → `main`. Before/at merge,
-   set `VITE_MAP_PMTILES_URL` on **each** production project (Tollesbury; LGBT after its
-   extract exists). Un-set = harmless raster-OSM fallback, so the merge is safe.
+1. **Ship** — merge `feature/maplibre-offline-maps` → `staging` → `main` (deploys to the live
+   apps). Before/at merge, set `VITE_MAP_PMTILES_URL` (non-sensitive!) on **each** production
+   project: **Tollesbury** now; **LGBT** once its London extract exists. Un-set = harmless
+   raster-OSM fallback, so the merge itself is safe even before LGBT has its file.
+2. **LGBT London extract** — same recipe as above, its own bbox, before LGBT's public launch
+   (else LGBT ships on the raster-OSM fallback, which reintroduces the OSM-policy concern).
+3. **Optional polish** — lazy-load MapLibre (it added ~800 KB to the bundle); pre-warm glyphs
+   for never-viewed areas; staging branding cleanup (cosmetic).
 
 ## Env var gotchas (hard-won — read before touching Vercel env vars)
 
