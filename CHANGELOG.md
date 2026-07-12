@@ -8,6 +8,15 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.2] — 2026-07-12
+
+### Fixed
+- **Reverse-proxy trailing-slash bug (v1.7.1 regression).** The `/ingest` Vercel rewrite used
+  `:path*`, which doesn't match a trailing slash — so posthog-js's capture endpoint (`/ingest/e/`)
+  hit a 404 and **events weren't ingested** (config/flags loaded fine, masking it). Switched the
+  rewrite to a regex catch-all (`:path(.*)`) that preserves the trailing slash, so captures proxy
+  correctly.
+
 ## [1.7.1] — 2026-07-12
 
 ### Fixed
