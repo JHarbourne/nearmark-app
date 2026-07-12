@@ -8,6 +8,17 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.1] — 2026-07-12
+
+### Fixed
+- **Analytics under-capture — reverse proxy.** PostHog events were sent straight to
+  `eu.i.posthog.com`, a heavily-blocked tracker domain, so ad/tracking blockers and Safari ITP
+  dropped a large share of real (especially mobile) visits. Events now go **first-party** through
+  the app's own domain — `/ingest`, a Vercel rewrite to PostHog EU — which dodges most blockers
+  (typically a big lift in captured volume). `api_host` is the current origin + `/ingest`;
+  `ui_host` still points at the cloud so the toolbar/links resolve. Do-Not-Track is still honoured
+  and client analytics still undercounts, so treat the numbers as a floor/trend.
+
 ## [1.7.0] — 2026-07-12
 
 ### Added

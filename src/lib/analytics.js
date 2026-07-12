@@ -10,7 +10,14 @@
 import { config } from '../config.js'
 
 const KEY = config.posthogKey
-const HOST = config.posthogHost
+// Send events FIRST-PARTY through the app's own domain (`/ingest`, a Vercel rewrite
+// to PostHog EU — see vercel.json) so tracker-blockers and Safari ITP don't drop
+// them; this is the single biggest lever on capture rate. Falls back to the direct
+// host if a deployment explicitly sets VITE_POSTHOG_HOST, or off-browser.
+const HOST =
+  typeof window !== 'undefined' && !import.meta.env.VITE_POSTHOG_HOST
+    ? `${window.location.origin}/ingest`
+    : config.posthogHost
 
 const dnt =
   typeof navigator !== 'undefined' &&
@@ -32,6 +39,7 @@ export async function initAnalytics() {
   posthog = mod.default
   posthog.init(KEY, {
     api_host: HOST,
+    ui_host: 'https://eu.posthog.com',           // events proxy through /ingest; toolbar/links still resolve to the cloud
     capture_pageview: true,
     capture_pageleave: true,
     autocapture: true,
