@@ -27,6 +27,9 @@ export default defineConfig(({ mode }) => {
   const description = pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your area’s streets.')
   // Canonical public URL, used for the social-card og:url when set.
   const publicUrl = pick(env.VITE_PUBLIC_URL, '')
+  // Google Search Console site-verification token (the "HTML tag" method). Inert
+  // meta tag, no cookies/tracking — just proves ownership. Blank = not emitted.
+  const gscVerification = pick(env.VITE_GSC_VERIFICATION, '')
 
   return {
     // Bake the package.json version in at build time so the footer can show it
@@ -65,6 +68,7 @@ export default defineConfig(({ mode }) => {
               .replace(/<meta name="theme-color" content="[^"]*"\s*\/>/, `<meta name="theme-color" content="${themeColor}" />`)
               .replace(/<meta name="description" content="[^"]*"\s*\/>/, `<meta name="description" content="${esc(description)}" />`)
             const tags = [
+              gscVerification ? `<meta name="google-site-verification" content="${esc(gscVerification)}" />` : '',
               `<meta property="og:type" content="website" />`,
               `<meta property="og:site_name" content="${esc(appName)}" />`,
               `<meta property="og:title" content="${esc(appName)}" />`,

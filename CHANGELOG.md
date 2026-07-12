@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.3] — 2026-07-12
+
+### Added
+- **Google Search Console verification** via `VITE_GSC_VERIFICATION` — injects the inert `<meta name="google-site-verification">` tag into the public page (no cookies, no tracking). Blank = not emitted.
+
 ## [1.7.2] — 2026-07-12
 
 ### Fixed
