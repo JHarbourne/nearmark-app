@@ -8,6 +8,23 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-07-12
+
+### Changed
+- **Single-story locations are edited on one screen again.** After the Stories layer landed,
+  even a location with just one story needed a second click and a second screen to reach its
+  content. Now a location with **0 or 1 story** shows that story's content **inline** in the
+  Location editor — place fields, story content and map on one screen, saved with a single
+  **Save** (like it was before Stories). A location only switches to the **list** view once it
+  has **two or more** stories; "**+ Add another story**" makes the jump. The single story's
+  heading tracks the place title, and the location's own Published/Draft governs its visibility,
+  so there's no separate per-story toggle in the inline case.
+
+### Internal
+- Extracted the story content form into a reusable **`StoryFields`** component, shared by the
+  standalone Story editor and the Location editor's inline single-story view (no behaviour change
+  to the multi-story flow).
+
 ## [1.4.1] — 2026-07-10
 
 ### Fixed
