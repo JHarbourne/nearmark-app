@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.4] — 2026-07-12
+
+### Fixed
+- **`VITE_GSC_VERIFICATION` now accepts a whole pasted `<meta>` tag,** not just the bare token — it extracts the `content` value either way, so a full copy-paste from Search Console verifies instead of producing a malformed nested tag.
+
 ## [1.7.3] — 2026-07-12
 
 ### Added

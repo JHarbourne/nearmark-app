@@ -29,7 +29,10 @@ export default defineConfig(({ mode }) => {
   const publicUrl = pick(env.VITE_PUBLIC_URL, '')
   // Google Search Console site-verification token (the "HTML tag" method). Inert
   // meta tag, no cookies/tracking — just proves ownership. Blank = not emitted.
-  const gscVerification = pick(env.VITE_GSC_VERIFICATION, '')
+  // Accept either the bare token OR a whole `<meta … content="TOKEN">` tag pasted
+  // straight from Search Console (common footgun) — pull the token out either way.
+  const gscRaw = pick(env.VITE_GSC_VERIFICATION, '')
+  const gscVerification = (gscRaw.match(/content=["']([^"']+)["']/i)?.[1] || gscRaw).trim()
 
   return {
     // Bake the package.json version in at build time so the footer can show it
