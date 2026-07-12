@@ -132,6 +132,11 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5 L10 17.5 L19.5 7" stroke="var(--bg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             {{ continueLabel }}
           </button>
+
+          <!-- unobtrusive "spotted an error?" mailto at the very foot of the card -->
+          <div v-if="feedbackHref" style="margin-top: 22px; text-align: center;">
+            <a :href="feedbackHref" :style="feedbackLink" @click="track('feedback_clicked', { location_id: loc.id, title: loc.title })">Suggest a correction or addition</a>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +150,7 @@ import { track } from '../lib/analytics.js'
 import { isFileVideo, youtubeEmbed } from '../lib/video.js'
 import { typo } from '../lib/typography.js'
 import { renderBody } from '../lib/richtext.js'
+import { config } from '../config.js'
 // No custom link label? Show the link's web address (host) rather than a generic
 // app-wide default, so it's always accurate (a church isn't an "artist's website").
 const urlLabel = computed(() => {
@@ -159,6 +165,20 @@ const props = defineProps({
   continueLabel: { type: String, default: 'Mark visited · next stop' },
 })
 const emit = defineEmits(['close', 'open-related', 'continue'])
+
+// ── "Suggest a correction" mailto (no form, no backend; works offline). Hidden
+// unless VITE_FEEDBACK_EMAIL is set. Subject: "<App> feedback – <Place> / <Story>"
+// (one title when the story heading is the same as the place, i.e. single-story).
+const feedbackEmail = config.feedbackEmail
+const feedbackHref = computed(() => {
+  if (!feedbackEmail) return ''
+  const storyTitle = (props.loc.title || '').trim()
+  const placeTitle = (props.loc.locationTitle || storyTitle).trim()
+  const titles = placeTitle && storyTitle && placeTitle !== storyTitle ? `${placeTitle} / ${storyTitle}` : (placeTitle || storyTitle)
+  const subject = `${config.appName} feedback – ${titles}`.trim()
+  const body = `Hi Jonathan,\n\nI have a correction or addition to the “${storyTitle || placeTitle}” card:\n\n`
+  return `mailto:${feedbackEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+})
 
 // ── pull-down-to-dismiss (touch). The X, Esc and backdrop still close too. Only
 // engages when the content is scrolled to the top and the drag is downward, so it
@@ -363,6 +383,11 @@ const furtherLink = {
   display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', marginBottom: '8px',
   borderRadius: '12px', background: 'var(--raised)', border: '1px solid var(--line)',
   textDecoration: 'none', color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500,
+}
+// deliberately small + low-contrast so it never competes with the card content
+const feedbackLink = {
+  display: 'inline-block', fontSize: '11px', lineHeight: 1.4, color: 'var(--ink-faint)',
+  textDecoration: 'underline', textUnderlineOffset: '2px', textDecorationColor: 'var(--line)',
 }
 const sliderFig = { position: 'relative', margin: '6px 0 20px', borderRadius: '16px', overflow: 'hidden' }
 const portraitFig = { margin: '22px 0 0' }

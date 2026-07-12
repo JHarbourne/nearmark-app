@@ -59,6 +59,10 @@ export const config = {
   contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' – blank hides the credit line
   contentSourceUrl: pick(env.VITE_CONTENT_SOURCE_URL, ''),     // optional link on the content-source label
   feedbackUrl: pick(env.VITE_FEEDBACK_URL, 'https://nearmark.co.uk/feedback'), // admin "Suggest an improvement" link; override or set '' to hide
+  // Public story-card "Suggest a correction" link → opens the device mail app
+  // (mailto:) to this address. Blank hides the link, so an unconfigured fork
+  // ships no contact address. Per deployment: e.g. jonathan@lgbthistoryuk.org.
+  feedbackEmail: pick(env.VITE_FEEDBACK_EMAIL, ''),
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
   // link for the "Powered by …" name. Defaults to nearmark.app for the default brand;
   // a white-label deploy (custom VITE_PLATFORM_NAME) stays plain text unless it sets a URL.
