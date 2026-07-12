@@ -287,7 +287,9 @@ const nextStopDistance = computed(() => {
 // Build the card view: the location's identity + the chosen story's content.
 // Story keys match what StoryCard reads, so { ...loc, ...story } renders directly.
 function cardFromStory(loc, story) {
-  return { ...loc, ...story, id: loc.id, recordId: loc.recordId, lat: loc.lat, lng: loc.lng, tourNum: loc.tourNum, stories: loc.stories }
+  // `story.title` (the heading) overwrites the location's title in the spread, so
+  // keep the place's own name too — the feedback link shows "Location / Story".
+  return { ...loc, ...story, id: loc.id, recordId: loc.recordId, lat: loc.lat, lng: loc.lng, tourNum: loc.tourNum, stories: loc.stories, locationTitle: loc.title }
 }
 const cardLoc = computed(() => {
   if (!openId.value) return null

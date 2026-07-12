@@ -8,6 +8,15 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-07-12
+
+### Added
+- **"Suggest a correction" link on every story card.** A small, low-contrast link at the very
+  foot of each story card (Discover *and* Guided Tour) opens the reader's mail app (a plain
+  `mailto:` — no form, no backend, works offline) pre-addressed to the deployment's contact, with
+  a subject of `<App> feedback – <Location> / <Story>` and a short pre-filled body. Set the
+  recipient per deployment via **`VITE_FEEDBACK_EMAIL`**; the link is hidden when it's unset.
+
 ## [1.5.1] — 2026-07-12
 
 ### Fixed
