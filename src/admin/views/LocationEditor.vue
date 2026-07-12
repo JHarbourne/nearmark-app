@@ -179,7 +179,7 @@ function blankStory() {
     heroImageUrl: '', historicImageUrl: '', sliderAfterUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', sliderAfterPosition: '50% 50%',
     imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true,
     historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', portraitCredit: '', portraitCreditUrl: '',
-    audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '', caption: '', links: '',
+    audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', videoCaption: '', thumbnailUrl: '', caption: '', links: '',
     hue: HUE_OPTIONS[0].value, relatedIds: [], notesInternal: '', status: 'published',
   }
 }

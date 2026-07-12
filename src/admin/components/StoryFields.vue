@@ -66,7 +66,7 @@
 
     <label for="st-summary">Text <span class="hint">~80–100 words</span></label>
     <textarea id="st-summary" v-model="form.summary" rows="9"></textarea>
-    <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph.</p>
+    <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph. For a line break <em>within</em> a paragraph (verse, quotes), end the line with a backslash <code>\</code> or type <code>&lt;br&gt;</code>.</p>
 
     <!-- before/after slider — appears in the story body, after the text -->
     <label style="display:flex; align-items:flex-start; gap:9px; margin:22px 0 8px; font-weight:500; cursor:pointer;">
@@ -202,24 +202,30 @@
       </span>
     </label>
     <div v-if="showMedia">
-      <label for="st-audio">Audio narration <span class="hint">mp3/m4a</span></label>
-      <div class="media-row">
-        <div class="media-input solo">
-          <input id="st-audio" type="url" v-model="form.audioUrl" placeholder="Paste a URL, or upload →" />
-          <div class="media-actions">
-            <label class="icon-btn" :class="{ busy: uploading.audio }" :title="uploading.audio ? 'Uploading…' : 'Upload an audio file from your device'">
-              <svg class="ic"><use href="#ic-upload" /></svg>
-              <input type="file" accept="audio/*" aria-label="Upload an audio narration file from your device" style="display:none" @change="up($event,'audioUrl','audio','audio')" />
-            </label>
+      <!-- audio narration URL + its duration, side by side -->
+      <div class="field-row" style="grid-template-columns: 1fr 110px; align-items: end;">
+        <div>
+          <label for="st-audio">Audio narration <span class="hint">mp3/m4a</span></label>
+          <div class="media-row">
+            <div class="media-input solo">
+              <input id="st-audio" type="url" v-model="form.audioUrl" placeholder="Paste a URL, or upload →" />
+              <div class="media-actions">
+                <label class="icon-btn" :class="{ busy: uploading.audio }" :title="uploading.audio ? 'Uploading…' : 'Upload an audio file from your device'">
+                  <svg class="ic"><use href="#ic-upload" /></svg>
+                  <input type="file" accept="audio/*" aria-label="Upload an audio narration file from your device" style="display:none" @change="up($event,'audioUrl','audio','audio')" />
+                </label>
+              </div>
+            </div>
+            <button v-if="canUndo('audioUrl')" type="button" class="btn btn-ghost btn-sm" @click="undoReplace('audioUrl')">↩ Undo</button>
           </div>
         </div>
-        <button v-if="canUndo('audioUrl')" type="button" class="btn btn-ghost btn-sm" @click="undoReplace('audioUrl')">↩ Undo</button>
-      </div>
-      <div class="field-row">
         <div>
-          <label for="st-audio-dur">Audio duration <span class="hint">secs</span></label>
+          <label for="st-audio-dur">Duration <span class="hint">secs</span></label>
           <input id="st-audio-dur" type="number" v-model.number="form.audioDuration" min="0" />
         </div>
+      </div>
+      <!-- video URL + its caption, side by side -->
+      <div class="field-row" style="align-items: start;">
         <div>
           <label for="st-video">Video URL <span class="hint">optional · mp4 or YouTube</span></label>
           <input id="st-video" type="url" v-model="form.videoUrl" placeholder="https://…" />
@@ -227,6 +233,10 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0; margin-top:1px;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             <span>Not a playable video – use a direct <strong>.mp4</strong> file or a <strong>YouTube</strong> link. Anything else is ignored in the app.</span>
           </p>
+        </div>
+        <div>
+          <label for="st-video-caption">Video caption <span class="hint">optional · shown under the video</span></label>
+          <input id="st-video-caption" type="text" v-model="form.videoCaption" placeholder="e.g. Archive footage, 1953" />
         </div>
       </div>
       <template v-if="form.audioUrl">
@@ -370,7 +380,7 @@ function onPickMedia(url) { if (picker.field) form[picker.field] = url }
 // isn't persisted. Called by the parent's save() before it writes the story.
 function normalize() {
   if (!showHistoric.value) { form.historicImageUrl = ''; form.sliderAfterUrl = '' }
-  if (!showMedia.value) { form.audioUrl = ''; form.videoUrl = '' }
+  if (!showMedia.value) { form.audioUrl = ''; form.videoUrl = ''; form.videoCaption = '' }
   if (!showPortrait.value) { form.portraitUrl = ''; form.portraitAlt = ''; form.portraitCaption = ''; form.portraitCredit = ''; form.portraitCreditUrl = '' }
 }
 

@@ -93,6 +93,7 @@
           <div v-if="ytEmbedUrl" :style="videoFrame">
             <iframe :src="ytEmbedUrl" :title="`${loc.title} – video`" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="position:absolute; inset:0; width:100%; height:100%; border:0;"></iframe>
           </div>
+          <p v-if="ytEmbedUrl && loc.videoCaption" :style="videoCap">{{ typo(loc.videoCaption) }}</p>
 
           <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
           <figure v-if="loc.portraitUrl" :style="portraitFig">
@@ -356,6 +357,7 @@ const creditSliderL = { ...creditBase, bottom: '34px', left: '12px', maxWidth: '
 const creditSliderR = { ...creditBase, bottom: '34px', right: '12px', maxWidth: '44%' } // slider: hero (today)
 const heroMedia = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }
 const videoFrame = { position: 'relative', aspectRatio: '16 / 9', width: '100%', margin: '20px 0 0', borderRadius: '14px', overflow: 'hidden', background: '#000' }
+const videoCap = { fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--ink-muted)', margin: '8px 2px 0', textAlign: 'center' }
 const scrim = { position: 'absolute', inset: 0, background: 'rgba(10,7,14,0.6)', border: 'none', cursor: 'pointer', backdropFilter: 'blur(2px)' }
 const sheet = {
   // minHeight keeps sparse stories from opening only part-way (looking half-open);

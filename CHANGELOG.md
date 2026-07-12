@@ -8,6 +8,20 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.0] — 2026-07-12
+
+### Added
+- **Line breaks within a story paragraph** (verse, quoted text). The story-body renderer now
+  supports a *soft* break: end a line with a backslash `\` or two trailing spaces, or type a
+  literal `<br>`, and the next line joins the same paragraph instead of starting a new one.
+  Existing content is unaffected — a plain new line still starts a new paragraph as before.
+- **Video caption** — a story with an embedded (YouTube) video can carry an optional caption,
+  shown under the player. New `video_caption` column (**migration 029** — run in each project).
+
+### Changed
+- **Story editor media fields** — the audio narration **Duration** now sits next to the audio
+  URL, and the new **Video caption** field sits next to the Video URL.
+
 ## [1.6.1] — 2026-07-12
 
 ### Fixed
