@@ -189,8 +189,8 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_BRAND_BARS` | Logo-mark bar colours, comma-separated hex (blank = neutral default) |
 | `VITE_LOGO_URL` | Optional in-app logo image URL; blank shows the wordmark + bar mark (never another org's logo) |
 | `VITE_ICON_URL` | Optional install icon (square ~512px PNG URL) → PWA manifest + favicon + apple-touch; blank = bundled neutral placeholder |
-| `VITE_APP_DESCRIPTION` | Meta description (search/share preview) |
-| `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex) |
+| `VITE_APP_DESCRIPTION` | Meta description – baked into the static `<meta>` + Open Graph/Twitter card, so link-preview scrapers (WhatsApp, iMessage…) show it |
+| `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex); also the static first-paint page background, so a light theme doesn't flash dark while the app boots |
 | `VITE_THEME` | Named palette in [`src/themes`](src/themes) (e.g. `tollesbury`); blank = default dark |
 | `VITE_PUBLIC_URL` | Canonical URL for the "Share this app" feature (blank = current site origin) |
 | `VITE_COVER_HEADLINE` | Big cover headline; `{city}` is replaced with the city name |
@@ -201,6 +201,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_DISCOVERY_SCAN_LABEL` | Discovery "scan" button label (default `Scan for nearby stories`; e.g. `…history`, `…places of interest`) |
 | `VITE_COMPLETION_MESSAGE` | Message on the "tour complete" screen |
 | `VITE_STORY_LINK_LABEL` | Label for a location's external link, e.g. `Visit the artist’s website` (the link hides when a location has no URL) |
+| `VITE_FEEDBACK_EMAIL` | Recipient for the story card's "Suggest a correction" `mailto:` link, e.g. `you@example.org` (blank hides the link) |
 | `VITE_CONTENT_SOURCE_LABEL` | Attribution credit, e.g. `example.org` (blank hides it) |
 | `VITE_PLATFORM_NAME` | "Powered by …" footer attribution (default `Nearmark`) |
 | `VITE_PLATFORM_URL` | Link for the platform name (blank = plain text) |

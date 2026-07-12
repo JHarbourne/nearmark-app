@@ -2,7 +2,7 @@
 
 A reference for what the platform does and how it's put together. For **setup and
 deployment** see the [README](../README.md); this document describes **behaviour, data and
-architecture**. It reflects the app as of migration 017.
+architecture**. It reflects the app as of migration 029 (v1.7.0).
 
 ---
 
@@ -35,8 +35,13 @@ admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and
   + `src/lib/tokens.js` resolve the palette/fonts from the theme named by `VITE_THEME`
   (`src/themes/`). Components never hardcode branding — they read CSS variables + config.
 - **Build/deploy.** Vite multi-page build (`index.html`, `admin.html`). A
-  `transformIndexHtml` plugin injects the themed `<title>` and favicon/apple-touch icon
-  (`VITE_ICON_URL`) into **both** HTML entry points. Pushes to `main` auto-deploy on Vercel.
+  `transformIndexHtml` plugin bakes per-deployment branding into the **static** HTML: the
+  themed `<title>` + favicon/apple-touch icon (`VITE_ICON_URL`) on both entries, and — on the
+  public entry — the meta **description** + **Open Graph/Twitter** card (`VITE_APP_DESCRIPTION`,
+  image `VITE_ICON_URL`, url `VITE_PUBLIC_URL`) and the static **theme-colour** + a matching
+  first-paint page background (`VITE_THEME_COLOR`). This is done at build time because
+  link-preview scrapers never run JS and the first paint happens before the app's CSS loads, so
+  both must be in the markup rather than set at runtime. Pushes to `main` auto-deploy on Vercel.
 - **Offline (PWA).** `vite-plugin-pwa` (Workbox, `autoUpdate`) precaches the app shell and
   adds runtime caching: the **vector basemap** (`.pmtiles`, CacheFirst with `rangeRequests`),
   Protomaps font glyphs (CacheFirst), Supabase REST (NetworkFirst), Supabase Storage media
@@ -72,7 +77,7 @@ subset); imagery (`hero_image_url` = lead photo; before/after pair `historic_ima
 `slider_after_url`, the latter falling back to the hero; `portrait_url`; focal `*_position`;
 alt text; slider labels; `caption`); credits (`hero_credit`, `historic_credit`, +
 `show_hero_credit` toggle); `wiki_url` + `link_label`; `audio_url`/`audio_duration_secs` +
-`transcript` (WCAG 1.2.1), `video_url`; `related_ids`; `hue` (accent); `notes_internal`;
+`transcript` (WCAG 1.2.1), `video_url` + `video_caption`; `related_ids`; `hue` (accent); `notes_internal`;
 `status` (draft/published — a story can be hidden independently; a story is public only
 when published *and* its parent location is publicly visible).
 A location with **one** story opens it directly; **two or more** show a picker list first
@@ -120,6 +125,7 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 026 | drop the moved content columns from `locations` (run after the app switch-over) |
 | 027 | location `address` (for geocoding) |
 | 028 | per-story `status` (draft/published) — hide an individual story |
+| 029 | per-story `video_caption` (caption shown under an embedded video) |
 
 ---
 
@@ -137,15 +143,21 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   story (the common case — identical to before). With **two or more**, a **story picker** list
   shows first (heading + thumbnail), then the chosen card opens.
 - **Story card.** Hero photo (with focal point), category/period tag, title, narrative (a safe
-  **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets — rendered with fixed paragraph
-  spacing; plain text is unaffected), an
+  **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets, plus **soft line breaks** within a
+  paragraph for verse/quotes: end a line with a backslash `\`, two trailing spaces, or a literal
+  `<br>`. Rendered with fixed paragraph spacing; a plain new line still starts a new paragraph, so
+  existing text is unaffected), an
   optional **before/after slider** (its own before + after photos, independent of the hero;
   after falls back to the hero if unset), second photo, optional **video** (a direct `.mp4`/`.webm` plays as
-  the muted looping hero; a **YouTube** link embeds as a player in the body — a non-playable
-  link is ignored so it can't blank the hero), audio narration (with a collapsible **"Show
-  transcript"** panel when a transcript exists — `[bracketed]` non-speech cues rendered
-  muted/italic), credits (respecting the show/hide toggles), an external link (label =
-  `link_label` or the app default `VITE_STORY_LINK_LABEL`), and "nearby stories". The card is a
+  the muted looping hero; a **YouTube** link embeds as a player in the body, with an optional
+  **caption** beneath it — a non-playable link is ignored so it can't blank the hero), audio
+  narration (with a collapsible **"Show transcript"** panel when a transcript exists —
+  `[bracketed]` non-speech cues rendered muted/italic), credits (respecting the show/hide
+  toggles), an external link (label = `link_label` or the app default `VITE_STORY_LINK_LABEL`),
+  "nearby stories", and a small, low-contrast **"Suggest a correction"** link at the foot that
+  opens the reader's mail app (a plain `mailto:` — no backend, works offline) pre-addressed to
+  `VITE_FEEDBACK_EMAIL` with the app name + location/story in the subject (hidden when that var is
+  unset). The card is a
   bottom sheet, closed by the ✕, Esc, tapping the backdrop, or **pulling it down** (engages only
   from the top of the content, so it doesn't fight scrolling).
 - **Map.** MapLibre GL rendering a self-hosted **Protomaps vector basemap** — a
@@ -175,17 +187,24 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **Locations list.** Grouped by tour, searchable/filterable; hero **thumbnail** column
   (ghost box when none) so missing photos are obvious; row actions Edit · Preview ·
   Duplicate · Delete.
-- **Location editor.** Place fields only — title, city, **address with one-click geocoding**
+- **Location editor.** Place fields — title, city, **address with one-click geocoding**
   ("Find on map" / Enter → OpenStreetMap Nominatim drops the pin and fills lat/lng),
   click-to-place map pin, trigger radius, visibility/consent, `guided_tour_only`,
-  draft/publish — plus a **Stories** section (list with up/down reorder, edit, delete,
-  "+ Add story").
-- **Story editor.** The content form for a single story, fields in roughly the card's
+  draft/publish. A location's content is edited **inline on the same screen** in the common
+  **single-story** case (place + story + map, saved with one **Save** — like it was before the
+  Stories split; the story's heading tracks the place title and the location's own draft/publish
+  governs visibility). A location with **two or more** stories instead shows a **Stories list**
+  (up/down reorder, edit, delete, "+ Add story"), each edited on its own screen; **"+ Add another
+  story"** promotes a single-story location into the list.
+- **Story editor.** The content form for one story, fields in roughly the card's
   top-to-bottom order (heading → period → significance → hero → text → before/after slider →
   second photo → audio/video → links → related); compact **upload** + **media-library picker**
-  icons, in-place replace, focal point, alt/caption/credits + credit toggle; audio with a
-  **transcript** field + missing-transcript accessibility warning; accent picker; live
-  story-card preview. Tour titles are capped at 21 characters so the hero title stays on one line.
+  icons, in-place replace, focal point, alt/caption/credits + credit toggle; audio with its
+  **duration** beside the URL and a **transcript** field + missing-transcript accessibility
+  warning; video with an optional **caption** beside the URL; accent picker; live story-card
+  preview. The form itself is a shared **`StoryFields`** component, reused both on this standalone
+  screen (2+ stories) and inline in the Location editor (0–1 stories). Tour titles are capped at
+  21 characters so the hero title stays on one line.
 - **Tours list & editor.** Drag-to-reorder tours; editor with cover image (same icon
   controls), drag/keyboard stop reordering, per-stop tour overrides, **Calculate walking
   route** button + numbered route preview, collapsible event window.
