@@ -98,7 +98,7 @@ const stat = { flex: 1, background: 'var(--raised)', borderRadius: '13px', paddi
 const statNum = { display: 'block', fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: '19px' }
 const statLbl = { fontSize: '11.5px', color: 'var(--ink-muted)' }
 const ctaWrap = {
-  position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 24px calc(30px + env(safe-area-inset-bottom))',
+  position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 24px max(30px, env(safe-area-inset-bottom))',
   background: 'linear-gradient(to top, var(--bg) 60%, transparent)', zIndex: 10,
 }
 const cta = {
