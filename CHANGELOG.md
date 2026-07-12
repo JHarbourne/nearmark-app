@@ -8,6 +8,21 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-07-12
+
+### Fixed
+- **Link-preview cards now match the deployment.** When the app is shared (WhatsApp, iMessage,
+  etc.) the preview description came from a hardcoded default ("…in your city's streets") because
+  scrapers read the static HTML and never run the JS that updated it. The build now bakes the
+  per-deployment **description** (`VITE_APP_DESCRIPTION`) into the static `<meta>` and adds proper
+  **Open Graph / Twitter** card tags (title, description, image, url). The generic default wording
+  is now "…in your **area's** streets".
+- **No more dark "black" flash on first load over a poor connection.** The static
+  `<meta name="theme-color">` was hardcoded dark and only corrected once the app's JS ran — so on
+  a light-themed deployment, the pre-app paint was black on a slow link. The build now bakes the
+  deployment's **theme colour** (`VITE_THEME_COLOR`) into the static meta and sets a matching
+  first-paint page background, so the boot screen is the app's own colour from the first frame.
+
 ## [1.5.0] — 2026-07-12
 
 ### Changed

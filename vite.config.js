@@ -20,6 +20,13 @@ export default defineConfig(({ mode }) => {
   // safe). Drives the PWA manifest + favicon + apple-touch icon. Blank = the
   // bundled neutral Nearmark placeholders, so no deployment ships another's logo.
   const iconUrl = pick(env.VITE_ICON_URL, '')
+  // Share-card / meta description. The manifest AND the static <meta> tags use
+  // this — link-preview scrapers (WhatsApp, iMessage, etc.) read the STATIC html
+  // and never run JS, so the runtime update in main.js can't reach them; it has
+  // to be baked in here.
+  const description = pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your area’s streets.')
+  // Canonical public URL, used for the social-card og:url when set.
+  const publicUrl = pick(env.VITE_PUBLIC_URL, '')
 
   return {
     // Bake the package.json version in at build time so the footer can show it
@@ -38,12 +45,40 @@ export default defineConfig(({ mode }) => {
       // and admin.html (backoffice), so no deployment ships another's branding.
       {
         name: 'nearmark-env-html',
-        transformIndexHtml(html) {
+        transformIndexHtml(html, ctx) {
           let out = html
             .split('<title>Nearmark</title>').join(`<title>${appName}</title>`)
             .split('<title>Admin · Nearmark</title>').join(`<title>Admin · ${appName}</title>`)
           if (iconUrl) {
             out = out.split('/favicon-48.png').join(iconUrl).split('/apple-touch-icon.png').join(iconUrl)
+          }
+          // Public app only: bake the per-deployment social-card + first-paint
+          // branding into the STATIC html. Link-preview scrapers don't run JS (so
+          // main.js can't reach them), and the very first paint happens before the
+          // app's CSS loads — on a light theme over a slow connection that first
+          // paint was the hardcoded dark theme-colour, i.e. a black flash.
+          const path = ctx?.path || ctx?.filename || ''
+          const isPublic = /(^|\/)index\.html$/.test(path) || path === ''
+          if (isPublic) {
+            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            out = out
+              .replace(/<meta name="theme-color" content="[^"]*"\s*\/>/, `<meta name="theme-color" content="${themeColor}" />`)
+              .replace(/<meta name="description" content="[^"]*"\s*\/>/, `<meta name="description" content="${esc(description)}" />`)
+            const tags = [
+              `<meta property="og:type" content="website" />`,
+              `<meta property="og:site_name" content="${esc(appName)}" />`,
+              `<meta property="og:title" content="${esc(appName)}" />`,
+              `<meta property="og:description" content="${esc(description)}" />`,
+              publicUrl ? `<meta property="og:url" content="${esc(publicUrl)}" />` : '',
+              iconUrl ? `<meta property="og:image" content="${esc(iconUrl)}" />` : '',
+              `<meta name="twitter:card" content="summary" />`,
+              `<meta name="twitter:title" content="${esc(appName)}" />`,
+              `<meta name="twitter:description" content="${esc(description)}" />`,
+              iconUrl ? `<meta name="twitter:image" content="${esc(iconUrl)}" />` : '',
+              // match the first pre-JS paint to the theme so the boot isn't a dark flash
+              `<style>html,body{background:${themeColor};}</style>`,
+            ].filter(Boolean).join('\n  ')
+            out = out.replace('</head>', `  ${tags}\n</head>`)
           }
           return out
         },
@@ -67,7 +102,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: appName,
           short_name: pick(env.VITE_APP_SHORT_NAME, appName),
-          description: pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your city’s streets.'),
+          description,
           start_url: '/',
           scope: '/',
           display: 'standalone',
