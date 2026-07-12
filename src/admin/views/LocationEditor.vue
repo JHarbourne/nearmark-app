@@ -70,27 +70,41 @@
         <input id="loc-radius" type="number" v-model.number="form.triggerRadius" min="20" max="300" />
       </div>
 
-      <!-- Stories (content) -->
+      <!-- Content. Most locations have a single story, edited inline here so the
+           whole place is one screen (like it was before Stories). A location with
+           2+ stories switches to a list, each edited on its own screen. -->
       <div class="card" style="padding:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-          <h3 style="margin:0; font-size:15px; min-width:0;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
-          <button v-if="canAddStory" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addStory">+ Add story</button>
-        </div>
-        <p v-if="isNew" class="hint" style="margin:12px 0 0;">Save the location first, then add its stories here.</p>
-        <p v-else-if="!stories.length" class="hint" style="margin:12px 0 0;">No stories yet — add one so this location has content.</p>
-        <ul v-else style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
-          <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
-          <li v-for="(s, i) in stories" :key="s.storyId" class="story-row" @click="editStory(s)" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer;">
-            <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97', opacity: s.status === 'draft' ? 0.4 : 1 }"></span>
-            <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}<span v-if="s.status === 'draft'" class="badge draft" style="margin-left:8px; font-weight:600;">Hidden</span></span>
-            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" aria-label="Move up">▲</button>
-            <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click.stop="move(i, 1)" aria-label="Move down">▼</button>
-            <button type="button" class="btn btn-ghost btn-sm" @click.stop="editStory(s)">Edit</button>
-            <button type="button" class="btn btn-danger btn-sm" @click.stop="removeStory(s)" aria-label="Delete story" title="Delete">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
-            </button>
-          </li>
-        </ul>
+        <!-- 2+ stories: the list -->
+        <template v-if="multiStory">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <h3 style="margin:0; font-size:15px; min-width:0;">Stories <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
+            <button class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addStory">+ Add story</button>
+          </div>
+          <ul style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
+            <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
+            <li v-for="(s, i) in stories" :key="s.storyId" class="story-row" @click="editStory(s)" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer;">
+              <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97', opacity: s.status === 'draft' ? 0.4 : 1 }"></span>
+              <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}<span v-if="s.status === 'draft'" class="badge draft" style="margin-left:8px; font-weight:600;">Hidden</span></span>
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" aria-label="Move up">▲</button>
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click.stop="move(i, 1)" aria-label="Move down">▼</button>
+              <button type="button" class="btn btn-ghost btn-sm" @click.stop="editStory(s)">Edit</button>
+              <button type="button" class="btn btn-danger btn-sm" @click.stop="removeStory(s)" aria-label="Delete story" title="Delete">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
+              </button>
+            </li>
+          </ul>
+        </template>
+
+        <!-- 0–1 story: edit it inline. The heading tracks the place title, and the
+             location's own Published/Draft governs visibility, so there's no
+             separate story toggle here. -->
+        <template v-else>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px;">
+            <h3 style="margin:0; font-size:15px; min-width:0;">Story <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
+            <button v-if="storyForm.storyId" type="button" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addAnotherStory">+ Add another story</button>
+          </div>
+          <StoryFields ref="fields" :key="storyKey" :story="storyForm" :show-heading="false" />
+        </template>
       </div>
 
       <!-- save -->
@@ -131,6 +145,7 @@ import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
+import StoryFields from '../components/StoryFields.vue'
 
 const cities = config.cities
 const mapCenter = config.mapCenter
@@ -152,16 +167,53 @@ if (form.guidedTourOnly === undefined) form.guidedTourOnly = false
 // live location record from the store (so the Stories list reflects saves/reorders)
 const liveLoc = computed(() => store.locations.find((l) => l.recordId === form.recordId) || null)
 const stories = computed(() => liveLoc.value?.stories || [])
-const canAddStory = computed(() => !isNew && !!form.recordId)
-// map pin colour: the primary story's hue, else a neutral default
-const hue = computed(() => stories.value[0]?.hue || HUE_OPTIONS[0].value)
+// 2+ stories → show the list (each edited on its own screen); 0–1 → edit inline.
+const multiStory = computed(() => stories.value.length >= 2)
+
+// ── inline single story (Tour → Location → Story) ──
+// A blank story mirrors the standalone editor's defaults.
+function blankStory() {
+  return {
+    storyId: undefined, locationId: form.recordId, sortOrder: 1,
+    heading: '', period: '', significance: '', summary: '', wikiUrl: config.wikiBaseUrl, linkLabel: '',
+    heroImageUrl: '', historicImageUrl: '', sliderAfterUrl: '', heroPosition: '50% 50%', historicPosition: '50% 50%', sliderAfterPosition: '50% 50%',
+    imageAlt: '', historicAlt: '', imageLabel: '', historicLabel: '', photoCredit: '', photoCreditUrl: '', showPhotoCredit: true,
+    historicCredit: '', historicCreditUrl: '', portraitUrl: '', portraitAlt: '', portraitCaption: '', portraitCredit: '', portraitCreditUrl: '',
+    audioUrl: '', audioDuration: 0, transcript: '', videoUrl: '', thumbnailUrl: '', caption: '', links: '',
+    hue: HUE_OPTIONS[0].value, relatedIds: [], notesInternal: '', status: 'published',
+  }
+}
+// the single story shown inline, seeded from the existing first story (a copy so
+// edits are only committed on Save) or a fresh blank.
+const firstStory = existing?.stories?.[0] || null
+const storyForm = reactive(firstStory ? JSON.parse(JSON.stringify(firstStory)) : blankStory())
+if (storyForm.showPhotoCredit === undefined) storyForm.showPhotoCredit = true
+const fields = ref(null)               // <StoryFields> instance (inline mode only)
+const storyKey = ref(0)                // bump to remount StoryFields on a fresh seed
+const storyBaseline = ref(JSON.stringify(storyForm))
+// re-seed the inline story from the store's current first story (used when a
+// delete drops a multi-story location back to one).
+function seedStoryForm() {
+  const src = stories.value[0]
+  const fresh = src ? JSON.parse(JSON.stringify(src)) : blankStory()
+  fresh.locationId = form.recordId
+  Object.keys(storyForm).forEach((k) => { delete storyForm[k] })
+  Object.assign(storyForm, fresh)
+  if (storyForm.showPhotoCredit === undefined) storyForm.showPhotoCredit = true
+  storyBaseline.value = JSON.stringify(storyForm)
+  storyKey.value++
+}
+
+// map pin colour: the inline story's hue while editing it, else the primary
+// story's hue, else a neutral default.
+const hue = computed(() => (multiStory.value ? stories.value[0]?.hue : storyForm.hue) || HUE_OPTIONS[0].value)
 
 const showVisHelp = ref(false)
 const showTourHelp = ref(false)
 
 // ── unsaved-changes guard ──
 const baseline = ref(JSON.stringify(form))
-const isDirty = () => JSON.stringify(form) !== baseline.value
+const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && JSON.stringify(storyForm) !== storyBaseline.value)
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
 onMounted(() => { store.registerDirtyCheck(isDirty); window.addEventListener('beforeunload', onBeforeUnload) })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
@@ -239,20 +291,52 @@ async function save() {
       const saved = store.locations.find((l) => l.id === form.id)
       if (saved) form.recordId = saved.recordId
     }
+    // Inline single-story mode: save its story alongside the place. We only
+    // create a story if there's actually content (so saving a bare place doesn't
+    // leave an empty story); an existing story is always re-saved.
+    if (!multiStory.value && form.recordId) await saveInlineStory()
     baseline.value = JSON.stringify(form)
     flash.value = form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)
   } catch (e) { alert('Save failed: ' + e.message) } finally { saving.value = false }
 }
+
+// Persist the inline story. Heading tracks the place title, and visibility is
+// governed by the location's own Published/Draft (no separate story toggle here).
+async function saveInlineStory() {
+  const s = storyForm
+  const hasContent = !!(String(s.summary || '').trim() || s.heroImageUrl || s.audioUrl || s.videoUrl || s.historicImageUrl || s.portraitUrl)
+  if (!s.storyId && !hasContent) { storyBaseline.value = JSON.stringify(s); return } // nothing worth saving yet
+  fields.value?.normalize()
+  s.locationId = form.recordId
+  s.heading = form.title
+  if (!s.status) s.status = 'published'
+  if (!s.sortOrder) s.sortOrder = 1
+  const saved = await store.saveStory({ ...s })
+  if (!s.storyId && saved?.id) s.storyId = saved.id
+  const inUse = new Set(fields.value?.inUseUrls() || [])
+  for (const url of fields.value?.sessionUploads || []) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
+  storyBaseline.value = JSON.stringify(s)
+}
 function back() { store.go('locations') }
 
 // ── stories ──
 function addStory() { store.go('story', { locationId: form.recordId }) }
 function editStory(s) { store.go('story', { locationId: form.recordId, storyId: s.storyId }) }
+// From the inline single-story view: save the place + this story, then open a
+// fresh second story (which flips this location into multi-story list mode).
+async function addAnotherStory() {
+  await save()
+  if (form.recordId && storyForm.storyId) store.go('story', { locationId: form.recordId })
+}
 async function removeStory(s) {
   if (!window.confirm(`Delete the story “${s.heading || 'untitled'}”? This can’t be undone.`)) return
-  try { await store.deleteStory(s) } catch (e) { alert('Delete failed: ' + e.message) }
+  try {
+    await store.deleteStory(s)
+    // if we've dropped back to a single story, re-seed the inline editor from it
+    if (stories.value.length <= 1) seedStoryForm()
+  } catch (e) { alert('Delete failed: ' + e.message) }
 }
 async function move(i, dir) {
   const list = [...stories.value]
