@@ -45,7 +45,7 @@ const orgName = theme.orgName
 const logoUrl = theme.logoUrl
 const title = config.splashTitle
 const body = config.splashBody
-const wrap = { position: 'absolute', inset: 0, padding: '64px 26px calc(30px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column' }
+const wrap = { position: 'absolute', inset: 0, padding: '64px 26px max(30px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column' }
 const cta = {
   width: '100%', height: '56px', border: 'none', borderRadius: '16px', cursor: 'pointer',
   fontFamily: "var(--font-button)", fontWeight: 700, fontSize: '17px', color: 'var(--bg)',

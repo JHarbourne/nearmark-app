@@ -30,7 +30,7 @@ defineProps({
 defineEmits(['keep', 'home'])
 const message = config.completionMessage
 const wrap = {
-  position: 'absolute', inset: 0, padding: '70px 30px calc(40px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column',
+  position: 'absolute', inset: 0, padding: '70px 30px max(40px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column',
   alignItems: 'center', textAlign: 'center',
   background: 'radial-gradient(120% 70% at 50% 0%, var(--raised) 0%, var(--bg) 60%)',
 }

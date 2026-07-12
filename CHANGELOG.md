@@ -8,6 +8,16 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.6.1] — 2026-07-12
+
+### Fixed
+- **Too much empty space at the bottom on iPhone.** Bottom-pinned chrome (the map's tab bar, the
+  "Start tour" footer, and the cover/splash/completion screens) padded the bottom with
+  `calc(Npx + env(safe-area-inset-bottom))` — which *stacks* extra room on top of the phone's
+  home-indicator inset, so on iOS (which already reserves ~34px) it double-padded. Switched to
+  `max(Npx, env(safe-area-inset-bottom))`: non-inset devices (Android/desktop) keep the exact same
+  `Npx`, while iPhones use just the safe-area, removing 18–30px of dead space per screen.
+
 ## [1.6.0] — 2026-07-12
 
 ### Added
