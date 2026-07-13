@@ -2,7 +2,7 @@
 
 A reference for what the platform does and how it's put together. For **setup and
 deployment** see the [README](../README.md); this document describes **behaviour, data and
-architecture**. It reflects the app as of migration 029 (v1.7.0).
+architecture**. It reflects the app as of migration 029 (v1.8.0).
 
 ---
 
@@ -42,6 +42,12 @@ admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and
   first-paint page background (`VITE_THEME_COLOR`). This is done at build time because
   link-preview scrapers never run JS and the first paint happens before the app's CSS loads, so
   both must be in the markup rather than set at runtime. Pushes to `main` auto-deploy on Vercel.
+- **Serverless functions & rewrites** (`api/`, Vercel; mapped by `vercel.json`). Beyond the
+  static SPA, a few Node functions serve: the **crawlable SEO pages** + `sitemap.xml`/`robots.txt`
+  (see §4); the **analytics reverse proxy** (`/ingest/*` → PostHog EU, so events are first-party
+  and dodge tracker-blockers). Each reads *that* deployment's own Supabase, so the routes are
+  per-tenant. (`google-site-verification` for Search Console is likewise baked into the static
+  HTML from `VITE_GSC_VERIFICATION` — an inert meta tag, no cookies.)
 - **Offline (PWA).** `vite-plugin-pwa` (Workbox, `autoUpdate`) precaches the app shell and
   adds runtime caching: the **vector basemap** (`.pmtiles`, CacheFirst with `rangeRequests`),
   Protomaps font glyphs (CacheFirst), Supabase REST (NetworkFirst), Supabase Storage media
@@ -171,6 +177,16 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **Deep links.** `?story=<slug>` opens a story; `?tour=<slug>` opens a tour detail —
   shareable, and used by the admin Preview buttons. Drafts resolve when an admin is signed
   in in the same browser (shared session).
+- **SEO / crawlable pages.** The app itself is client-rendered, so search engines see almost
+  nothing. Vercel serverless functions (`api/place.js`, `api/tour.js`) render real, indexable
+  HTML per stop (`/place/<slug>`) and tour (`/tour/<slug>`) — `<title>`, meta description,
+  canonical, Open Graph, **JSON-LD** (`TouristAttraction` / `TouristTrip`), the story text +
+  hero image, and an **"Open in the app"** button that deep-links back into the SPA. A live
+  **`/sitemap.xml`** (`api/sitemap.js` — generated from Supabase, published stops + tours only,
+  so it self-updates as content is added) and **`/robots.txt`** complete it. All read the
+  deployment's own published content (via RLS) and are branded per-app from the same env, so
+  every white-label deployment gets its own SEO pages automatically, always fresh — no rebuild.
+  Canonical/OG URLs use the request host, so they follow whatever domain serves the app.
 - **Offline.** Installable to the home screen; previously-viewed content, tiles and media
   are served from cache. Opening a tour pre-caches all its stops' images and audio up front,
   so the full route works offline even for stops not yet reached.
@@ -186,7 +202,8 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   quick links.
 - **Locations list.** Grouped by tour, searchable/filterable; hero **thumbnail** column
   (ghost box when none) so missing photos are obvious; row actions Edit · Preview ·
-  Duplicate · Delete.
+  **Duplicate** (clones the place *and* its stories as a numbered draft — "(copy)", "(copy 2)"…
+  — staying on the list) · Delete.
 - **Location editor.** Place fields — title, city, **address with one-click geocoding**
   ("Find on map" / Enter → OpenStreetMap Nominatim drops the pin and fills lat/lng),
   click-to-place map pin, trigger radius, visibility/consent, `guided_tour_only`,
@@ -232,8 +249,16 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   data** (a `.pmtiles` file per deployment; label glyphs from Protomaps' asset CDN). The
   admin map + geocoding still use OSM raster tiles / Nominatim. Map labels/POIs are OSM data
   (fix via osm.org).
-- **PostHog** (optional) — privacy-light analytics; disabled when `VITE_POSTHOG_KEY` is
-  blank.
+- **PostHog** (optional) — privacy-light product analytics (`localStorage` id, no third-party
+  cookies; Do-Not-Track honoured; a Settings opt-out toggle). Events go **first-party through a
+  `/ingest` reverse proxy** (a `vercel.json` rewrite → PostHog EU), so tracker-blockers / Safari
+  ITP don't drop them. The public write-only key is baked in, gated to the platform's own hosts;
+  disabled when unset. The marketing site (`nearmark-website`) mirrors the proxy but stays fully
+  cookieless (`persistence: 'memory'`) — which means its numbers show via raw event insights, not
+  PostHog's session-based *Web Analytics* tab.
+- **Google Search Console** — domain verification via `VITE_GSC_VERIFICATION` (an inert
+  `<meta name="google-site-verification">` baked into the public HTML — no cookies/tracking).
+  Accepts either the bare token or a whole pasted verification tag; blank = not emitted.
 
 ---
 

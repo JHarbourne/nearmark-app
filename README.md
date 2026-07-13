@@ -24,6 +24,10 @@ content themselves – no code, no spreadsheets.
   screen-reader-accessible (WCAG 2.1 AA).
 - **A backend on Supabase** – Postgres database, email/password admin auth, and file
   storage, all protected by row-level security.
+- **Search-engine-friendly out of the box** – because the app itself is client-rendered,
+  each deployment also serves crawlable, server-rendered pages per stop (`/place/<slug>`) and
+  tour (`/tour/<slug>`) with Open Graph + JSON-LD, plus a live `/sitemap.xml` and `/robots.txt`.
+  Verify the domain in Google Search Console (set `VITE_GSC_VERIFICATION`) and submit the sitemap.
 
 Built with **Vue 3 + Vite**. Hosted free on **Vercel**. One codebase serves two pages:
 the public app (`index.html`) and the admin (`admin.html`, served at `/admin`).
@@ -193,6 +197,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex); also the static first-paint page background, so a light theme doesn't flash dark while the app boots |
 | `VITE_THEME` | Named palette in [`src/themes`](src/themes) (e.g. `tollesbury`); blank = default dark |
 | `VITE_PUBLIC_URL` | Canonical URL for the "Share this app" feature (blank = current site origin) |
+| `VITE_GSC_VERIFICATION` | Google Search Console verification token (or the whole pasted `<meta>` tag) → an inert `<meta name="google-site-verification">` on the public page; no cookies. Blank = not emitted |
 | `VITE_COVER_HEADLINE` | Big cover headline; `{city}` is replaced with the city name |
 | `VITE_COVER_INTRO` | Cover intro line; supports `{city}` |
 | `VITE_SPLASH_TITLE` | Title on the first (location-permission) screen |
