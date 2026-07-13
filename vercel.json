@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/robots.txt", "destination": "/api/robots" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/place/:slug", "destination": "/api/place?slug=:slug" },
+    { "source": "/tour/:slug", "destination": "/api/tour?slug=:slug" },
     { "source": "/ingest/static/:path(.*)", "destination": "https://eu-assets.i.posthog.com/static/:path" },
     { "source": "/ingest/:path(.*)", "destination": "https://eu.i.posthog.com/:path" }
   ]

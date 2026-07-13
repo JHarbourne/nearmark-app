@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.8.0] — 2026-07-12
+
+### Added
+- **Crawlable SEO pages + sitemap.** Content lived only inside the JS app, so search engines saw nothing. New Vercel serverless routes render real, indexable HTML per stop and tour: `/place/<slug>` and `/tour/<slug>` (title, meta description, canonical, Open Graph, JSON-LD `TouristAttraction`/`TouristTrip`, the story text + hero image, and an "Open in the app" deep link), plus a live-generated `/sitemap.xml` and `/robots.txt`. Reads each deployment's own Supabase (published-only via RLS) and is branded per-app, so every white-label deployment gets its own SEO pages automatically. Always fresh — no rebuild when content changes.
+
 ## [1.7.6] — 2026-07-12
 
 ### Changed
