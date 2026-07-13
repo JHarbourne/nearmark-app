@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.8.1] — 2026-07-12
+
+### Changed
+- **Clearer "unsaved changes" prompt.** Leaving a location/tour/story editor with unsaved edits showed a native "Cancel / OK" confirm, where the buttons didn't say what they do. It's now a proper dialog with **Save** (saves, then continues — and stays put if a required field is missing), **Don't save** (discards), and **Cancel** (stay). Esc or click-outside cancels.
+
 ## [1.8.0] — 2026-07-12
 
 ### Added

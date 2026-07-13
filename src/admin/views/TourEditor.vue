@@ -186,7 +186,7 @@ if (form.routeGeometry === undefined) form.routeGeometry = null // tours predati
 const baseline = ref(JSON.stringify(form))
 const isDirty = () => JSON.stringify(form) !== baseline.value
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
-onMounted(() => { store.registerDirtyCheck(isDirty); window.addEventListener('beforeunload', onBeforeUnload) })
+onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload) })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
 if (!form.coverPosition) form.coverPosition = '50% 50%'
 if (!form.stopOverrides) form.stopOverrides = {} // older tours predate this column

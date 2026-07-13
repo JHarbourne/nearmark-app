@@ -44,14 +44,35 @@
       </div>
       <component :is="view" />
     </main>
+
+    <!-- unsaved-changes guard: a clear Save / Don't save / Cancel choice (replaces the
+         ambiguous native "Cancel / OK" confirm). Save actually saves, then continues. -->
+    <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- modal backdrop: Esc + click-outside are keyboard/pointer shortcuts; the Cancel button is the accessible path -->
+    <div v-if="store.pendingNav" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"
+      style="position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(20,16,28,0.45);"
+      @keydown.esc="store.navCancel()" @click.self="store.navCancel()">
+      <div style="background:var(--card,#fff); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:22px 22px 18px; max-width:430px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+        <h2 id="unsaved-title" style="margin:0 0 6px; font-size:18px;">Unsaved changes</h2>
+        <p class="muted" style="margin:0 0 20px; font-size:14px; line-height:1.5;">You've made changes on this page. Save them before leaving?</p>
+        <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" @click="store.navCancel()">Cancel</button>
+          <button class="btn btn-danger" @click="store.navDiscard()">Don't save</button>
+          <button ref="saveBtn" class="btn btn-primary" @click="store.navSave()">Save</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { store } from './store.js'
 import { config } from '../config.js'
 const feedbackUrl = config.feedbackUrl
+
+// focus the Save button when the unsaved-changes dialog opens (Enter = Save, Esc = Cancel)
+const saveBtn = ref(null)
+watch(() => store.pendingNav, (v) => { if (v) nextTick(() => saveBtn.value?.focus()) })
 import Login from './views/Login.vue'
 import SetPassword from './views/SetPassword.vue'
 import Dashboard from './views/Dashboard.vue'

@@ -215,7 +215,7 @@ const showTourHelp = ref(false)
 const baseline = ref(JSON.stringify(form))
 const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && JSON.stringify(storyForm) !== storyBaseline.value)
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
-onMounted(() => { store.registerDirtyCheck(isDirty); window.addEventListener('beforeunload', onBeforeUnload) })
+onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload) })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
 
 // ── privacy / publication helpers ──

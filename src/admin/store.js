@@ -19,6 +19,8 @@ export const store = reactive({
   route: 'dashboard',
   params: {},
   dirtyCheck: null, // editors register a () => boolean here; go() confirms before leaving
+  dirtySave: null,  // editors also register their async save() so the guard can offer "Save"
+  pendingNav: null, // { route, params } of a navigation awaiting the unsaved-changes choice
 
   locations: [],
   tours: [],
@@ -149,16 +151,44 @@ export const store = reactive({
   },
 
   // ── routing (with an unsaved-changes guard) ──
+  // When the current editor is dirty, don't navigate immediately: open the
+  // Save / Don't save / Cancel dialog (rendered by AdminApp) and stash where we
+  // were headed. The dialog's buttons resolve via navSave/navDiscard/navCancel.
   go(route, params = {}) {
     if (this.dirtyCheck && this.dirtyCheck()) {
-      if (typeof window !== 'undefined' && !window.confirm('You have unsaved changes on this page. Leave without saving?')) return
-      this.dirtyCheck = null
+      this.pendingNav = { route, params }
+      return
     }
+    this._navigate(route, params)
+  },
+  _navigate(route, params) {
+    this.dirtyCheck = null
+    this.dirtySave = null
     this.route = route
     this.params = params
   },
-  registerDirtyCheck(fn) { this.dirtyCheck = fn },
-  clearDirtyCheck() { this.dirtyCheck = null },
+  registerDirtyCheck(fn, save = null) { this.dirtyCheck = fn; this.dirtySave = save },
+  clearDirtyCheck() { this.dirtyCheck = null; this.dirtySave = null },
+
+  // ── unsaved-changes dialog actions ──
+  async navSave() {
+    const nav = this.pendingNav
+    if (!nav) return
+    if (this.dirtySave) {
+      try { await this.dirtySave() } catch (e) { this.pendingNav = null; alert('Save failed: ' + (e?.message || e)); return }
+    }
+    // If the save didn't clear the dirty state (e.g. it hit a validation alert),
+    // stay on the page so it can be fixed rather than silently leaving.
+    if (this.dirtyCheck && this.dirtyCheck()) { this.pendingNav = null; return }
+    this.pendingNav = null
+    this._navigate(nav.route, nav.params)
+  },
+  navDiscard() {
+    const nav = this.pendingNav
+    this.pendingNav = null
+    if (nav) this._navigate(nav.route, nav.params)
+  },
+  navCancel() { this.pendingNav = null },
 
   // ── data ──
   async load() {
