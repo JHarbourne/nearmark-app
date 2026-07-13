@@ -5,9 +5,11 @@ node_modules/
 .env
 .env.local
 *.env
-.env.*          # .env.staging, .env.clean, etc. (Vercel pulls hold live tokens)
-!.env.example   # keep the checked-in template
-!.env.test      # keep the checked-in test config
+# .env.staging, .env.clean, etc. — Vercel pulls hold live tokens
+.env.*
+# keep the checked-in templates
+!.env.example
+!.env.test
 
 # Build output
 dist/
