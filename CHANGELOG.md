@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.8.2] — 2026-07-13
+
+### Changed
+- **Tour editor: the route map stays in view.** When reordering a long list of stops, the map scrolled away, so you had to keep scrolling up to match a stop to its numbered pin. The map now sticks in the right-hand column as you scroll the stops (on wide screens; it returns to normal flow when the layout stacks on narrow screens).
+
+### Fixed
+- **External-link icons no longer wrap onto their own line.** In the admin sidebar and several views, the little "opens in a new tab" icon could get knocked onto the next line on its own (e.g. under "Suggest an improvement"). The icon now stays glued to the last word of its label.
+
 ## [1.8.1] — 2026-07-12
 
 ### Changed

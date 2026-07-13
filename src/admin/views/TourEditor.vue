@@ -139,7 +139,7 @@
         </div>
       </div>
 
-      <div class="card" style="padding:18px;">
+      <div class="card map-sticky" style="padding:18px;">
         <span class="field-label" style="margin-top:0;">Route preview</span>
         <PlaceMap route-only :route-points="routePoints" :route-geometry="form.routeGeometry || []" :key="routeKey" />
         <p class="muted" style="font-size:13px; margin-top:10px;">Stops: {{ form.stopIds.length }} · auto duration ≈ {{ autoMins }} min</p>
@@ -376,4 +376,11 @@ function back() { store.go('tours') }
 .icon-btn:focus-visible { outline: 2px solid var(--violet); outline-offset: 1px; }
 .icon-btn.busy { opacity: 0.5; cursor: default; }
 .icon-btn .ic { width: 18px; height: 18px; display: block; }
+
+/* keep the route map in view while scrolling the (often long) stops list, so the
+   numbered pins on the map line up with the numbered stops without scrolling up. */
+.map-sticky { position: sticky; top: 16px; align-self: start; max-height: calc(100vh - 32px); overflow: auto; }
+/* once the columns stack (≤860px, see styles.css) the map sits below the stops,
+   where sticking it would fight the natural flow – so pin only on wide screens. */
+@media (max-width: 860px) { .map-sticky { position: static; max-height: none; overflow: visible; } }
 </style>

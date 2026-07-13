@@ -6,7 +6,7 @@
     <div class="pagehead" style="flex-shrink:0;">
       <h1>Analytics</h1>
       <a v-if="analyticsUrl" :href="analyticsUrl" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
-        Open in PostHog<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        Open in <span style="white-space:nowrap;">PostHog<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span>
       </a>
     </div>
 
@@ -23,7 +23,7 @@
       </p>
       <template v-if="analyticsUrl">
         <a :href="analyticsUrl" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">
-          Open PostHog analytics<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          Open PostHog <span style="white-space:nowrap;">analytics<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span>
         </a>
         <p class="muted" style="font-size:13px; line-height:1.6; margin:18px 0 0;">
           <strong>Want it embedded here?</strong> In PostHog, open a dashboard → <em>Share</em> →
