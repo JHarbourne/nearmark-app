@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.5] — 2026-07-12
+
+### Fixed
+- **Duplicate location now copies the content and confirms.** Since the Stories layer, Duplicate copied only the place (an empty shell), had no error handling, and gave no feedback (so it looked like nothing happened). It now also copies the location's stories, surfaces any error, and opens the new copy in the editor.
+
 ## [1.7.4] — 2026-07-12
 
 ### Fixed

@@ -119,8 +119,20 @@ const groups = computed(() => {
 const totalShown = computed(() => groups.value.reduce((n, g) => n + g.locations.length, 0))
 
 async function duplicate(l) {
-  const copy = { ...l, recordId: undefined, id: l.id + '-copy-' + Math.random().toString(36).slice(2, 6), title: l.title + ' (copy)', tourNum: null, status: 'draft' }
-  await store.saveLocation(copy)
+  const newId = l.id + '-copy-' + Math.random().toString(36).slice(2, 6)
+  const copy = { ...l, recordId: undefined, id: newId, title: l.title + ' (copy)', tourNum: null, status: 'draft' }
+  try {
+    await store.saveLocation(copy)
+    const saved = store.locations.find((x) => x.id === newId)
+    // copy the stories too (content lives on stories now) so the duplicate is a
+    // real starting point, not an empty shell — each becomes a new story.
+    for (const s of l.stories || []) {
+      await store.saveStory({ ...JSON.parse(JSON.stringify(s)), storyId: undefined, locationId: saved?.recordId })
+    }
+    store.go('locationEditor', { id: newId }) // open the copy so it's obvious it worked
+  } catch (e) {
+    alert('Duplicate failed: ' + (e?.message || e))
+  }
 }
 async function remove(l) {
   if (confirm(`Delete “${l.title}”? This cannot be undone.`)) await store.deleteLocation(l)
