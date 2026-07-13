@@ -433,7 +433,14 @@ function chooseStory(storyId) {
   const s = (l.stories || []).find((x) => x.storyId === storyId)
   track('story_viewed', { location_id: l.id, story_id: storyId, title: s?.heading, mode: mapMode.value })
 }
-function closeStory() { openId.value = null; openStoryKey.value = null }
+function closeStory() {
+  // If the location has 2+ stories, step back to its story picker rather than
+  // dropping the user all the way out to the map/tour.
+  const l = byId.value[openId.value]
+  openStoryKey.value = null
+  openId.value = null
+  if (l && (l.stories || []).length > 1) storyListLoc.value = l
+}
 function arriveNext() { if (nextStop.value) openStory(nextStop.value.id) }
 function continueStop() {
   const s = nextStop.value
