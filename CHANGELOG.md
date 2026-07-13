@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.7.6] — 2026-07-12
+
+### Changed
+- **Duplicate location is less surprising.** It now stays on the list (instead of jumping into the editor), names repeated copies uniquely ("(copy)", "(copy 2)", "(copy 3)"…), and shows a confirmation of what it made and where (a draft under "Not in a tour").
+
 ## [1.7.5] — 2026-07-12
 
 ### Fixed

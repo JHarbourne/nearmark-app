@@ -7,6 +7,8 @@
       <button class="btn btn-primary" @click="store.go('locationEditor', { id: null })">+ Add new location</button>
     </div>
 
+    <div v-if="flash" role="status" style="margin:0 0 14px; padding:10px 14px; border:1px solid var(--line); border-left:3px solid var(--green, #1f9d57); border-radius:10px; background:var(--raised); font-size:13.5px; font-weight:600; color:var(--ink);">{{ flash }}</div>
+
     <div class="toolbar">
       <input type="text" v-model="q" placeholder="Search by title…" aria-label="Search locations by title" style="max-width:260px;" />
       <select v-model="cityFilter" aria-label="Filter by city" style="max-width:160px;">
@@ -118,9 +120,23 @@ const groups = computed(() => {
 })
 const totalShown = computed(() => groups.value.reduce((n, g) => n + g.locations.length, 0))
 
+const flash = ref('')
+let flashTimer
+function showFlash(msg) {
+  flash.value = msg
+  clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => { flash.value = '' }, 6000)
+}
+
 async function duplicate(l) {
+  // Numbered, unique name so repeated copies are distinguishable in the list:
+  // "X (copy)", then "X (copy 2)", "(copy 3)"… (strip any existing suffix first).
+  const base = l.title.replace(/\s*\(copy(?:\s+\d+)?\)\s*$/i, '').trim()
+  const taken = new Set(store.locations.map((x) => x.title))
+  let name = `${base} (copy)`
+  for (let n = 2; taken.has(name); n++) name = `${base} (copy ${n})`
   const newId = l.id + '-copy-' + Math.random().toString(36).slice(2, 6)
-  const copy = { ...l, recordId: undefined, id: newId, title: l.title + ' (copy)', tourNum: null, status: 'draft' }
+  const copy = { ...l, recordId: undefined, id: newId, title: name, tourNum: null, status: 'draft' }
   try {
     await store.saveLocation(copy)
     const saved = store.locations.find((x) => x.id === newId)
@@ -129,7 +145,9 @@ async function duplicate(l) {
     for (const s of l.stories || []) {
       await store.saveStory({ ...JSON.parse(JSON.stringify(s)), storyId: undefined, locationId: saved?.recordId })
     }
-    store.go('locationEditor', { id: newId }) // open the copy so it's obvious it worked
+    // stay on the list (as expected) and confirm — the new row is a draft, so it
+    // sits under "Not in a tour" / the Draft filter until you place it.
+    showFlash(`Copied to “${name}” — added as a draft (under “Not in a tour”). Click its Edit to open it.`)
   } catch (e) {
     alert('Duplicate failed: ' + (e?.message || e))
   }
