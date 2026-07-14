@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.8.3] — 2026-07-14
+
+### Fixed
+- **iOS home-screen title follows the app name.** The `apple-mobile-web-app-title` meta tag was a baked "Nearmark", so an iPhone "Add to Home Screen" could label the icon "Nearmark" regardless of the deployment. It's now set at runtime from `VITE_APP_NAME` (alongside the existing title/description/theme-colour branding), keeping `index.html` org-neutral.
+
+### Docs
+- **maplibre-migration.md:** recorded the LGBT London `.pmtiles` extract as generated & render-verified (bbox, size), and improved the recipe — derive the bbox from the deployment's own venue coordinates + padding, plus a Vite range-serve trick for render-verifying a new extract before hand-off.
+
 ## [1.8.2] — 2026-07-13
 
 ### Changed

@@ -13,6 +13,7 @@ applyTheme()
 document.title = config.appName
 document.querySelector('meta[name="description"]')?.setAttribute('content', config.description)
 document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors.bg)
+document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', config.appName) // iOS home-screen label fallback
 
 initAnalytics()
 createApp(App).mount('#app')

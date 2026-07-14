@@ -23,8 +23,13 @@ Leaflet.
   (see "Env var gotchas" below); does not affect the map.
 - 🚢 **Shipped to production (v1.4.0, 2026-07-10).** Merged `feature/maplibre-offline-maps`
   → `staging` → `main`; `tollesbury-app` and `lgbt` auto-deploy from `main`. Tollesbury runs
-  the vector basemap + offline caching live. **LGBT** still needs its own London `.pmtiles`
-  extract before its post-cutover launch (until then it falls back to raster OSM).
+  the vector basemap + offline caching live.
+- ✅ **LGBT London extract — generated & render-verified (2026-07-13).** `lgbt-london.pmtiles`
+  (15 MB, bbox `-0.21,51.45,-0.09,51.54`, data-driven from the 82 published venues + ~1 km
+  padding). Verified end-to-end by serving it over Vite range requests against the live LGBT
+  data — all pins render on a full street/label basemap. **Left to the user:** upload to the
+  LGBT Supabase `media` bucket and set `VITE_MAP_PMTILES_URL` on the LGBT Vercel project (until
+  then LGBT falls back to raster OSM). Then do the on-device airplane-mode check.
 
 ## What changed
 
@@ -51,9 +56,16 @@ pmtiles extract https://build.protomaps.com/<YYYYMMDD>.pmtiles area.pmtiles \
 pmtiles show area.pmtiles                 # sanity check: bounds, ~few MB
 ```
 
-Tollesbury used `--bbox=0.78,51.72,0.90,51.80` → 2.4 MB. Host it where **HTTP range
-requests** are served (Supabase Storage `media` bucket works) and set the public URL as
-`VITE_MAP_PMTILES_URL`. LGBT History will need its **own** London extract + URL.
+Examples: Tollesbury `--bbox=0.78,51.72,0.90,51.80` → 2.4 MB; LGBT (inner London)
+`--bbox=-0.21,51.45,-0.09,51.54` → 15 MB. Derive the bbox from the deployment's own
+published venue coordinates (min/max lat & lng from the Supabase REST API) plus ~1 km padding,
+rather than guessing — that keeps the file as small as the content allows. Host it where **HTTP
+range requests** are served (Supabase Storage `media` bucket works) and set the public URL as
+`VITE_MAP_PMTILES_URL`.
+
+Tip: to render-verify a new extract before handing it off, drop it in `public/` and run the dev
+server with `VITE_MAP_PMTILES_URL=/area.pmtiles` (Vite serves static files with range support);
+point `VITE_SUPABASE_URL`/`ANON_KEY` at that deployment so fit-to-bounds lands inside the extract.
 
 ## Remaining work
 
@@ -61,8 +73,8 @@ requests** are served (Supabase Storage `media` bucket works) and set the public
    apps). Before/at merge, set `VITE_MAP_PMTILES_URL` (non-sensitive!) on **each** production
    project: **Tollesbury** now; **LGBT** once its London extract exists. Un-set = harmless
    raster-OSM fallback, so the merge itself is safe even before LGBT has its file.
-2. **LGBT London extract** — same recipe as above, its own bbox, before LGBT's public launch
-   (else LGBT ships on the raster-OSM fallback, which reintroduces the OSM-policy concern).
+2. ✅ **LGBT London extract** — done (see status above). Remaining: user uploads it + sets
+   `VITE_MAP_PMTILES_URL` on the LGBT Vercel project, then the on-device airplane-mode check.
 3. **Optional polish** — lazy-load MapLibre (it added ~800 KB to the bundle); pre-warm glyphs
    for never-viewed areas; staging branding cleanup (cosmetic).
 
