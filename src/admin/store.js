@@ -28,6 +28,15 @@ export const store = reactive({
   error: '',
   activity: [],
   editors: [],
+  role: null, // RBAC role of the signed-in user ('super_admin'|'editor'); null = no RBAC on this project (pre-migration) → full access, as before
+
+  // ── RBAC gates: mirror the migration-030 RLS so the UI never offers an action the
+  // DB will reject. role === null → no RBAC here → everything allowed (unchanged).
+  get isEditor() { return this.role === 'editor' },
+  get isSuperAdmin() { return this.role === 'super_admin' },
+  canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },      // tours: owner + SA only
+  canDeleteTour(tour) { return this.canEditTour(tour) },
+  canDeleteLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },   // locations: anyone edits, owner/SA delete
 
   // ── session ──
   async init() {
@@ -198,6 +207,7 @@ export const store = reactive({
       const [locs, trs] = await Promise.all([db.listLocations(), db.listTours()])
       this.locations = locs
       this.tours = trs
+      if (this.liveBackend) this.role = await db.myRole().catch(() => null)
     } catch (e) {
       this.error = e.message
     } finally {

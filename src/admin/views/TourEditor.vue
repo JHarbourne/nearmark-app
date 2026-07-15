@@ -133,7 +133,8 @@
             <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
             <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
           </div>
-          <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button class="btn btn-primary" @click="save()" :disabled="saving || !canEdit">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <span v-if="!canEdit" class="muted" role="status" style="font-size:13px;">Read-only — this tour belongs to someone else; only its owner or a Super Admin can edit it.</span>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
         </div>
@@ -172,6 +173,7 @@ const cities = config.cities
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
 const existing = store.params.id ? store.tours.find((t) => t.id === store.params.id) : null
 const isNew = !existing
+const canEdit = computed(() => !existing || store.canEditTour(existing)) // tours: owner + SA only (mirrors migration-030 RLS)
 
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   id: 'tour-' + Math.random().toString(36).slice(2, 8), recordId: undefined,
@@ -334,6 +336,7 @@ const saving = ref(false)
 const flash = ref('')
 let flashTimer
 async function save() {
+  if (!canEdit.value) return
   if (!form.title) { alert('Title is required.'); return }
   saving.value = true
   try {

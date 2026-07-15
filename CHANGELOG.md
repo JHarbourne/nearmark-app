@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.0] — 2026-07-15
+
+### Added
+- **Back-office roles & ownership (RBAC — Phase 1).** Foundations for multiple editors. Every record now has an owner (`created_by`), and each user has a role (`super_admin` / `editor`). The admin loads your role and mirrors the new database rules so it never offers an action the database will reject: editors can create anything and edit any location, but can only **delete** their own locations, and **tours** are edit- and delete-locked to their owner or a Super Admin (others see them read-only). Super Admins can change roles in **User management**. Enforced in the database via RLS (`supabase/migration-030-rbac-ownership.sql`), with an insert trigger that stamps ownership automatically. **Dormant until you apply that migration per project** — with no migration the app behaves exactly as before (full access for every signed-in admin), so this release is safe to deploy everywhere. Phases 2–4 (edit notifications, soft-delete/archive workflow, duplicate-title handling) still to come.
+
 ## [1.8.4] — 2026-07-14
 
 ### Fixed

@@ -24,19 +24,23 @@
       </div>
       <p v-if="userMsg" role="status" :style="{ fontSize:'13px', margin:'0 0 14px', color: userErr ? 'var(--red)' : 'var(--green)' }">{{ userMsg }}</p>
 
-      <p v-if="loadingUsers" class="muted" style="font-size:14px;">Loading editors…</p>
-      <p v-else-if="loadError" style="font-size:13px; color:var(--red); line-height:1.6;">
+      <p v-if="loadingUsers && !rbacActive" class="muted" style="font-size:14px;">Loading editors…</p>
+      <p v-else-if="loadError && !rbacActive" style="font-size:13px; color:var(--red); line-height:1.6;">
         Couldn't load editors: {{ loadError }}<br>
         <span class="muted" style="font-size:12px;">Has the <code>admin-users</code> Edge Function been deployed?</span>
       </p>
-      <table v-else-if="users.length">
-        <thead><tr><th>Email</th><th>Last sign-in</th><th class="right">Access</th></tr></thead>
+      <table v-else-if="displayUsers.length">
+        <thead><tr><th>Email</th><th v-if="rbacActive">Role</th><th>Last sign-in</th><th class="right">Access</th></tr></thead>
         <tbody>
-          <tr v-for="u in users" :key="u.id">
+          <tr v-for="u in displayUsers" :key="u.id">
             <td style="font-weight:600;" data-label="Email">{{ u.email }}<span v-if="!u.confirmed" class="muted" style="font-weight:400; margin-left:6px;">· invited</span></td>
+            <td v-if="rbacActive" data-label="Role"><span class="badge" :class="u.role === 'super_admin' ? 'published' : 'draft'">{{ u.role === 'super_admin' ? 'Super Admin' : 'Editor' }}</span></td>
             <td class="muted" data-label="Last sign-in">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '–' }}</td>
             <td class="right" data-label="Access">
-              <button v-if="u.email !== store.user?.email" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
+              <template v-if="u.email !== store.user?.email">
+                <button v-if="rbacActive && store.isSuperAdmin" class="btn btn-ghost btn-sm" @click="toggleRole(u)" :disabled="roleBusy">{{ u.role === 'super_admin' ? 'Make editor' : 'Make Super Admin' }}</button>
+                <button v-if="!u.fromProfiles" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
+              </template>
               <span v-else class="muted" style="font-size:13px;">you</span>
             </td>
           </tr>
@@ -107,7 +111,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { store } from '../store.js'
 import { config } from '../../config.js'
-import { adminUsers } from '../../lib/supabase.js'
+import { adminUsers, db } from '../../lib/supabase.js'
 
 // ── two-factor (TOTP) enrolment ──
 const mfaLoading = ref(true)
@@ -167,6 +171,32 @@ async function loadUsers() {
   try { const r = await adminUsers.list(); users.value = r.users || [] }
   catch (e) { loadError.value = e.message } finally { loadingUsers.value = false }
 }
+
+// ── RBAC roles (migration 030) — read straight from the profiles table (works via RLS
+// even where the admin-users Edge Function isn't deployed, e.g. staging). null = no RBAC.
+const profiles = ref(null)
+const rbacActive = computed(() => Array.isArray(profiles.value))
+const roleBusy = ref(false)
+async function loadProfiles() { profiles.value = await db.listProfiles() }
+function roleOf(u) {
+  const p = (profiles.value || []).find((x) => x.user_id === u.id || x.email === u.email)
+  return p?.role || 'editor'
+}
+// One list that works with or without the Edge Function: prefer the rich edge-function
+// users (merging in each role); if that failed, fall back to the profiles rows.
+const displayUsers = computed(() => {
+  if (users.value.length) return users.value.map((u) => ({ ...u, role: roleOf(u) }))
+  if (rbacActive.value) return profiles.value.map((p) => ({ id: p.user_id, email: p.email, confirmed: true, lastSignInAt: null, role: p.role, fromProfiles: true }))
+  return []
+})
+async function toggleRole(u) {
+  const next = u.role === 'super_admin' ? 'editor' : 'super_admin'
+  if (!confirm(`Change ${u.email} to ${next === 'super_admin' ? 'Super Admin' : 'Editor'}?`)) return
+  roleBusy.value = true; userMsg.value = ''
+  try { await db.setRole(u.id, next); userErr.value = false; userMsg.value = `${u.email} is now ${next === 'super_admin' ? 'a Super Admin' : 'an editor'}.`; await loadProfiles() }
+  catch (e) { userErr.value = true; userMsg.value = e.message } finally { roleBusy.value = false }
+}
+onMounted(loadProfiles)
 async function invite() {
   const addr = inviteEmail.value.trim()
   if (!addr) return

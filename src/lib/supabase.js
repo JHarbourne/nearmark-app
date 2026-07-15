@@ -20,6 +20,7 @@ export const supabase = supabaseConfigured ? createClient(URL, ANON) : null
 function rowToLocation(r) {
   return {
     recordId: r.id,           // uuid (used for updates/deletes + story FK)
+    createdBy: r.created_by || null, // owner (RBAC, migration 030); absent pre-migration
     id: r.slug,               // stable slug used across the app
     title: r.title || '',
     city: r.city || 'London',
@@ -182,6 +183,7 @@ function attachStories(locations, stories) {
 function rowToTour(r) {
   return {
     recordId: r.id,
+    createdBy: r.created_by || null, // owner (RBAC, migration 030); absent pre-migration
     id: r.slug,
     title: r.title || '',
     city: r.city || 'London',
@@ -471,6 +473,24 @@ export const db = {
     for (const r of (data || [])) { const who = r.actor || 'admin'; counts[who] = (counts[who] || 0) + 1 }
     return Object.entries(counts).map(([who, count]) => ({ who, count })).sort((a, b) => b.count - a.count)
   },
+  // ── RBAC (migration 030): profiles/roles. All defensive — a null return means the
+  // profiles table isn't there yet (pre-migration project), so the app treats RBAC as
+  // inactive and keeps full access, exactly as before.
+  myRole: async () => {
+    if (!supabase) return null
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return null
+    const { data, error } = await supabase.from('profiles').select('role').eq('user_id', uid).maybeSingle()
+    if (error) return null
+    return data?.role || null
+  },
+  listProfiles: async () => {
+    if (!supabase) return null
+    const { data, error } = await supabase.from('profiles').select('user_id, email, display_name, role').order('created_at')
+    if (error) return null
+    return data
+  },
+  setRole: (userId, role) => run(supabase.from('profiles').update({ role }).eq('user_id', userId)),
 }
 
 // ── auth ──
