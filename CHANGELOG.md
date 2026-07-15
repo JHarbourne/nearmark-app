@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.1] — 2026-07-16
+
+### Added
+- **Edit notifications + in-app bell (RBAC — Phase 2).** When someone who isn't the owner edits one of your locations — or a story inside it — you get an in-app notification. A **bell** in the admin sidebar shows an unread count, and its panel lists recent activity ("Anita edited your location …"), each linking to the record. A de-dupe guard collapses one logical edit (which touches the location *and* its inline story) into a single notification. Enforced by database triggers (`supabase/migration-031-notifications.sql`); dormant until that migration is applied per project, so it's safe to deploy everywhere.
+
 ## [1.9.0] — 2026-07-15
 
 ### Added

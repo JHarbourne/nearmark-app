@@ -29,14 +29,21 @@ export const store = reactive({
   activity: [],
   editors: [],
   role: null, // RBAC role of the signed-in user ('super_admin'|'editor'); null = no RBAC on this project (pre-migration) → full access, as before
+  notifications: [], // in-app notification feed (migration 031); empty where the table isn't there
 
   // ── RBAC gates: mirror the migration-030 RLS so the UI never offers an action the
   // DB will reject. role === null → no RBAC here → everything allowed (unchanged).
   get isEditor() { return this.role === 'editor' },
   get isSuperAdmin() { return this.role === 'super_admin' },
+  get unreadCount() { return this.notifications.filter((n) => !n.readAt).length },
   canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },      // tours: owner + SA only
   canDeleteTour(tour) { return this.canEditTour(tour) },
   canDeleteLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },   // locations: anyone edits, owner/SA delete
+  async refreshNotifications() { if (this.liveBackend) this.notifications = await db.listNotifications().catch(() => []) },
+  async markNotificationsRead() {
+    await db.markNotificationsRead().catch(() => {})
+    this.notifications = this.notifications.map((n) => (n.readAt ? n : { ...n, readAt: new Date() }))
+  },
 
   // ── session ──
   async init() {
@@ -207,7 +214,10 @@ export const store = reactive({
       const [locs, trs] = await Promise.all([db.listLocations(), db.listTours()])
       this.locations = locs
       this.tours = trs
-      if (this.liveBackend) this.role = await db.myRole().catch(() => null)
+      if (this.liveBackend) {
+        this.role = await db.myRole().catch(() => null)
+        this.notifications = await db.listNotifications().catch(() => [])
+      }
     } catch (e) {
       this.error = e.message
     } finally {

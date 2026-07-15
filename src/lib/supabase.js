@@ -491,6 +491,20 @@ export const db = {
     return data
   },
   setRole: (userId, role) => run(supabase.from('profiles').update({ role }).eq('user_id', userId)),
+  // ── notifications (migration 031). Defensive: [] if the table isn't there yet. ──
+  listNotifications: async () => {
+    if (!supabase) return []
+    const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(30)
+    if (error) return []
+    return (data || []).map((r) => ({
+      id: r.id, type: r.type, entityType: r.entity_type, entityId: r.entity_id,
+      message: r.message, createdAt: new Date(r.created_at), readAt: r.read_at ? new Date(r.read_at) : null,
+    }))
+  },
+  markNotificationsRead: async () => {
+    if (!supabase) return
+    await supabase.from('notifications').update({ read_at: new Date().toISOString() }).is('read_at', null)
+  },
 }
 
 // ── auth ──
