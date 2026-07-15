@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.2] — 2026-07-16
+
+### Added
+- **"Guide & help" link in the admin sidebar.** Opens the Nearmark how-to guide (field-by-field help for locations, stories, before/after sliders and tours, plus how roles & permissions work). Points at `nearmark.co.uk/guide` by default; overridable per deployment via `VITE_GUIDE_URL`.
+
 ## [1.9.1] — 2026-07-16
 
 ### Added

@@ -37,6 +37,7 @@
           <span v-if="store.unreadCount" style="min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--red,#e5484d); color:#fff; font-size:11px; font-weight:700; display:inline-flex; align-items:center; justify-content:center;">{{ store.unreadCount }}</span>
         </button>
         <a href="/" target="_blank" class="navlink" style="display:block; margin-top:10px; padding-left:0;">View live<span style="white-space:nowrap;">app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
+        <a v-if="guideUrl" :href="guideUrl" target="_blank" rel="noopener" class="navlink" style="display:block; padding-left:0;">Guide &amp; <span style="white-space:nowrap;">help<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
         <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="display:block; padding-left:0;">Suggest an <span style="white-space:nowrap;">improvement<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
         <button class="navlink" style="padding-left:0;" @click="store.signOut()">Sign out</button>
         <p class="muted" style="font-size:11.5px; margin:16px 0 0; color:var(--ink-faint);">Powered by <a v-if="platformUrl" :href="platformUrl" target="_blank" rel="noopener" style="color:inherit;">{{ platformName }}</a><span v-else>{{ platformName }}</span> · v{{ version }}</p>
@@ -101,6 +102,7 @@ import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { store } from './store.js'
 import { config } from '../config.js'
 const feedbackUrl = config.feedbackUrl
+const guideUrl = config.guideUrl
 
 // focus the Save button when the unsaved-changes dialog opens (Enter = Save, Esc = Cancel)
 const saveBtn = ref(null)

@@ -67,6 +67,10 @@ export const config = {
   // link for the "Powered by …" name. Defaults to nearmark.app for the default brand;
   // a white-label deploy (custom VITE_PLATFORM_NAME) stays plain text unless it sets a URL.
   platformUrl: pick(env.VITE_PLATFORM_URL, env.VITE_PLATFORM_NAME ? '' : 'https://nearmark.app'),
+  // Admin how-to guide (opens from the sidebar). The guide is generic Nearmark admin
+  // help, so it applies to every deployment; a white-label deploy can repoint it at
+  // its own docs via VITE_GUIDE_URL.
+  guideUrl: pick(env.VITE_GUIDE_URL, 'https://nearmark.co.uk/guide'),
   contentSourceNote: pick(env.VITE_CONTENT_SOURCE_NOTE, ''),   // Settings sourcing paragraph – blank hides it
   wikiBaseUrl: pick(env.VITE_WIKI_BASE_URL, ''),               // base for article links + admin URL validation
   repoUrl: pick(env.VITE_REPO_URL, ''),                        // admin "source code" link – blank hides it
