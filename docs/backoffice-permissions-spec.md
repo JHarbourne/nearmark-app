@@ -4,6 +4,12 @@ Status: **approved design, implementation held until the test month ends** (feat
 Applies to the Nearmark core, so every deployment (Tollesbury, LGBT History, …) inherits it.
 Super Admin for all current projects: **jharbourne@mac.com**.
 
+> **Refreshed 2026-07-15 for the current schema.** The content model is now Tour → Location →
+> **Story** (the stories-layer split). This spec extends roles/ownership/RLS/notifications to the
+> `stories` table, and the migrations are **renumbered 030–033** — the original 022–024 numbers now
+> collide with the shipped stories migrations 025–027. `media` and `activity_log` keep their existing
+> blanket policies (shared asset library / append-only log — no per-record ownership).
+
 ## Why
 Today every authenticated user is a full admin (`schema.sql`: the `auth full …` policies).
 There is no role distinction and no record ownership, so any editor can delete anyone's
@@ -44,17 +50,25 @@ Add to `locations` and `tours`:
 
 Backfill every existing row to the Super Admin so nothing is left unowned.
 
+**Stories inherit their parent location's ownership** — no `created_by` on `stories`. A story
+belongs to exactly one location (`location_id … on delete cascade`), so the location's owner is
+effectively the story's owner. Keeps the model simple (no per-story column or backfill) and matches
+how editors think ("this is content on *my* location").
+
 ## 3. Permission matrix
 
-| Action | Location | Tour |
-|---|---|---|
-| Create | any editor/SA → becomes owner | any editor/SA → becomes owner |
-| Read (admin) | all | all |
-| **Edit** | anyone; **owner notified** if not the editor | **owner or SA only** |
-| **Delete** | owner or SA (others → request) | owner or SA (others → request) |
+| Action | Location | Story | Tour |
+|---|---|---|---|
+| Create | any editor/SA → becomes owner | anyone (belongs to its location) | any editor/SA → becomes owner |
+| Read (admin) | all | all | all |
+| **Edit** | anyone; **owner notified** if not the editor | anyone; **parent-location owner notified** | **owner or SA only** |
+| **Delete** | owner or SA (others → request) | parent-location owner or SA | owner or SA (others → request) |
+
+Stories follow their **parent location** (editable by anyone, deletable by the location's owner/SA) —
+*not* the stricter tour rules.
 
 Enforced in RLS (the real boundary — the UI only mirrors it). Replaces the blanket
-`auth full` policies with per-action policies:
+`auth full locations/stories/tours` policies with per-action policies:
 ```sql
 -- LOCATIONS
 create policy loc_select on public.locations for select to authenticated using (true);
@@ -74,17 +88,28 @@ create policy tour_update on public.tours for update to authenticated
   with check (is_super_admin() or created_by = auth.uid());
 create policy tour_delete on public.tours for delete to authenticated
   using (is_super_admin() or created_by = auth.uid());
+
+-- STORIES  (content within a location — inherit the parent location's rules)
+create policy story_select on public.stories for select to authenticated using (true);
+create policy story_insert on public.stories for insert to authenticated with check (true);
+create policy story_update on public.stories for update to authenticated
+  using (true) with check (true);              -- anyone edits; trigger notifies the location owner
+create policy story_delete on public.stories for delete to authenticated
+  using (is_super_admin() or exists (
+    select 1 from public.locations l
+    where l.id = stories.location_id and l.created_by = auth.uid()));
 ```
-Immutability trigger keeps `created_by` from being reassigned on update.
+Immutability trigger keeps `created_by` from being reassigned on `locations`/`tours` update.
 
 ## 4. Edit notifications
 `notifications` table: `recipient uuid`, `type`, `entity_type`, `entity_id`, `actor uuid`,
 `actor_name`, `message`, `created_at`, `read_at`.
 
-AFTER UPDATE trigger on `locations` (and any actor-vs-owner change): if the editor is not
-the owner, insert a row for the owner — "Anita edited your location *St Mary's Church*."
-Surfaced as an in-app **bell** (query `recipient = auth.uid() and read_at is null`).
-Tours don't need edit-notifications (only owner/SA can edit them).
+AFTER UPDATE trigger on `locations` **and `stories`**: if the editor is not the (parent-)location's
+owner, insert a row for that owner — "Anita edited your location *St Mary's Church*" or "Anita edited
+a story in your location *St Mary's Church*." Surfaced as an in-app **bell** (query
+`recipient = auth.uid() and read_at is null`). Since most content now lives in stories, the story
+trigger is the one that fires most. Tours don't need edit-notifications (only owner/SA can edit them).
 
 Email digests (Brevo) are a later add-on — see [brand-auth-emails] task.
 
@@ -105,6 +130,11 @@ Flow:
    or **purge** permanently (hard delete) after the recovery window.
 
 Owner/SA deleting their own record also archives first (recoverable), not hard-deletes.
+
+**Stories aren't separately archived** — a story belongs to one location (`on delete cascade`), so
+archiving/restoring/purging a location carries its stories with it. Removing a *single* story is a
+plain delete by the parent-location owner or SA (`story_delete` above), not the request-workflow
+(that stays at the location/tour level).
 
 ## 6. Duplicate titles + evergreen / event-only
 
@@ -136,14 +166,17 @@ exists, show a non-blocking dialog:
 ## Phasing (nothing runs on the live apps until sign-off)
 | Phase | Delivers | Migration |
 |---|---|---|
-| **1** | `profiles`/roles, `created_by` + backfill, per-action RLS, immutability trigger | `migration-022-rbac-ownership.sql` — **drafted, not run** |
-| **2** | `notifications` + edit-notify trigger (+ admin bell UI to build) | `migration-023-notifications.sql` — **drafted, not run** |
-| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete now SA-only (+ UI to build) | `migration-024-deletion-workflow.sql` — **drafted, not run** |
-| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | 025 (to draft) |
+| **1** | `profiles`/roles, `created_by` + backfill, per-action RLS (locations, **stories**, tours), immutability trigger | `migration-030-rbac-ownership.sql` — draft exists as **022**; renumber + add the story policies |
+| **2** | `notifications` + edit-notify trigger on **locations and stories** (+ admin bell UI to build) | `migration-031-notifications.sql` — draft exists as **023**; extend trigger to stories |
+| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete now SA-only (+ UI to build) | `migration-032-deletion-workflow.sql` — draft exists as **024** |
+| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `033` (to draft) |
 | 5 | email notifications (Brevo) | Edge Function |
 
-DB layer for phases 1–3 is drafted; the **admin-app UI** (bell, delete→rpc wiring,
-Archive view with Restore/Purge, owner/SA-only edit affordances) is still to build.
+Migrations renumbered from the original 022–024 → **030–032** (022–024 now collide with the shipped
+stories migrations 025–027). Before running, the drafts need: (a) the renumber, (b) the `stories`
+per-action policies + the story edit-notify trigger folded in. DB layer for phases 1–3 is otherwise
+drafted; the **admin-app UI** (bell, delete→rpc wiring, Archive view with Restore/Purge, owner/SA-only
+edit affordances) is still to build.
 
 Every migration is additive and must be run in **each** project (Tollesbury and LGBT),
 each followed by `notify pgrst, 'reload schema';`.
@@ -152,3 +185,5 @@ each followed by `notify pgrst, 'reload schema';`.
 - Notification delivery: in-app bell only for v1, or email from the start?
 - Recovery window length for soft-archive (default 30 days) and who can purge.
 - Whether `editor`s may create tours at all, or only the Super Admin (currently: any editor).
+- Whether removing a **single story** should soft-archive (recoverable) like locations/tours, or a
+  plain delete is acceptable (it's sub-content, and its parent location stays archive-protected).
