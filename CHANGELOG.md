@@ -8,6 +8,12 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.8.4] — 2026-07-14
+
+### Fixed
+- **Offline map — English-only labels.** The vector basemap rendered some place names in English *and* the local script stacked together (e.g. Chinatown, next to the Soho venues, showed English and Chinese). Protomaps' default label logic deliberately does this; every label is now flattened to a single English-preferring line.
+- **Offline map — hard stop at the edge.** Panning past the edge of the downloaded map area scrolled into blank grey. The map now stops at the boundary of the offline extract, read from the `.pmtiles` file's own header bounds (works offline via the cached file). Applies to any deployment with an offline basemap; the worldwide raster-OSM fallback is left unconstrained.
+
 ## [1.8.3] — 2026-07-14
 
 ### Fixed

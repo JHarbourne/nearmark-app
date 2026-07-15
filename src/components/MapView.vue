@@ -125,7 +125,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import maplibregl from 'maplibre-gl'
-import { Protocol } from 'pmtiles'
+import { Protocol, PMTiles } from 'pmtiles'
 import { layers, LIGHT } from '@protomaps/basemaps'
 import { badgeColors } from '../lib/tokens.js'
 import { config } from '../config.js'
@@ -208,6 +208,15 @@ let didFit = false
 function buildStyle() {
   const url = config.mapPmtilesUrl
   if (url) {
+    // English-only labels. Protomaps' default label logic stacks name:en AND the
+    // local-script name (so e.g. Chinatown renders in English AND Chinese). Flatten
+    // every text-field to a plain English-preferring lookup so labels stay single-language.
+    const styleLayers = layers('protomaps', LIGHT, { lang: 'en' })
+    for (const l of styleLayers) {
+      if (l.layout && l.layout['text-field']) {
+        l.layout['text-field'] = ['coalesce', ['get', 'name:en'], ['get', 'name']]
+      }
+    }
     return {
       version: 8,
       glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
@@ -215,7 +224,7 @@ function buildStyle() {
       sources: {
         protomaps: { type: 'vector', url: `pmtiles://${url}`, attribution: '© OpenStreetMap' },
       },
-      layers: layers('protomaps', LIGHT, { lang: 'en' }),
+      layers: styleLayers,
     }
   }
   return {
@@ -349,6 +358,16 @@ onMounted(() => {
   map.touchZoomRotate.disableRotation()
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right')
   map.addControl(new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }), 'bottom-right')
+
+  // An offline extract covers a finite area; stop panning at its edge instead of
+  // scrolling into blank grey. Read the .pmtiles header bounds (works offline – the
+  // service worker serves the cached file) and constrain the map to them. Only when a
+  // vector extract is configured (the raster-OSM fallback is worldwide, so left free).
+  if (config.mapPmtilesUrl) {
+    new PMTiles(config.mapPmtilesUrl).getHeader()
+      .then((h) => { if (map && h) map.setMaxBounds([[h.minLon, h.minLat], [h.maxLon, h.maxLat]]) })
+      .catch(() => { /* header unreachable — leave the map unconstrained */ })
+  }
   map.on('load', () => {
     mapLoaded = true
     renderMarkers()
