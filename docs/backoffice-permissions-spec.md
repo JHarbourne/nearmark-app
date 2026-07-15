@@ -1,6 +1,6 @@
 # Back-office permissions (RBAC + ownership) — spec
 
-Status: **approved design, implementation held until the test month ends** (feature freeze).
+Status: **Phases 1 & 2 built + verified on staging (2026-07-16); Phase 3 next.** Live on prod only when the migrations are run per project (see Phasing below).
 Applies to the Nearmark core, so every deployment (Tollesbury, LGBT History, …) inherits it.
 Super Admin for all current projects: **jharbourne@mac.com**.
 
@@ -164,24 +164,27 @@ exists, show a non-blocking dialog:
 > Create an event-only variant · Cancel
 
 ## Phasing (nothing runs on the live apps until sign-off)
-| Phase | Delivers | Migration |
-|---|---|---|
-| **1** | `profiles`/roles, `created_by` + backfill, per-action RLS (locations, **stories**, tours), immutability trigger | `migration-030-rbac-ownership.sql` — draft exists as **022**; renumber + add the story policies |
-| **2** | `notifications` + edit-notify trigger on **locations and stories** (+ admin bell UI to build) | `migration-031-notifications.sql` — draft exists as **023**; extend trigger to stories |
-| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete now SA-only (+ UI to build) | `migration-032-deletion-workflow.sql` — draft exists as **024** |
-| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `033` (to draft) |
-| 5 | email notifications (Brevo) | Edge Function |
+| Phase | Delivers | Migration | Status |
+|---|---|---|---|
+| **1** | `profiles`/roles, `created_by` + backfill, per-action RLS (locations, **stories**, tours), auto-owner + immutability triggers | `migration-030-rbac-ownership.sql` | ✅ **BUILT + verified on staging** (app v1.9.0). Dormant on prod until run. |
+| **2** | `notifications` + de-duped edit-notify triggers (locations & stories) + admin **bell** UI | `migration-031-notifications.sql` | ✅ **BUILT + verified on staging** (app v1.9.1). Dormant on prod until run. |
+| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI | `migration-032-deletion-workflow.sql` (draft exists as **024** — renumber + extend to stories) | ⏭️ **NEXT — not yet built** |
+| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `033` (to draft) | not built |
+| 5 | email notifications (Brevo) | Edge Function | not built |
 
-Migrations renumbered from the original 022–024 → **030–032** (022–024 now collide with the shipped
-stories migrations 025–027). Before running, the drafts need: (a) the renumber, (b) the `stories`
-per-action policies + the story edit-notify trigger folded in. DB layer for phases 1–3 is otherwise
-drafted; the **admin-app UI** (bell, delete→rpc wiring, Archive view with Restore/Purge, owner/SA-only
-edit affordances) is still to build.
+**Progress (2026-07-16):** Phases 1 & 2 are built (renumbered from the parked 022/023, with the
+stories-layer additions) and verified end-to-end on **nearmark-staging** — editor restrictions hold,
+and a non-owner edit notifies the owner via the bell. The app layer (`v1.9.1`) is deployed to all
+projects but **dormant** (full access) on any project without the migrations, so prod is unchanged.
+**To go live on a real app:** run migrations 030 then 031 in that project's SQL Editor (edit the SA
+email in 030), each followed by `notify pgrst, 'reload schema';`. Phase 3 (soft-delete/archive) is the
+remaining safety-critical piece — draft 024 needs renumbering to 032 and extending to stories, plus
+the Archive UI.
 
 Every migration is additive and must be run in **each** project (Tollesbury and LGBT),
 each followed by `notify pgrst, 'reload schema';`.
 
-## Open items to confirm before Phase 2+
+## Open items to confirm before Phase 3+
 - Notification delivery: in-app bell only for v1, or email from the start?
 - Recovery window length for soft-archive (default 30 days) and who can purge.
 - Whether `editor`s may create tours at all, or only the Super Admin (currently: any editor).

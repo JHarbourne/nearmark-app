@@ -126,12 +126,15 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 019 | per-location audio `transcript` (WCAG 1.2.1) |
 | 020 | slider `after` image (`slider_after_url`), separate from the hero |
 | 021 | second-photo credit (`portrait_credit`, `portrait_credit_url`) |
-| 022–024 | back-office permissions (RBAC/ownership, notifications, deletion workflow) — **drafted, not run** (parked; see `docs/backoffice-permissions-spec.md`) |
+| 022–024 | back-office permissions — parked drafts, **renumbered & superseded by 030–032** (022–024 collided with the shipped stories migrations 025–027; see `docs/backoffice-permissions-spec.md`) |
 | 025 | **`stories`** table + one-per-location backfill + shared `location_visible_to_anon()` visibility helper (Tour→Location→Story) |
 | 026 | drop the moved content columns from `locations` (run after the app switch-over) |
 | 027 | location `address` (for geocoding) |
 | 028 | per-story `status` (draft/published) — hide an individual story |
 | 029 | per-story `video_caption` (caption shown under an embedded video) |
+| 030 | RBAC Phase 1 — `profiles` (roles), `created_by` ownership, auto-owner insert trigger, per-action RLS on locations/stories/tours — **live on staging; dormant on prod until applied** |
+| 031 | RBAC Phase 2 — `notifications` table + edit-notify triggers (locations & stories, de-duped) — **live on staging; dormant on prod until applied** |
+| 032–033 | RBAC Phases 3–4 (soft-delete/archive workflow, duplicate-title handling) — **not yet built** |
 
 ---
 
@@ -228,7 +231,16 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **Media library.** Lists everything in the bucket (folders + root); edit metadata; upload,
   replace, delete.
 - **User management.** Invite/list/remove admins + manage own 2FA (needs the `admin-users`
-  Edge Function).
+  Edge Function). When RBAC is applied (below), also shows each admin's **role** and lets a Super
+  Admin change it (reads the `profiles` table, so the role UI works even without the Edge Function).
+- **Roles & permissions (RBAC — rolling out).** Two roles (`super_admin` / `editor`) with per-record
+  **ownership** (`created_by`). Editors create anything and edit any location, but only **delete**
+  their own; **tours** are edit- and delete-locked to their owner or a Super Admin (others see them
+  read-only). The admin UI mirrors these rules, but the **database RLS is the real boundary**. A
+  non-owner edit notifies the owner via an in-app **bell** in the sidebar. Enforced by migrations
+  030 (Phase 1) + 031 (Phase 2), applied per project — **dormant (full access, exactly as before)
+  until applied**, so a project that hasn't opted in is unchanged. Phases 3–5 (soft-delete/archive,
+  duplicate-title handling, email digests) still to come — design in `docs/backoffice-permissions-spec.md`.
 - **Safety.** An **unsaved-changes guard** warns before leaving a dirty editor (in-app
   navigation and browser close/reload).
 
