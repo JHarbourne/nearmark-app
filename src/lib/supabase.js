@@ -520,7 +520,11 @@ export const auth = {
   // ── MFA: TOTP authenticator app (Google Authenticator, 1Password, Authy…) ──
   mfaAAL: () => supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
   mfaList: () => supabase.auth.mfa.listFactors(),
-  mfaEnroll: (friendlyName) => supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName }),
+  // `issuer` is what an authenticator app shows as the account's title. Without it,
+  // Supabase falls back to the project's Site URL host (e.g. "localhost" during dev),
+  // so pin it to the deployment's app name for a recognisable entry.
+  mfaEnroll: (friendlyName) =>
+    supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName, issuer: config.appName }),
   mfaVerify: (factorId, code) => supabase.auth.mfa.challengeAndVerify({ factorId, code }),
   mfaUnenroll: (factorId) => supabase.auth.mfa.unenroll({ factorId }),
 }

@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.5] — 2026-07-25
+
+### Fixed
+- **Authenticator app now shows the deployment's name, not the Site URL host.** When enrolling two-factor auth (TOTP), the app now passes an explicit `issuer` (the app's `VITE_APP_NAME`) to Supabase. Previously no issuer was sent, so the authenticator entry fell back to the project's Site URL host — which showed as "localhost" for anyone enrolled during development. New enrolments read the proper brand name (e.g. "LGBT History UK"); existing entries are unaffected until re-enrolled.
+
 ## [1.9.4] — 2026-07-25
 
 ### Changed
