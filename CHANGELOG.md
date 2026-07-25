@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.4] — 2026-07-25
+
+### Changed
+- **Product analytics now report to the dedicated Apps PostHog project.** The baked-in default PostHog token (used by the Nearmark-hosted apps on `nearmark.app`, `tollesbury.app` and `lgbthistoryuk.org`) was pointing at the project that has since become the *marketing site's* ("Nearmark Website"). It now sends to the separate **Apps (Nearmark & Tollesbury)** project, and the admin "View analytics" link points at that project's dashboard (`232225`). No behaviour change for visitors; a per-deployment `VITE_POSTHOG_KEY` (if any) still overrides.
+
 ## [1.9.3] — 2026-07-18
 
 ### Fixed
