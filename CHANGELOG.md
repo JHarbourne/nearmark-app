@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.9.3] — 2026-07-18
+
+### Fixed
+- **Offline map is far more robust in the field.** The vector basemap is downloaded once and cached (not bundled), which made it fragile: iOS could evict the ~15 MB file, and a captive-portal Wi-Fi (a station/café login that reports "connected" with no real internet) would make the app try — and fail — to re-download it, leaving a silent grey map. Now:
+  - **Persistent storage** is requested so the browser is far less likely to evict the cached basemap.
+  - The precache **validates the download** (real binary file, not an HTML login page) before marking the offline map ready, and **retries** on the next map open instead of trusting the "online" flag once.
+  - When tiles genuinely can't load, the map shows a clear **"Map not downloaded"** notice with a fix — *open the map once on the internet to save it for offline; on Wi-Fi that isn't loading, turn Wi-Fi off and use mobile data* — and a Reload button, instead of a blank grey map. It clears itself if the connection recovers.
+
 ## [1.9.2] — 2026-07-16
 
 ### Added

@@ -71,9 +71,34 @@ export function precacheBasemap() {
     if (navigator.onLine === false) return
     if (navigator.connection?.saveData === true) return
   }
-  basemapWarmed = true
   // Plain (cors) GET, NOT no-cors: rangeRequests can only slice a readable 200
   // response — an opaque no-cors body can't be sliced. Supabase Storage sends the
-  // CORS headers that make this a readable response.
-  fetch(url, { credentials: 'omit' }).catch(() => { /* offline/blocked — best-effort */ })
+  // CORS headers that make this a readable response; the SW's 'map-basemap' rule caches it.
+  //
+  // Validate the response before marking the basemap "warmed". A captive-portal Wi-Fi
+  // ("connected, but no real internet" — station/café logins) reports navigator.onLine=true
+  // and can answer with a login page instead of the map. We only count it a success if we
+  // actually got the binary file (not an HTML page, not a tiny body); otherwise we leave
+  // basemapWarmed=false so the next map open (on a real connection) retries.
+  fetch(url, { credentials: 'omit' }).then((res) => {
+    const type = (res.headers.get('content-type') || '').toLowerCase()
+    const len = Number(res.headers.get('content-length') || 0)
+    const looksReal = res.ok && !type.includes('html') && !(len > 0 && len < 1_000_000)
+    if (looksReal) basemapWarmed = true
+  }).catch(() => { /* offline/blocked — leave un-warmed so we retry next time */ })
+}
+
+// Ask the browser to keep our caches (the ~15 MB offline basemap especially) from being
+// evicted under storage pressure — iOS is aggressive about this, which is why an offline
+// map that worked yesterday can be gone today. Installed PWAs / engaged users are usually
+// granted this silently. Best-effort, safe to call once.
+let persistRequested = false
+export async function requestPersistentStorage() {
+  if (persistRequested || typeof navigator === 'undefined') return
+  persistRequested = true
+  try {
+    if (navigator.storage?.persist && !(await navigator.storage.persisted())) {
+      await navigator.storage.persist()
+    }
+  } catch { /* unsupported — ignore */ }
 }

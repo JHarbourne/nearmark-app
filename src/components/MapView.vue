@@ -66,6 +66,23 @@
       <span style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--accent-warm);">Open</span>
     </button>
 
+    <!-- OFFLINE-MAP notice: the vector basemap couldn't load — no cached tiles AND no
+         working connection (classically a captive-portal Wi-Fi that reports "online").
+         Tells the walker how to fix it. Takes the top slot over the location notice. -->
+    <div v-if="showBasemapNote" :style="locNote" role="status">
+      <span :style="locNoteIcon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-warm)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 5.2-2.7"/><path d="M2 8.8a15 15 0 0 1 4.2-2.5"/><path d="M18 12.9a10 10 0 0 0-2-1.3"/><path d="M22 8.8a15 15 0 0 0-8.7-3.6"/><path d="M12 20h.01"/></svg>
+      </span>
+      <span style="flex: 1; min-width: 0;">
+        <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--accent-warm); text-transform: uppercase;">Map not downloaded</span>
+        <span style="display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; line-height: 1.4;">Open the map once on the internet (mobile data or Wi-Fi) to save it for offline use. On Wi-Fi that isn't loading? Turn Wi-Fi off and use mobile data.</span>
+      </span>
+      <button @click="reloadForMap" :style="locNoteBtn">Reload</button>
+      <button @click="dismissedBasemap = true" :style="locNoteClose" aria-label="Dismiss">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
     <!-- LOCATION-OFF notice: persistent, fixable cue when GPS isn't available
          (the start-time prompt can be skipped/dismissed, so the map needs its own) -->
     <div v-if="showLocNote" :style="locNote" role="status">
@@ -161,9 +178,14 @@ const mapEl = ref(null)
 // ── "location off" notice: shown until permission is granted (or the user
 // dismisses it), so people who skipped the prompt know why they get no alerts ──
 const dismissedLocNote = ref(false)
+// offline basemap couldn't load (no cached tiles + no working connection, e.g. captive-portal Wi-Fi)
+const basemapFailed = ref(false)
+const dismissedBasemap = ref(false)
+const showBasemapNote = computed(() => basemapFailed.value && !dismissedBasemap.value)
+function reloadForMap() { window.location.reload() }
 const showLocNote = computed(() =>
   props.permission !== 'granted' && props.permission !== 'unsupported' &&
-  !dismissedLocNote.value && !props.proximity && !showList.value
+  !dismissedLocNote.value && !props.proximity && !showList.value && !basemapFailed.value
 )
 const locNoteText = computed(() => {
   if (props.permission === 'denied') return 'Blocked for this site – turn it back on in your browser or device settings.'
@@ -366,7 +388,19 @@ onMounted(() => {
   if (config.mapPmtilesUrl) {
     new PMTiles(config.mapPmtilesUrl).getHeader()
       .then((h) => { if (map && h) map.setMaxBounds([[h.minLon, h.minLat], [h.maxLon, h.maxLat]]) })
-      .catch(() => { /* header unreachable — leave the map unconstrained */ })
+      .catch(() => {
+        // Header unreachable → the offline basemap isn't cached and can't be fetched right
+        // now (typically a captive-portal Wi-Fi: "connected" but no real internet). Surface
+        // the notice; leave the map bounds free.
+        basemapFailed.value = true
+      })
+    // A failed vector-tile/source load (no cached basemap + no real connection) → same notice.
+    map.on('error', (e) => {
+      const msg = String(e?.error?.message || e?.error || '')
+      if (e?.sourceId === 'protomaps' || /pmtiles/i.test(msg)) basemapFailed.value = true
+    })
+    // …and if the tiles do come through (connection recovered), clear the notice.
+    map.on('idle', () => { if (basemapFailed.value && map?.isSourceLoaded?.('protomaps')) basemapFailed.value = false })
   }
   map.on('load', () => {
     mapLoaded = true
