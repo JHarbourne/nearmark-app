@@ -58,6 +58,18 @@ admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and
   `.pmtiles` via HTTP range requests; `rangeRequests` serves those byte-ranges out of the one
   cached full file, so the map renders with no network. The admin is excluded from the offline
   shell (online-only).
+- **Offline-map resilience (v1.9.3).** Because the basemap is cached at runtime (not bundled),
+  it was fragile in the field: iOS evicts the ~15 MB file, and a **captive-portal Wi-Fi**
+  (`navigator.onLine === true` but no real internet) made the pre-fetch try and fail, leaving a
+  silent grey map. Hardened three ways: (1) `requestPersistentStorage()`
+  (`navigator.storage.persist`) so the cache resists eviction; (2) `precacheBasemap()` now
+  **validates the response** (not `text/html`, not a tiny body) before marking the basemap
+  warmed, and stays un-warmed on failure so the next map open **retries** rather than trusting
+  the online flag once; (3) `MapView` detects a basemap failure (the `PMTiles` header fetch
+  rejecting, or a `protomaps` source error) and shows a **"Map not downloaded"** notice with a
+  fix (load once online; on dead Wi-Fi turn it off and use mobile data) plus Reload — clearing
+  itself when the source loads. Installing the PWA to the home screen materially improves iOS
+  cache durability.
 - **Canonical host.** A tiny inline guard in each HTML entry redirects `www.` → apex in
   normal browser tabs (installed PWAs excepted), backing up the server 308.
 
