@@ -208,11 +208,15 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_STORY_LINK_LABEL` | Label for a location's external link, e.g. `Visit the artist’s website` (the link hides when a location has no URL) |
 | `VITE_FEEDBACK_EMAIL` | Recipient for the story card's "Suggest a correction" `mailto:` link, e.g. `you@example.org` (blank hides the link) |
 | `VITE_CONTENT_SOURCE_LABEL` | Attribution credit, e.g. `example.org` (blank hides it) |
+| `VITE_CONTENT_SOURCE_URL` | Optional link on the content-source label (blank = plain text) |
 | `VITE_PLATFORM_NAME` | "Powered by …" footer attribution (default `Nearmark`) |
 | `VITE_PLATFORM_URL` | Link for the platform name (blank = plain text) |
 | `VITE_CONTENT_SOURCE_NOTE` | Sourcing paragraph in Settings (blank hides it) |
 | `VITE_WIKI_BASE_URL` | Base URL for article links + admin URL validation |
 | `VITE_REPO_URL` | "Source code" link in the admin (blank hides it) |
+| `VITE_GUIDE_URL` | "Guide & help" link in the admin sidebar (default `nearmark.co.uk/guide`; blank hides it) |
+| `VITE_FEEDBACK_URL` | Admin "Suggest an improvement" link (default `nearmark.co.uk/feedback`; blank hides it) |
+| `VITE_RELEASES_URL` | Admin version / "what's new" link (blank = `<VITE_REPO_URL>/releases`) |
 | `VITE_SUPABASE_URL` | Supabase project URL (backend) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase publishable/anon key (safe in the client) |
 | `VITE_POSTHOG_KEY` | PostHog project token for analytics (blank disables) |
@@ -225,6 +229,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_MAP_CENTER_LAT` / `VITE_MAP_CENTER_LNG` | Initial map centre |
 | `VITE_MAP_ZOOM` | Initial map zoom level |
 | `VITE_MAP_PMTILES_URL` | Offline vector basemap: a per-deployment Protomaps `.pmtiles` file URL (served with HTTP range support, e.g. Supabase Storage). Blank → online-only raster OSM. See `docs/maplibre-migration.md` |
+| `VITE_CONSENT_NOTICE_VERSION` | Privacy-notice version stamped when an admin logs a resident's written consent to publish an address (default `1.0`) |
 
 **App icons & logo (white-label).** The icons shipped in `public/`
 (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-48.png`) are
