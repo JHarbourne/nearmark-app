@@ -2,10 +2,10 @@
      from the prototype. Audio is a real HTML5 Audio element; hero supports image
      or muted looping background video; "Read full article" opens wiki_url. -->
 <template>
-  <div style="position: absolute; inset: 0; z-index: 60;">
-    <button @click="$emit('close')" :style="[scrim, scrimDrag]" aria-label="Close story" tabindex="-1"></button>
-    <div ref="sheetRef" :style="[sheet, sheetDrag]" role="dialog" aria-modal="true" :aria-label="loc.title" @touchstart="onTouchStart" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
-      <div ref="scrollRef" style="overflow-y: auto;">
+  <div :style="embedded ? { position: 'relative' } : { position: 'absolute', inset: 0, zIndex: 60 }">
+    <button v-if="!embedded" @click="$emit('close')" :style="[scrim, scrimDrag]" aria-label="Close story" tabindex="-1"></button>
+    <div ref="sheetRef" :style="[sheetStyle, sheetDrag]" :role="embedded ? null : 'dialog'" :aria-modal="embedded ? null : 'true'" :aria-label="embedded ? null : loc.title" @touchstart="onTouchStart" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
+      <div ref="scrollRef" :style="{ overflowY: embedded ? 'visible' : 'auto' }">
         <!-- hero: a static header image (or looping video). This same image is
              the location's thumbnail. The before/after slider now lives in the
              body, after the first paragraph, so it gets its own room. -->
@@ -13,8 +13,8 @@
           <video v-if="heroVideoUrl" :src="heroVideoUrl" autoplay muted loop playsinline :aria-label="loc.caption ? null : (loc.imageAlt || loc.title)" :style="[heroMedia, { objectPosition: loc.heroPosition || '50% 50%' }]"></video>
           <div v-else :style="heroFill" :role="(loc.heroImageUrl && !loc.caption) ? 'img' : null" :aria-label="(loc.heroImageUrl && !loc.caption) ? (loc.imageAlt || loc.title) : null"></div>
           <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(28,21,38,0.94) 1%, rgba(28,21,38,0) 42%);"></div>
-          <span style="position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 38px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.6); pointer-events: none; z-index: 3;"></span>
-          <button ref="closeRef" @click="$emit('close')" :style="closeBtn" aria-label="Close story">
+          <span v-if="!embedded" style="position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 38px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.6); pointer-events: none; z-index: 3;"></span>
+          <button v-if="!embedded" ref="closeRef" @click="$emit('close')" :style="closeBtn" aria-label="Close story">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1 L11 11 M11 1 L1 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
           </button>
           <span :style="period">{{ loc.period }}</span>
@@ -129,7 +129,7 @@
             </div>
           </div>
 
-          <button v-if="showContinue" @click="$emit('continue')" :style="continueBtn">
+          <button v-if="showContinue && !embedded" @click="$emit('continue')" :style="continueBtn">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5 L10 17.5 L19.5 7" stroke="var(--bg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             {{ continueLabel }}
           </button>
@@ -164,6 +164,10 @@ const props = defineProps({
   audioOn: { type: Boolean, default: true },
   showContinue: { type: Boolean, default: false },
   continueLabel: { type: String, default: 'Mark visited · next stop' },
+  // Embedded = render the card in-flow (e.g. the admin editor's live preview):
+  // no fixed bottom-sheet overlay, no close/continue controls, no modal focus
+  // trap / Escape / pull-to-dismiss. All normal behaviour is otherwise unchanged.
+  embedded: { type: Boolean, default: false },
 })
 const emit = defineEmits(['close', 'open-related', 'continue'])
 
@@ -230,6 +234,7 @@ const closeRef = ref(null)
 let lastFocused = null
 function onKeydown(e) { if (e.key === 'Escape') emit('close') }
 onMounted(() => {
+  if (props.embedded) return                     // in-flow preview: no modal focus trap, Escape, or drag
   lastFocused = document.activeElement           // remember what opened the sheet
   // preventScroll: Safari otherwise scrolls the still-animating sheet to reveal
   // the focused button, making the card jump up then settle.
@@ -367,6 +372,14 @@ const sheet = {
   background: 'var(--card)', borderRadius: '26px 26px 0 0', overflow: 'hidden',
   boxShadow: '0 -10px 50px rgba(0,0,0,0.6)', animation: 'sheetUp .3s ease',
 }
+// embedded = in-flow card (no bottom-sheet framing): grows with its content, all
+// four corners rounded, no fixed positioning / min-max height / drop shadow.
+const embedSheet = {
+  position: 'relative', display: 'flex', flexDirection: 'column',
+  background: 'var(--card)', borderRadius: '26px', overflow: 'hidden',
+  border: '1px solid var(--line)',
+}
+const sheetStyle = computed(() => (props.embedded ? embedSheet : sheet))
 const closeBtn = {
   position: 'absolute', top: '14px', right: '14px', width: '32px', height: '32px', borderRadius: '50%',
   background: 'rgba(23,17,31,0.55)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer',

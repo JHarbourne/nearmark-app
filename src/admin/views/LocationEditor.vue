@@ -103,7 +103,7 @@
             <h3 style="margin:0; font-size:15px; min-width:0;">Story <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
             <button v-if="storyForm.storyId" type="button" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addAnotherStory">+ Add another story</button>
           </div>
-          <StoryFields ref="fields" :key="storyKey" :story="storyForm" :show-heading="false" />
+          <StoryFields ref="fields" :key="storyKey" :story="storyForm" :contact="contact" :show-heading="false" />
         </template>
       </div>
 
@@ -191,6 +191,26 @@ if (storyForm.showPhotoCredit === undefined) storyForm.showPhotoCredit = true
 const fields = ref(null)               // <StoryFields> instance (inline mode only)
 const storyKey = ref(0)                // bump to remount StoryFields on a fresh seed
 const storyBaseline = ref(JSON.stringify(storyForm))
+
+// ── private owner contact for the inline story (participants table – separate
+// from the story form, never published). Loaded/persisted alongside the story. ──
+const contact = reactive({ contact_email: '', contact_mobile: '' })
+let participantExisted = false
+const contactBaseline = ref(JSON.stringify(contact))
+async function loadInlineContact() {
+  participantExisted = false
+  contact.contact_email = ''
+  contact.contact_mobile = ''
+  if (storyForm.storyId) {
+    const p = await store.getParticipant(storyForm.storyId)
+    if (p) {
+      contact.contact_email = p.contact_email || ''
+      contact.contact_mobile = p.contact_mobile || ''
+      participantExisted = true
+    }
+  }
+  contactBaseline.value = JSON.stringify(contact)
+}
 // re-seed the inline story from the store's current first story (used when a
 // delete drops a multi-story location back to one).
 function seedStoryForm() {
@@ -202,6 +222,7 @@ function seedStoryForm() {
   if (storyForm.showPhotoCredit === undefined) storyForm.showPhotoCredit = true
   storyBaseline.value = JSON.stringify(storyForm)
   storyKey.value++
+  loadInlineContact()
 }
 
 // map pin colour: the inline story's hue while editing it, else the primary
@@ -213,9 +234,9 @@ const showTourHelp = ref(false)
 
 // ── unsaved-changes guard ──
 const baseline = ref(JSON.stringify(form))
-const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && JSON.stringify(storyForm) !== storyBaseline.value)
+const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && (JSON.stringify(storyForm) !== storyBaseline.value || JSON.stringify(contact) !== contactBaseline.value))
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
-onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload) })
+onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload); loadInlineContact() })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
 
 // ── privacy / publication helpers ──
@@ -315,9 +336,16 @@ async function saveInlineStory() {
   if (!s.sortOrder) s.sortOrder = 1
   const saved = await store.saveStory({ ...s })
   if (!s.storyId && saved?.id) s.storyId = saved.id
+  // persist the private owner contact once the story has an id (upsert when there's
+  // something to store, or a record already exists so clears stick)
+  if (s.storyId && (contact.contact_email || contact.contact_mobile || participantExisted)) {
+    await store.saveParticipant(s.storyId, { contact_email: contact.contact_email, contact_mobile: contact.contact_mobile })
+    participantExisted = true
+  }
   const inUse = new Set(fields.value?.inUseUrls() || [])
   for (const url of fields.value?.sessionUploads || []) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
   storyBaseline.value = JSON.stringify(s)
+  contactBaseline.value = JSON.stringify(contact)
 }
 function back() { store.go('locations') }
 
