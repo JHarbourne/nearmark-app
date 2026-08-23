@@ -8,6 +8,42 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.10.0] — 2026-08-24
+
+Artist / resident **self-service approval** for owner-managed tours (arts trails,
+open gardens, and the like). Each contributor gets a private link to preview their
+own card exactly as it will appear, confirm their details, and approve it — the
+tour stays unpublished until the organiser publishes it.
+
+### Added
+- **Private approval page (`/approve/<token>`).** A contributor opens a token-scoped
+  link and sees *only their own* draft card (the real story card, hidden from the
+  public), confirms where they'll be, adds an optional website / social link, reads
+  a plain-English consent notice, and taps **Approve**. No login. The only way in is
+  two token-scoped `SECURITY DEFINER` RPCs; the `participants` table stays anon-denied,
+  and there's no enumeration. Approving records opt-in consent and (optionally) a note
+  or corrections back to the organiser.
+- **Owner-contact box in the admin.** Every story can carry a private owner email +
+  mobile (kept off the public read path), with the approval status (Pending / Approved),
+  the contributor's approval link, and one-tap **Copy / Text / WhatsApp / Email** send
+  buttons pre-filled with a friendly message.
+- **Per-tour "Participatory" flag.** Owner-managed tours hide the public "Suggest a
+  correction" link (contributors approve their own cards instead); curated tours keep it.
+- **`privacyUrl` config** (`VITE_PRIVACY_URL`) — a privacy/consent policy link shown on
+  the approval page.
+
+### Changed
+- **Website / social fields accept a bare domain.** Typing `jharbourne.com` no longer
+  trips browser URL validation; it's stored as `https://jharbourne.com` so the public
+  link still works.
+- Admin location editor now hosts the owner-contact box under the map; contributor
+  address edits on a solo location flag the pin for re-checking.
+
+### Deployment notes
+- Run migrations **032–035** on each instance's Supabase (participants table, approval
+  flow + RPCs, approval fields, and the tour `participatory` column).
+- Set `VITE_PRIVACY_URL` for any deployment that runs the approval flow.
+
 ## [1.9.5] — 2026-07-25
 
 ### Fixed
