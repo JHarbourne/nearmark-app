@@ -103,7 +103,7 @@
             <h3 style="margin:0; font-size:15px; min-width:0;">Story <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
             <button v-if="storyForm.storyId" type="button" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addAnotherStory">+ Add another story</button>
           </div>
-          <StoryFields ref="fields" :key="storyKey" :story="storyForm" :contact="contact" :show-heading="false" />
+          <StoryFields ref="fields" :key="storyKey" :story="storyForm" :contact="contact" :show-heading="false" hide-contact />
         </template>
       </div>
 
@@ -134,6 +134,13 @@
           <label for="loc-coords" style="margin-top:10px;">Paste coordinates <span class="hint">lat, lng – e.g. copied from Google Maps</span></label>
           <input id="loc-coords" type="text" :value="coordsText" @change="pasteCoords($event.target.value)" placeholder="51.7607, 0.8369" />
         </div>
+
+        <!-- Owner contact + approval for the inline single story — kept here, under
+             the map, so it's reachable without scrolling the content form. Hidden
+             while this location has 2+ stories (each is approved on its own screen). -->
+        <div v-if="!multiStory" class="card" style="padding:18px;">
+          <OwnerContact :contact="contact" />
+        </div>
       </div>
     </div>
   </div>
@@ -146,6 +153,7 @@ import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 import StoryFields from '../components/StoryFields.vue'
+import OwnerContact from '../components/OwnerContact.vue'
 
 const cities = config.cities
 const mapCenter = config.mapCenter
@@ -196,7 +204,9 @@ const storyBaseline = ref(JSON.stringify(storyForm))
 // from the story form, never published). Loaded/persisted alongside the story. ──
 // contact_email/contact_mobile are editable; token/status/approved_at/approval_note
 // are read-only approval metadata (Phase 2) shown by StoryFields.
-const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null })
+// name/keep_details/address_changed are read-only approval fields the artist sets
+// via the /approve/<token> RPC (migration 034); surfaced by OwnerContact.
+const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null, name: null, keep_details: false, address_changed: false })
 let participantExisted = false
 const contactBaseline = ref(JSON.stringify(contact))
 // only the editable fields participate in the unsaved-changes check
@@ -206,6 +216,9 @@ function applyParticipantMeta(p) {
   contact.status = p?.status || null
   contact.approved_at = p?.approved_at || null
   contact.approval_note = p?.approval_note || null
+  contact.name = p?.name || null
+  contact.keep_details = !!p?.keep_details
+  contact.address_changed = !!p?.address_changed
 }
 async function loadInlineContact() {
   participantExisted = false
