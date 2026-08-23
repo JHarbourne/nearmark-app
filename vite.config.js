@@ -131,7 +131,7 @@ export default defineConfig(({ mode }) => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
           navigateFallback: '/index.html',
-          navigateFallbackDenylist: [/^\/admin/], // admin is online-only, not the public shell
+          navigateFallbackDenylist: [/^\/admin/, /^\/approve/], // admin + the approval page are online-only, not the public shell
           runtimeCaching: [
             {
               // Offline vector basemap: the per-deployment .pmtiles file. MapLibre
@@ -214,6 +214,7 @@ export default defineConfig(({ mode }) => {
         input: {
           app: resolve(__dirname, 'index.html'),
           admin: resolve(__dirname, 'admin.html'),
+          approve: resolve(__dirname, 'approve.html'),
         },
       },
     },

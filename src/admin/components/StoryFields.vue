@@ -298,6 +298,28 @@
           <input id="st-contact-mobile" type="tel" v-model="contact.contact_mobile" placeholder="07…" />
         </div>
       </div>
+
+      <!-- Approval status + the artist's private approval link (Phase 2). Shown
+           once a participant row exists (i.e. the story has been saved with a
+           contact) — the token drives the /approve/<token> page. -->
+      <div v-if="contact.token" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">
+        <span class="field-label" style="margin-top:0;">Approval
+          <span v-if="isApproved" class="badge" style="background:var(--green,#2FBF71); color:#fff; margin-left:8px;">Approved</span>
+          <span v-else class="badge" style="background:var(--amber,#E0A800); color:#fff; margin-left:8px;">Pending</span>
+        </span>
+        <p v-if="isApproved" class="muted" style="font-size:12.5px; margin:2px 0 0;">Approved by the artist{{ approvedDate ? ' · ' + approvedDate : '' }}.</p>
+        <p v-else class="muted" style="font-size:12.5px; margin:2px 0 0;">Waiting for the artist to approve. Send them the link below.</p>
+        <p v-if="contact.approval_note" style="font-size:12.5px; margin:8px 0 0; padding:8px 10px; background:var(--raised); border:1px solid var(--line); border-radius:8px; color:var(--ink-soft);">
+          <strong>Their note:</strong> {{ contact.approval_note }}
+        </p>
+        <label for="st-approve-link" style="margin-top:12px;">Approval link <span class="hint">private – send only to this artist</span></label>
+        <div class="media-row">
+          <div class="media-input solo">
+            <input id="st-approve-link" type="text" :value="approveLink" readonly @focus="$event.target.select()" />
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" @click="copyLink">{{ copied ? 'Copied ✓' : 'Copy' }}</button>
+        </div>
+      </div>
     </div>
 
     <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
@@ -331,6 +353,25 @@ const form = reactive(props.story)
 // Same laundering for the optional contact object, so v-model on it doesn't trip
 // eslint's no-mutating-props rule.
 const contact = props.contact ? reactive(props.contact) : null
+
+// ── approval status + private approval link (Phase 2) ──
+// Read-only display of the participant's approval state and the /approve/<token>
+// link. Reads from the same `contact` object (which carries the participant row's
+// token/status/approved_at/approval_note when one exists).
+const isApproved = computed(() => !!contact && (contact.status === 'approved' || !!contact.approved_at))
+const approvedDate = computed(() => (contact?.approved_at ? new Date(contact.approved_at).toLocaleDateString() : ''))
+const appOrigin = (config.publicUrl || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '')
+const approveLink = computed(() => (contact?.token ? `${appOrigin}/approve/${contact.token}` : ''))
+const copied = ref(false)
+let copiedTimer
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(approveLink.value)
+    copied.value = true
+    clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => { copied.value = false }, 2500)
+  } catch { window.prompt('Copy the approval link:', approveLink.value) }
+}
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
 const linkUrlLabel = computed(() => { try { return new URL(form.wikiUrl).hostname.replace(/^www\./, '') } catch { return '' } })
