@@ -71,10 +71,10 @@
           <input id="approve-name" type="text" v-model="name" placeholder="The name to show this is approved by you" autocomplete="name" />
 
           <label class="fld-label" for="approve-website">Website <span class="hint">optional · shown on your page</span></label>
-          <input id="approve-website" type="url" v-model="website" placeholder="https://…" inputmode="url" />
+          <input id="approve-website" type="text" v-model="website" placeholder="e.g. jharbourne.com" inputmode="url" autocapitalize="none" autocorrect="off" />
 
           <label class="fld-label" for="approve-social">Social media link <span class="hint">optional · shown on your page</span></label>
-          <input id="approve-social" type="url" v-model="social" placeholder="https://instagram.com/…" inputmode="url" />
+          <input id="approve-social" type="text" v-model="social" placeholder="e.g. instagram.com/yourname" inputmode="url" autocapitalize="none" autocorrect="off" />
 
           <label class="keep">
             <input type="checkbox" v-model="keep" />
@@ -139,6 +139,14 @@ const isShared = computed(() => !!row.value?.is_shared)
 const venueTitle = computed(() => row.value?.location_title || '')
 // Approve needs both the opt-in consent AND a name (the consent signature).
 const canApprove = computed(() => agreed.value && name.value.trim().length > 0)
+
+// Artists naturally type a bare domain ("jharbourne.com", "instagram.com/name").
+// Store it as a working link by adding https:// when there's no scheme; blank → null.
+function withScheme(v) {
+  const s = (v || '').trim()
+  if (!s) return null
+  return /^https?:\/\//i.test(s) ? s : `https://${s}`
+}
 
 // Read the token from the path (/approve/<token>, via the Vercel rewrite) and, as
 // a fallback for local dev where the rewrite isn't active, from ?token=.
@@ -224,8 +232,8 @@ async function submit() {
       p_token: token,
       p_note: note.value.trim() || null,
       p_name: name.value.trim() || null,
-      p_website: website.value.trim() || null,
-      p_social: social.value.trim() || null,
+      p_website: withScheme(website.value),
+      p_social: withScheme(social.value),
       p_keep: keep.value,
       // a shared venue's address is read-only here → never send an edit for it
       p_address: isShared.value ? null : (address.value.trim() || null),
