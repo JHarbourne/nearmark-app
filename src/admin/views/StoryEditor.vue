@@ -78,18 +78,29 @@ form.locationId = store.params.locationId // always bind to the parent
 const fields = ref(null)
 
 // ── private owner contact (participants table – never part of the story form) ──
-const contact = reactive({ contact_email: '', contact_mobile: '' })
+// contact_email/contact_mobile are editable; token/status/approved_at/approval_note
+// are read-only approval metadata (Phase 2) shown by StoryFields.
+const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null })
 let participantExisted = false
 const contactBaseline = ref(JSON.stringify(contact))
+// only the editable fields participate in the unsaved-changes check
+const contactEditable = () => JSON.stringify({ e: contact.contact_email, m: contact.contact_mobile })
+function applyParticipantMeta(p) {
+  contact.token = p?.token || null
+  contact.status = p?.status || null
+  contact.approved_at = p?.approved_at || null
+  contact.approval_note = p?.approval_note || null
+}
 async function loadContact() {
   if (!form.storyId) return
   const p = await store.getParticipant(form.storyId)
   if (p) {
     contact.contact_email = p.contact_email || ''
     contact.contact_mobile = p.contact_mobile || ''
+    applyParticipantMeta(p)
     participantExisted = true
   }
-  contactBaseline.value = JSON.stringify(contact)
+  contactBaseline.value = contactEditable()
 }
 
 // ── live preview: merge the story form with the parent location identity into the
@@ -109,7 +120,7 @@ const previewLoc = computed(() => ({
 
 // ── unsaved-changes guard ──
 const baseline = ref(JSON.stringify(form))
-const isDirty = () => JSON.stringify(form) !== baseline.value || JSON.stringify(contact) !== contactBaseline.value
+const isDirty = () => JSON.stringify(form) !== baseline.value || contactEditable() !== contactBaseline.value
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
 onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload); loadContact() })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
@@ -129,13 +140,14 @@ async function save() {
     // Persist the private owner contact once the story has an id. Upsert when
     // there's something to store, or when a record already exists (so clears stick).
     if (form.storyId && (contact.contact_email || contact.contact_mobile || participantExisted)) {
-      await store.saveParticipant(form.storyId, { contact_email: contact.contact_email, contact_mobile: contact.contact_mobile })
+      const saved = await store.saveParticipant(form.storyId, { contact_email: contact.contact_email, contact_mobile: contact.contact_mobile })
+      if (saved) applyParticipantMeta(saved) // capture the token/status so the approval link appears at once
       participantExisted = true
     }
     const inUse = new Set(fields.value?.inUseUrls() || [])
     for (const url of fields.value?.sessionUploads || []) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
     baseline.value = JSON.stringify(form)
-    contactBaseline.value = JSON.stringify(contact)
+    contactBaseline.value = contactEditable()
     flash.value = 'Saved ✓'
     clearTimeout(flashTimer)
     flashTimer = setTimeout(() => { flash.value = '' }, 4000)

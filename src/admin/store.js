@@ -276,8 +276,9 @@ export const store = reactive({
     try { return await db.getParticipant(storyId) } catch { return null }
   },
   async saveParticipant(storyId, contact) {
-    if (!storyId) return
-    await db.saveParticipant(storyId, contact)
+    if (!storyId) return null
+    const saved = await db.saveParticipant(storyId, contact)
+    return Array.isArray(saved) ? saved[0] : saved
   },
   // persist the given order as sort_order (1-based; lower = higher up)
   async reorderStories(stories) {

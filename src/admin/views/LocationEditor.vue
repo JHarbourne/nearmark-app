@@ -194,22 +194,34 @@ const storyBaseline = ref(JSON.stringify(storyForm))
 
 // ── private owner contact for the inline story (participants table – separate
 // from the story form, never published). Loaded/persisted alongside the story. ──
-const contact = reactive({ contact_email: '', contact_mobile: '' })
+// contact_email/contact_mobile are editable; token/status/approved_at/approval_note
+// are read-only approval metadata (Phase 2) shown by StoryFields.
+const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null })
 let participantExisted = false
 const contactBaseline = ref(JSON.stringify(contact))
+// only the editable fields participate in the unsaved-changes check
+const contactEditable = () => JSON.stringify({ e: contact.contact_email, m: contact.contact_mobile })
+function applyParticipantMeta(p) {
+  contact.token = p?.token || null
+  contact.status = p?.status || null
+  contact.approved_at = p?.approved_at || null
+  contact.approval_note = p?.approval_note || null
+}
 async function loadInlineContact() {
   participantExisted = false
   contact.contact_email = ''
   contact.contact_mobile = ''
+  applyParticipantMeta(null)
   if (storyForm.storyId) {
     const p = await store.getParticipant(storyForm.storyId)
     if (p) {
       contact.contact_email = p.contact_email || ''
       contact.contact_mobile = p.contact_mobile || ''
+      applyParticipantMeta(p)
       participantExisted = true
     }
   }
-  contactBaseline.value = JSON.stringify(contact)
+  contactBaseline.value = contactEditable()
 }
 // re-seed the inline story from the store's current first story (used when a
 // delete drops a multi-story location back to one).
@@ -234,7 +246,7 @@ const showTourHelp = ref(false)
 
 // ── unsaved-changes guard ──
 const baseline = ref(JSON.stringify(form))
-const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && (JSON.stringify(storyForm) !== storyBaseline.value || JSON.stringify(contact) !== contactBaseline.value))
+const isDirty = () => JSON.stringify(form) !== baseline.value || (!multiStory.value && (JSON.stringify(storyForm) !== storyBaseline.value || contactEditable() !== contactBaseline.value))
 function onBeforeUnload(e) { if (isDirty()) { e.preventDefault(); e.returnValue = '' } }
 onMounted(() => { store.registerDirtyCheck(isDirty, save); window.addEventListener('beforeunload', onBeforeUnload); loadInlineContact() })
 onUnmounted(() => { store.clearDirtyCheck(); window.removeEventListener('beforeunload', onBeforeUnload) })
@@ -339,13 +351,14 @@ async function saveInlineStory() {
   // persist the private owner contact once the story has an id (upsert when there's
   // something to store, or a record already exists so clears stick)
   if (s.storyId && (contact.contact_email || contact.contact_mobile || participantExisted)) {
-    await store.saveParticipant(s.storyId, { contact_email: contact.contact_email, contact_mobile: contact.contact_mobile })
+    const saved = await store.saveParticipant(s.storyId, { contact_email: contact.contact_email, contact_mobile: contact.contact_mobile })
+    if (saved) applyParticipantMeta(saved) // capture the token/status so the approval link appears at once
     participantExisted = true
   }
   const inUse = new Set(fields.value?.inUseUrls() || [])
   for (const url of fields.value?.sessionUploads || []) if (!inUse.has(url)) await store.removeMedia(url).catch(() => {})
   storyBaseline.value = JSON.stringify(s)
-  contactBaseline.value = JSON.stringify(contact)
+  contactBaseline.value = contactEditable()
 }
 function back() { store.go('locations') }
 
