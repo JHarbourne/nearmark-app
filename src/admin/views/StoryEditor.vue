@@ -80,7 +80,9 @@ const fields = ref(null)
 // ── private owner contact (participants table – never part of the story form) ──
 // contact_email/contact_mobile are editable; token/status/approved_at/approval_note
 // are read-only approval metadata (Phase 2) shown by StoryFields.
-const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null })
+// name/keep_details/address_changed are read-only approval fields the artist sets
+// via the /approve/<token> RPC (migration 034); surfaced by OwnerContact.
+const contact = reactive({ contact_email: '', contact_mobile: '', token: null, status: null, approved_at: null, approval_note: null, name: null, keep_details: false, address_changed: false })
 let participantExisted = false
 const contactBaseline = ref(JSON.stringify(contact))
 // only the editable fields participate in the unsaved-changes check
@@ -90,6 +92,9 @@ function applyParticipantMeta(p) {
   contact.status = p?.status || null
   contact.approved_at = p?.approved_at || null
   contact.approval_note = p?.approval_note || null
+  contact.name = p?.name || null
+  contact.keep_details = !!p?.keep_details
+  contact.address_changed = !!p?.address_changed
 }
 async function loadContact() {
   if (!form.storyId) return

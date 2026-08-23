@@ -18,12 +18,14 @@
 begin;
 
 -- ── tokens: give every participant a hard-to-guess token ─────────────────────
--- 12 random bytes → 24 hex chars. Default for new rows; backfill any existing
--- rows that predate this (migration 032 left token nullable + unused).
+-- a random UUID with the hyphens stripped → 32 hex chars. (gen_random_uuid is on
+-- Supabase's search path; pgcrypto's gen_random_bytes is not.) Default for new
+-- rows; backfill any existing rows that predate this (migration 032 left token
+-- nullable + unused).
 alter table public.participants
-  alter column token set default encode(gen_random_bytes(12), 'hex');
+  alter column token set default replace(gen_random_uuid()::text, '-', '');
 update public.participants
-  set token = encode(gen_random_bytes(12), 'hex')
+  set token = replace(gen_random_uuid()::text, '-', '')
   where token is null;
 
 -- ── the participant's free-text "something looks wrong" note (optional) ──────

@@ -284,43 +284,9 @@
     <!-- Owner contact — private operational record (resident / artist behind this
          story). Stored in a separate `participants` table (never in the story, never
          published, never exposed to the public API). Rendered only when the parent
-         supplies a reactive `contact` object. -->
-    <div v-if="contact" style="margin:22px 0 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
-      <span class="field-label" style="margin-top:0;">Owner contact <span class="hint">private – never published</span></span>
-      <p class="muted" style="font-size:12.5px; margin:2px 0 12px;">The resident or artist behind this story. Kept on record for organising and consent – never shown in the app.</p>
-      <div class="field-row">
-        <div>
-          <label for="st-contact-email">Email</label>
-          <input id="st-contact-email" type="email" v-model="contact.contact_email" placeholder="name@example.com" />
-        </div>
-        <div>
-          <label for="st-contact-mobile">Mobile</label>
-          <input id="st-contact-mobile" type="tel" v-model="contact.contact_mobile" placeholder="07…" />
-        </div>
-      </div>
-
-      <!-- Approval status + the artist's private approval link (Phase 2). Shown
-           once a participant row exists (i.e. the story has been saved with a
-           contact) — the token drives the /approve/<token> page. -->
-      <div v-if="contact.token" style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">
-        <span class="field-label" style="margin-top:0;">Approval
-          <span v-if="isApproved" class="badge" style="background:var(--green,#2FBF71); color:#fff; margin-left:8px;">Approved</span>
-          <span v-else class="badge" style="background:var(--amber,#E0A800); color:#fff; margin-left:8px;">Pending</span>
-        </span>
-        <p v-if="isApproved" class="muted" style="font-size:12.5px; margin:2px 0 0;">Approved by the artist{{ approvedDate ? ' · ' + approvedDate : '' }}.</p>
-        <p v-else class="muted" style="font-size:12.5px; margin:2px 0 0;">Waiting for the artist to approve. Send them the link below.</p>
-        <p v-if="contact.approval_note" style="font-size:12.5px; margin:8px 0 0; padding:8px 10px; background:var(--raised); border:1px solid var(--line); border-radius:8px; color:var(--ink-soft);">
-          <strong>Their note:</strong> {{ contact.approval_note }}
-        </p>
-        <label for="st-approve-link" style="margin-top:12px;">Approval link <span class="hint">private – send only to this artist</span></label>
-        <div class="media-row">
-          <div class="media-input solo">
-            <input id="st-approve-link" type="text" :value="approveLink" readonly @focus="$event.target.select()" />
-          </div>
-          <button type="button" class="btn btn-ghost btn-sm" @click="copyLink">{{ copied ? 'Copied ✓' : 'Copy' }}</button>
-        </div>
-      </div>
-    </div>
+         supplies a reactive `contact` object AND doesn't host the box itself (the
+         Location editor sets `hide-contact` and renders OwnerContact under its map). -->
+    <OwnerContact v-if="contact && !hideContact" :contact="contact" style="margin-top:22px;" />
 
     <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
   </div>
@@ -333,6 +299,7 @@ import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { isPlayableVideo } from '../../lib/video.js'
 import { config, wikiDomain } from '../../config.js'
 import MediaPicker from './MediaPicker.vue'
+import OwnerContact from './OwnerContact.vue'
 
 const props = defineProps({
   // the story being edited – a reactive object owned by the parent; this
@@ -344,6 +311,9 @@ const props = defineProps({
   // owned by the parent and persisted to the separate `participants` table. When
   // null (default) the Owner contact group is not rendered.
   contact: { type: Object, default: null },
+  // when true, don't render the Owner contact / approval box here — the host
+  // (the Location editor) renders it in its own column under the map instead.
+  hideContact: { type: Boolean, default: false },
 })
 
 // reactive() on an already-reactive proxy returns the SAME proxy, so `form`
@@ -354,24 +324,8 @@ const form = reactive(props.story)
 // eslint's no-mutating-props rule.
 const contact = props.contact ? reactive(props.contact) : null
 
-// ── approval status + private approval link (Phase 2) ──
-// Read-only display of the participant's approval state and the /approve/<token>
-// link. Reads from the same `contact` object (which carries the participant row's
-// token/status/approved_at/approval_note when one exists).
-const isApproved = computed(() => !!contact && (contact.status === 'approved' || !!contact.approved_at))
-const approvedDate = computed(() => (contact?.approved_at ? new Date(contact.approved_at).toLocaleDateString() : ''))
-const appOrigin = (config.publicUrl || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '')
-const approveLink = computed(() => (contact?.token ? `${appOrigin}/approve/${contact.token}` : ''))
-const copied = ref(false)
-let copiedTimer
-async function copyLink() {
-  try {
-    await navigator.clipboard.writeText(approveLink.value)
-    copied.value = true
-    clearTimeout(copiedTimer)
-    copiedTimer = setTimeout(() => { copied.value = false }, 2500)
-  } catch { window.prompt('Copy the approval link:', approveLink.value) }
-}
+// The owner-contact + approval box (including the /approve/<token> link) now lives
+// in OwnerContact.vue, rendered above from the same `contact` object.
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
 const linkUrlLabel = computed(() => { try { return new URL(form.wikiUrl).hostname.replace(/^www\./, '') } catch { return '' } })
