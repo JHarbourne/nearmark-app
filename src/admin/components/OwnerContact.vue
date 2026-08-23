@@ -55,6 +55,7 @@
              a mobile is on record, so there's a number to text / WhatsApp. -->
         <a v-if="contact.contact_mobile" :href="smsHref" class="btn btn-ghost btn-sm send-btn">Text</a>
         <a v-if="contact.contact_mobile" :href="waHref" target="_blank" rel="noopener" class="btn btn-ghost btn-sm send-btn">WhatsApp</a>
+        <a v-if="contact.contact_email" :href="mailHref" class="btn btn-ghost btn-sm send-btn">Email</a>
       </div>
     </div>
 
@@ -90,6 +91,8 @@ const approveLink = computed(() => (contact.token ? `${appOrigin}/approve/${cont
 const sendMessage = computed(() => `Hi! Here’s your ${config.appName} listing to check over and approve when you get a moment: ${approveLink.value} – thank you!`)
 // SMS: the `?&body=` form is the one that works on both iOS and Android.
 const smsHref = computed(() => `sms:${contact.contact_mobile || ''}?&body=${encodeURIComponent(sendMessage.value)}`)
+// Email: opens the mail client pre-filled, when an email is on record.
+const mailHref = computed(() => `mailto:${contact.contact_email || ''}?subject=${encodeURIComponent(config.appName + ' – please check your listing')}&body=${encodeURIComponent(sendMessage.value)}`)
 // WhatsApp: needs an international number. Assumes UK — strip spaces/punctuation
 // and turn a leading 0 into 44. (Non-UK numbers would need their own code.)
 const waHref = computed(() => {

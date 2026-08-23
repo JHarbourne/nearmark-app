@@ -66,13 +66,14 @@
 
           <!-- your details -->
           <h2 class="title" style="font-size:20px; margin-top:22px;">Your details</h2>
-          <label class="fld-label" for="approve-name">Your name <span class="req">required</span></label>
+          <p class="lead" style="margin:0 0 2px;">Your <strong>website</strong> and <strong>social link</strong> will appear on your public page. Your <strong>name</strong> is just so we know who approved – it’s not shown.</p>
+          <label class="fld-label" for="approve-name">Your name <span class="req">required</span> <span class="hint">· private, not shown</span></label>
           <input id="approve-name" type="text" v-model="name" placeholder="The name to show this is approved by you" autocomplete="name" />
 
-          <label class="fld-label" for="approve-website">Website <span class="hint">optional</span></label>
+          <label class="fld-label" for="approve-website">Website <span class="hint">optional · shown on your page</span></label>
           <input id="approve-website" type="url" v-model="website" placeholder="https://…" inputmode="url" />
 
-          <label class="fld-label" for="approve-social">Social media link <span class="hint">optional</span></label>
+          <label class="fld-label" for="approve-social">Social media link <span class="hint">optional · shown on your page</span></label>
           <input id="approve-social" type="url" v-model="social" placeholder="https://instagram.com/…" inputmode="url" />
 
           <label class="keep">
