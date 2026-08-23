@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { store } from '../store.js'
 import { config } from '../../config.js'
 
@@ -92,7 +92,15 @@ const q = ref('')
 const cityFilter = ref('')
 const statusFilter = ref('')
 const groupBy = ref('tour') // 'tour' | 'none'
-const collapsed = reactive({})
+// Collapsed tour groups, remembered across reloads (keyed by group key g.key).
+const COLLAPSED_KEY = 'admin.locationsCollapsed'
+function loadCollapsed() {
+  try { return JSON.parse(localStorage.getItem(COLLAPSED_KEY)) || {} } catch { return {} }
+}
+const collapsed = reactive(loadCollapsed())
+watch(collapsed, (v) => {
+  try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(v)) } catch { /* storage unavailable / full — ignore */ }
+}, { deep: true })
 function toggle(k) { collapsed[k] = !collapsed[k] }
 
 const cities = computed(() => [...new Set(store.locations.map((l) => l.city))])

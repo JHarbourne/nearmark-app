@@ -69,13 +69,18 @@ label, .field-label { display: block; font-size: 13px; font-weight: 600; margin:
    to the larger body size. */
 .hint { font-size: 13px; font-weight: 400; color: var(--muted); }
 label .hint, .field-label .hint { font-weight: 400; color: var(--muted); }
-input[type=text], input[type=email], input[type=password], input[type=url], input[type=number], input[type=date], select, textarea {
+input[type=text], input[type=email], input[type=tel], input[type=password], input[type=url], input[type=number], input[type=date], select, textarea {
   width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; font-family: inherit; font-size: 14px; background: #fff; color: var(--ink);
 }
-/* single-line fields + selects share one height so text inputs and pulldowns line up */
-input[type=text], input[type=email], input[type=password], input[type=url], input[type=number], input[type=date], select { height: 42px; }
+/* single-line fields + selects share one height so text inputs and pulldowns line up
+   (tel was missing here, which left Mobile shorter than the styled Email beside it) */
+input[type=text], input[type=email], input[type=tel], input[type=password], input[type=url], input[type=number], input[type=date], select { height: 42px; }
 textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Two-up field pairs. Each cell (label + input) is a row-subgrid spanning two shared
+   rows, so the inputs line up horizontally and share height even when one label wraps
+   to two lines. Column gap only — the label's own top margin spaces the rows. */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.field-row > div { display: grid; grid-template-rows: subgrid; grid-row: span 2; align-content: start; }
 .swatch { width: 30px; height: 30px; padding: 0; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
 .swatch.sel { box-shadow: 0 0 0 2px var(--ink); }
 .swatch:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -104,6 +109,8 @@ tr.row-clickable:hover { background: var(--line); }
   /* collapse the editor two-column grids and field pairs to one column */
   .editor-cols { grid-template-columns: 1fr !important; }
   .field-row { grid-template-columns: 1fr !important; }
+  /* one column: drop the row-subgrid so each pair just stacks in normal flow */
+  .field-row > div { display: block; }
   /* Narrow screens: a multi-column table can't fit a phone, so stack each row
      into a labelled card (label ← value) instead of a horizontal scroll that
      hides the right-hand columns off-screen. Each <td> carries a data-label. */
