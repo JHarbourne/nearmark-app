@@ -59,6 +59,7 @@ export const config = {
   contentSourceLabel: pick(env.VITE_CONTENT_SOURCE_LABEL, ''), // e.g. 'example.org' – blank hides the credit line
   contentSourceUrl: pick(env.VITE_CONTENT_SOURCE_URL, ''),     // optional link on the content-source label
   feedbackUrl: pick(env.VITE_FEEDBACK_URL, 'https://nearmark.co.uk/feedback'), // admin "Suggest an improvement" link; override or set '' to hide
+  privacyUrl: pick(env.VITE_PRIVACY_URL, ''),                  // privacy/consent policy link shown on the /approve page; blank hides the link
   // Public story-card "Suggest a correction" link → opens the device mail app
   // (mailto:) to this address. Blank hides the link, so an unconfigured fork
   // ships no contact address. Per deployment: e.g. jonathan@lgbthistoryuk.org.

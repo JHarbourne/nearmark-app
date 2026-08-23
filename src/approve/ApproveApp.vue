@@ -53,8 +53,7 @@
         <form v-else class="panel" @submit.prevent="submit">
           <h2 class="title" style="font-size:20px;">Your approval</h2>
           <p class="lead">
-            By approving, you consent to us publishing this. We keep your details only for the trail and you can ask us to remove them — see the
-            <a class="link" href="/privacy" target="_blank" rel="noopener">privacy policy</a>.
+            By approving, you consent to us publishing this. We keep your details only for the trail and you can ask us to remove them<template v-if="privacyUrl"> — see the <a class="link" :href="privacyUrl" target="_blank" rel="noopener">privacy policy</a></template>.
           </p>
 
           <label class="consent">
@@ -89,6 +88,7 @@ import { config } from '../config.js'
 const appName = config.appName
 const orgName = config.orgName
 const platformName = config.platformName
+const privacyUrl = config.privacyUrl
 
 // state machine: loading → (notfound | form | approved | done)
 const state = ref('loading')
