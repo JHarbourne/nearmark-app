@@ -268,6 +268,17 @@ export const store = reactive({
     this.logActivity('Deleted story', story.heading)
     await this.load()
   },
+  // ── participants (private per-story owner contact; migration 032) ──
+  // Defensive: a missing participants table (pre-migration project) returns null
+  // and never blocks a story save.
+  async getParticipant(storyId) {
+    if (!storyId) return null
+    try { return await db.getParticipant(storyId) } catch { return null }
+  },
+  async saveParticipant(storyId, contact) {
+    if (!storyId) return
+    await db.saveParticipant(storyId, contact)
+  },
   // persist the given order as sort_order (1-based; lower = higher up)
   async reorderStories(stories) {
     await Promise.all(stories.map((s, i) => (s.storyId ? db.setStoryOrder(s.storyId, i + 1) : null)))

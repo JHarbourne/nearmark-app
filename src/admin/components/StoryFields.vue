@@ -281,6 +281,25 @@
     <label for="st-notes">Internal notes <span class="hint">never shown in the app</span></label>
     <textarea id="st-notes" v-model="form.notesInternal" rows="2"></textarea>
 
+    <!-- Owner contact — private operational record (resident / artist behind this
+         story). Stored in a separate `participants` table (never in the story, never
+         published, never exposed to the public API). Rendered only when the parent
+         supplies a reactive `contact` object. -->
+    <div v-if="contact" style="margin:22px 0 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
+      <span class="field-label" style="margin-top:0;">Owner contact <span class="hint">private – never published</span></span>
+      <p class="muted" style="font-size:12.5px; margin:2px 0 12px;">The resident or artist behind this story. Kept on record for organising and consent – never shown in the app.</p>
+      <div class="field-row">
+        <div>
+          <label for="st-contact-email">Email</label>
+          <input id="st-contact-email" type="email" v-model="contact.contact_email" placeholder="name@example.com" />
+        </div>
+        <div>
+          <label for="st-contact-mobile">Mobile</label>
+          <input id="st-contact-mobile" type="tel" v-model="contact.contact_mobile" placeholder="07…" />
+        </div>
+      </div>
+    </div>
+
     <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
   </div>
 </template>
@@ -299,12 +318,19 @@ const props = defineProps({
   story: { type: Object, required: true },
   // hide the Heading field (single-story inline mode keeps heading = location title)
   showHeading: { type: Boolean, default: true },
+  // optional private owner-contact object ({ contact_email, contact_mobile }),
+  // owned by the parent and persisted to the separate `participants` table. When
+  // null (default) the Owner contact group is not rendered.
+  contact: { type: Object, default: null },
 })
 
 // reactive() on an already-reactive proxy returns the SAME proxy, so `form`
 // shares identity with props.story (edits flow to the parent) while reading as a
 // plain local to eslint's no-mutating-props rule.
 const form = reactive(props.story)
+// Same laundering for the optional contact object, so v-model on it doesn't trip
+// eslint's no-mutating-props rule.
+const contact = props.contact ? reactive(props.contact) : null
 
 const wikiPlaceholder = config.wikiBaseUrl ? `${config.wikiBaseUrl}…` : 'https://…'
 const linkUrlLabel = computed(() => { try { return new URL(form.wikiUrl).hostname.replace(/^www\./, '') } catch { return '' } })

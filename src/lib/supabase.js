@@ -252,7 +252,7 @@ export async function computeWalkingRoute(coordinates) {
 }
 
 // parse the "Label | https://url" per-line links field into [{ label, url }]
-function parseLinks(raw) {
+export function parseLinks(raw) {
   if (!raw) return []
   return raw.split('\n').map((line) => {
     const i = line.indexOf('|')
@@ -452,6 +452,18 @@ export const db = {
   updateStory: (storyId, s) => run(supabase.from('stories').update(storyToRow(s)).eq('id', storyId).select()),
   deleteStory: (storyId) => run(supabase.from('stories').delete().eq('id', storyId)),
   setStoryOrder: (storyId, order) => run(supabase.from('stories').update({ sort_order: order }).eq('id', storyId)),
+  // ── participants (private per-story owner contact; migration 032) ──
+  // Private by RLS: authenticated admins only, never the anon/public API.
+  getParticipant: async (storyId) => {
+    const { data, error } = await supabase.from('participants').select('*').eq('story_id', storyId).maybeSingle()
+    if (error) throw new Error(error.message)
+    return data || null
+  },
+  saveParticipant: (storyId, { contact_email, contact_mobile }) =>
+    run(supabase.from('participants').upsert(
+      { story_id: storyId, contact_email: contact_email || null, contact_mobile: contact_mobile || null },
+      { onConflict: 'story_id' },
+    ).select()),
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),

@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_fOLs7tcBHhXmkZZgotuXyZ3yLgEC",
+      "name": "tollesbury-app",
+      "directory": ".",
+      "orgId": "team_kRwSOJKhOtCOKgdezLqfPumS"
+    }
+  ]
+}
