@@ -66,6 +66,11 @@
           <span>Show this credit on the cover <span class="hint">off = kept on record, hidden in the app</span></span>
         </label>
 
+        <label style="display:flex; align-items:center; gap:9px; margin-top:2px; font-weight:500; cursor:pointer;">
+          <input type="checkbox" v-model="form.participatory" />
+          <span>Participatory tour <span class="hint">owners/artists approve their own cards · hides the public "Suggest a correction" link</span></span>
+        </label>
+
         <label for="tour-duration">Estimated duration <span class="hint">mins · blank = auto</span></label>
         <input id="tour-duration" type="number" v-model.number="form.durationOverrideMins" :placeholder="`auto: ${autoMins} min`" min="0" />
 
@@ -178,7 +183,7 @@ const canEdit = computed(() => !existing || store.canEditTour(existing)) // tour
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   id: 'tour-' + Math.random().toString(36).slice(2, 8), recordId: undefined,
   title: '', city: config.cities[0], theme: '', description: '', coverImageUrl: '',
-  status: 'draft', stopIds: [], stopOverrides: {}, durationOverrideMins: null,
+  status: 'draft', participatory: false, stopIds: [], stopOverrides: {}, durationOverrideMins: null,
   coverPosition: '50% 50%', coverCredit: '', coverCreditUrl: '', coverAlt: '', showCoverCredit: true,
   eventStart: null, eventEnd: null, takedownAt: null, routeGeometry: null,
 })

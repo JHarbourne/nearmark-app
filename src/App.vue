@@ -101,6 +101,7 @@
           :audio-on="settings.audioOn"
           :show-continue="showContinue"
           :continue-label="continueLabel"
+          :allow-feedback="!activeTour?.participatory"
           @close="closeStory"
           @open-related="openStory"
           @continue="continueStop"

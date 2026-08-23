@@ -197,6 +197,7 @@ function rowToTour(r) {
 
     coverAlt: r.cover_alt || '',
     status: r.status || 'draft',
+    participatory: r.participatory === true, // migration 035; hides the public "Suggest a correction" link
     stopIds: r.stop_ids || [],
     stopOverrides: r.stop_overrides || {}, // { slug: { title, blurb } } – per-tour title/blurb
     routeGeometry: r.route_geometry || null, // [[lat,lng],…] road-following path, or null → straight lines
@@ -222,6 +223,7 @@ function tourToRow(t) {
     show_cover_credit: t.showCoverCredit !== false,
     cover_alt: t.coverAlt || null,
     status: t.status || 'draft',
+    participatory: t.participatory === true, // migration 035
     stop_ids: t.stopIds || [],
     stop_overrides: t.stopOverrides && Object.keys(t.stopOverrides).length ? t.stopOverrides : null,
     route_geometry: t.routeGeometry && t.routeGeometry.length ? t.routeGeometry : null,
