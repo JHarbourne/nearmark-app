@@ -51,8 +51,18 @@
           <input id="oc-approve-link" type="text" :value="approveLink" readonly @focus="$event.target.select()" />
         </div>
         <button type="button" class="btn btn-ghost btn-sm" @click="copyLink">{{ copied ? 'Copied ✓' : 'Copy' }}</button>
+        <!-- one-tap send, pre-filled with a friendly message + the link. Only when
+             a mobile is on record, so there's a number to text / WhatsApp. -->
+        <a v-if="contact.contact_mobile" :href="smsHref" class="btn btn-ghost btn-sm send-btn">Text</a>
+        <a v-if="contact.contact_mobile" :href="waHref" target="_blank" rel="noopener" class="btn btn-ghost btn-sm send-btn">WhatsApp</a>
       </div>
     </div>
+
+    <!-- No token yet (no participant row saved) → tell the organiser how to get one,
+         instead of the whole approval block silently vanishing. -->
+    <p v-else class="muted" style="font-size:12.5px; margin:16px 0 0; padding-top:14px; border-top:1px solid var(--line);">
+      Save a contact and the approval link will appear here.
+    </p>
   </div>
 </template>
 
@@ -76,6 +86,17 @@ const approvedDate = computed(() => (contact.approved_at ? new Date(contact.appr
 const appOrigin = (config.publicUrl || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '')
 const approveLink = computed(() => (contact.token ? `${appOrigin}/approve/${contact.token}` : ''))
 
+// A friendly, pre-filled message for the one-tap Text / WhatsApp buttons.
+const sendMessage = computed(() => `Hi! Here’s your ${config.appName} listing to check over and approve when you get a moment: ${approveLink.value} – thank you!`)
+// SMS: the `?&body=` form is the one that works on both iOS and Android.
+const smsHref = computed(() => `sms:${contact.contact_mobile || ''}?&body=${encodeURIComponent(sendMessage.value)}`)
+// WhatsApp: needs an international number. Assumes UK — strip spaces/punctuation
+// and turn a leading 0 into 44. (Non-UK numbers would need their own code.)
+const waHref = computed(() => {
+  const intl = String(contact.contact_mobile || '').replace(/[^\d]/g, '').replace(/^0/, '44')
+  return `https://wa.me/${intl}?text=${encodeURIComponent(sendMessage.value)}`
+})
+
 const copied = ref(false)
 let copiedTimer
 async function copyLink() {
@@ -94,4 +115,6 @@ async function copyLink() {
 .media-row { display: flex; align-items: center; gap: 8px; }
 .media-row > .media-input { flex: 1; min-width: 0; }
 .media-row > .btn { flex-shrink: 0; }
+/* anchors styled as buttons (Text / WhatsApp): match the .btn look + centre content */
+.send-btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 </style>
