@@ -135,7 +135,7 @@
           </button>
 
           <!-- unobtrusive "spotted an error?" mailto at the very foot of the card -->
-          <div v-if="feedbackHref" style="margin-top: 22px; text-align: center;">
+          <div v-if="feedbackHref && allowFeedback && !embedded" style="margin-top: 22px; text-align: center;">
             <a :href="feedbackHref" :style="feedbackLink" @click="track('feedback_clicked', { location_id: loc.id, title: loc.title })">Suggest a correction or addition</a>
           </div>
         </div>
@@ -168,6 +168,10 @@ const props = defineProps({
   // no fixed bottom-sheet overlay, no close/continue controls, no modal focus
   // trap / Escape / pull-to-dismiss. All normal behaviour is otherwise unchanged.
   embedded: { type: Boolean, default: false },
+  // Participatory tours (Arts Trails) let owners/artists approve their own cards,
+  // so the public isn't invited to suggest edits. Default true = curated tour
+  // behaviour (link shown). App.vue passes !activeTour.participatory.
+  allowFeedback: { type: Boolean, default: true },
 })
 const emit = defineEmits(['close', 'open-related', 'continue'])
 
