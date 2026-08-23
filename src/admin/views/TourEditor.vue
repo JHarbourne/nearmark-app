@@ -66,9 +66,9 @@
           <span>Show this credit on the cover <span class="hint">off = kept on record, hidden in the app</span></span>
         </label>
 
-        <label style="display:flex; align-items:center; gap:9px; margin-top:2px; font-weight:500; cursor:pointer;">
-          <input type="checkbox" v-model="form.participatory" />
-          <span>Participatory tour <span class="hint">owners/artists approve their own cards · hides the public "Suggest a correction" link</span></span>
+        <label class="participatory-toggle">
+          <input type="checkbox" v-model="form.participatory" class="big-check" />
+          <span><strong>Participatory tour</strong><br><span class="hint">owners/artists approve their own cards · hides the public "Suggest a correction" link</span></span>
         </label>
 
         <label for="tour-duration">Estimated duration <span class="hint">mins · blank = auto</span></label>
@@ -391,4 +391,18 @@ function back() { store.go('tours') }
 /* once the columns stack (≤860px, see styles.css) the map sits below the stops,
    where sticking it would fight the natural flow – so pin only on wide screens. */
 @media (max-width: 860px) { .map-sticky { position: static; max-height: none; overflow: visible; } }
+
+/* Participatory tour — a tour-level mode switch, framed + with a larger checkbox
+   so it doesn't read as an afterthought among the plain fields. */
+.participatory-toggle {
+  display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
+  margin: 10px 0 4px; padding: 13px 15px;
+  border: 1px solid var(--line); border-radius: 12px; font-weight: 500;
+}
+.participatory-toggle:hover { border-color: var(--violet); }
+.participatory-toggle .hint { font-weight: 400; }
+.big-check {
+  width: 22px; height: 22px; flex-shrink: 0; margin: 1px 0 0;
+  accent-color: var(--violet); cursor: pointer;
+}
 </style>
