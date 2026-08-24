@@ -53,7 +53,7 @@
         <form v-else class="panel" @submit.prevent="submit">
           <!-- where you'll be -->
           <h2 class="title" style="font-size:20px;">Where you’ll be</h2>
-          <p v-if="venueTitle" class="lead" style="margin-bottom:10px;"><strong>{{ venueTitle }}</strong></p>
+          <p v-if="showVenueTitle" class="lead" style="margin-bottom:10px;"><strong>{{ venueTitle }}</strong></p>
           <template v-if="isShared">
             <p class="ro-address">{{ address || 'No address on record.' }}</p>
             <p class="hint-line">This location is shared with other stories, so its address is fixed. If it needs changing, mention it in the note lower down.</p>
@@ -137,6 +137,14 @@ const error = ref('')
 
 const isShared = computed(() => !!row.value?.is_shared)
 const venueTitle = computed(() => row.value?.location_title || '')
+// Show the bold venue name only when it adds something the address doesn't already
+// say. For a studio whose title *is* its address ("16 Orchard Close" with address
+// "16 Orchard Close, Tollesbury") this would otherwise print the address twice.
+const showVenueTitle = computed(() => {
+  const t = venueTitle.value.trim().toLowerCase()
+  const a = (address.value || '').trim().toLowerCase()
+  return !!t && !a.startsWith(t)
+})
 // Approve needs both the opt-in consent AND a name (the consent signature).
 const canApprove = computed(() => agreed.value && name.value.trim().length > 0)
 
