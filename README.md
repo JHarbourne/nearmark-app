@@ -207,6 +207,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_COMPLETION_MESSAGE` | Message on the "tour complete" screen |
 | `VITE_STORY_LINK_LABEL` | Label for a location's external link, e.g. `Visit the artist’s website` (the link hides when a location has no URL) |
 | `VITE_FEEDBACK_EMAIL` | Recipient for the story card's "Suggest a correction" `mailto:` link, e.g. `you@example.org` (blank hides the link) |
+| `VITE_PRIVACY_URL` | Privacy/consent policy link shown on the `/approve/<token>` approval page (blank hides the link). See [`docs/approval-flow.md`](docs/approval-flow.md) |
 | `VITE_CONTENT_SOURCE_LABEL` | Attribution credit, e.g. `example.org` (blank hides it) |
 | `VITE_CONTENT_SOURCE_URL` | Optional link on the content-source label (blank = plain text) |
 | `VITE_PLATFORM_NAME` | "Powered by …" footer attribution (default `Nearmark`) |

@@ -1,5 +1,11 @@
 # Consent & content intake — spec (draft)
 
+> **Update (1.10.0):** the **approval** half of this spec is now built and live — owners
+> preview and sign off a prepared draft card via a tokenised `/approve/<token>` page.
+> See [`approval-flow.md`](approval-flow.md). What remains deferred here is the **intake**
+> half: owners submitting their *own* text + images, rather than approving a card an
+> organiser prepared.
+
 **Status:** draft for build **after** the 2026 Tollesbury Arts Trail (feature-freeze/testing phase now).
 **Origin:** Anita (Arts Trail organiser) struggles to collect written permission from householders/artists
 opening their homes. Paper forms are slow to chase and weak to audit. Jonathan's proposal: one emailed,
