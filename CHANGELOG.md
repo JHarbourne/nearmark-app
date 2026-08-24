@@ -38,6 +38,14 @@ tour stays unpublished until the organiser publishes it.
   link still works.
 - Admin location editor now hosts the owner-contact box under the map; contributor
   address edits on a solo location flag the pin for re-checking.
+- **Bigger, framed "Participatory tour" toggle** in the tour editor, so a control that
+  changes a whole tour's public behaviour no longer reads as a tiny afterthought.
+
+### Fixed
+- **Approval page no longer prints the address twice.** A shared studio whose location
+  title *is* its address ("16 Orchard Close" with address "16 Orchard Close, Tollesbury")
+  showed two near-identical lines; the bold venue title is now suppressed when the
+  address already starts with it.
 
 ### Deployment notes
 - Run migrations **032–035** on each instance's Supabase (participants table, approval
