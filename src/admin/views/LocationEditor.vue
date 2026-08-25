@@ -139,6 +139,18 @@
           <input id="loc-coords" type="text" :value="coordsText" @change="pasteCoords($event.target.value)" placeholder="51.7607, 0.8369" />
         </div>
 
+        <!-- live preview of the single (inline) story's card. Hidden while this
+             location has 2+ stories — each is previewed on its own editor screen. -->
+        <div v-if="!multiStory" class="card" style="padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:15px;">Preview</h3>
+            <button type="button" class="btn btn-ghost btn-sm" @click="showLocPreview = !showLocPreview">{{ showLocPreview ? 'Hide' : 'Preview as story card' }}</button>
+          </div>
+          <div v-if="showLocPreview" style="margin-top:12px;">
+            <StoryCard :loc="previewLoc" embedded :audio-on="false" />
+          </div>
+        </div>
+
         <!-- Owner contact + approval for the inline single story — kept here, under
              the map, so it's reachable without scrolling the content form. Hidden
              while this location has 2+ stories (each is approved on its own screen). -->
@@ -157,10 +169,12 @@ import { reactive, ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { config } from '../../config.js'
+import { parseLinks } from '../../lib/supabase.js'
 import PlaceMap from '../components/PlaceMap.vue'
 import StoryFields from '../components/StoryFields.vue'
 import OwnerContact from '../components/OwnerContact.vue'
 import MoveStoryDialog from '../components/MoveStoryDialog.vue'
+import StoryCard from '../../components/StoryCard.vue'
 
 const cities = config.cities
 const mapCenter = config.mapCenter
@@ -206,6 +220,18 @@ if (storyForm.showPhotoCredit === undefined) storyForm.showPhotoCredit = true
 const fields = ref(null)               // <StoryFields> instance (inline mode only)
 const storyKey = ref(0)                // bump to remount StoryFields on a fresh seed
 const storyBaseline = ref(JSON.stringify(storyForm))
+
+// Live preview of the inline single story as its public card (parity with the
+// standalone Story editor). Merges the story form with the location identity —
+// heading → title — the way App.vue builds a card. The multi-story case previews
+// each story on its own editor screen instead.
+const showLocPreview = ref(false)
+const previewLoc = computed(() => ({
+  ...storyForm,
+  title: storyForm.heading || form.title || 'Untitled',
+  locationTitle: form.title || '',
+  linkList: parseLinks(storyForm.links),
+}))
 
 // ── private owner contact for the inline story (participants table – separate
 // from the story form, never published). Loaded/persisted alongside the story. ──
