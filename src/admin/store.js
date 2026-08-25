@@ -276,6 +276,16 @@ export const store = reactive({
     this.logActivity('Deleted story', story.heading)
     await this.load()
   },
+  // Move a saved story to another location (reassigns location_id). Its content and
+  // its owner/approval record travel with it. Placed at the end of the target.
+  async moveStory(story, toLocationRecordId) {
+    if (!story.storyId || !toLocationRecordId) return
+    const target = this.locations.find((l) => l.recordId === toLocationRecordId)
+    const nextOrder = (target?.stories || []).reduce((m, s) => Math.max(m, s.sortOrder || 0), 0) + 1
+    await db.moveStory(story.storyId, toLocationRecordId, nextOrder)
+    this.logActivity('Moved story', `${story.heading} → ${target?.title || 'another location'}`)
+    await this.load()
+  },
   // ── participants (private per-story owner contact; migration 032) ──
   // Defensive: a missing participants table (pre-migration project) returns null
   // and never blocks a story save.

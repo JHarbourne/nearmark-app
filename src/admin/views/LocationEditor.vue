@@ -88,6 +88,7 @@
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" aria-label="Move up">▲</button>
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === stories.length - 1" @click.stop="move(i, 1)" aria-label="Move down">▼</button>
               <button type="button" class="btn btn-ghost btn-sm" @click.stop="editStory(s)">Edit</button>
+              <button type="button" class="btn btn-ghost btn-sm" @click.stop="openMove(s)" title="Move this story to another location">Move</button>
               <button type="button" class="btn btn-danger btn-sm" @click.stop="removeStory(s)" aria-label="Delete story" title="Delete">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
               </button>
@@ -101,7 +102,10 @@
         <template v-else>
           <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px;">
             <h3 style="margin:0; font-size:15px; min-width:0;">Story <span class="hint" style="font-weight:400;">the content shown when this pin is&nbsp;tapped</span></h3>
-            <button v-if="storyForm.storyId" type="button" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" @click="addAnotherStory">+ Add another story</button>
+            <span v-if="storyForm.storyId" style="display:flex; gap:8px; flex-shrink:0;">
+              <button type="button" class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="openMove(storyForm)" title="Move this story to another location">Move</button>
+              <button type="button" class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="addAnotherStory">+ Add another story</button>
+            </span>
           </div>
           <StoryFields ref="fields" :key="storyKey" :story="storyForm" :contact="contact" :show-heading="false" hide-contact />
         </template>
@@ -143,6 +147,8 @@
         </div>
       </div>
     </div>
+
+    <MoveStoryDialog v-if="movingStory" :story="movingStory" :exclude-id="form.recordId" @close="movingStory = null" @select="onMoveSelect" />
   </div>
 </template>
 
@@ -154,6 +160,7 @@ import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
 import StoryFields from '../components/StoryFields.vue'
 import OwnerContact from '../components/OwnerContact.vue'
+import MoveStoryDialog from '../components/MoveStoryDialog.vue'
 
 const cities = config.cities
 const mapCenter = config.mapCenter
@@ -398,6 +405,30 @@ async function move(i, dir) {
   if (j < 0 || j >= list.length) return
   ;[list[i], list[j]] = [list[j], list[i]]
   try { await store.reorderStories(list) } catch (e) { alert('Reorder failed: ' + e.message) }
+}
+
+// ── move a story to another location ──
+// Operates on the saved DB record, so require it saved (and, for the inline single
+// story, unedited) before moving — otherwise the reload would drop unsaved edits.
+const movingStory = ref(null)
+function openMove(s) {
+  if (!s?.storyId) { alert('Save this story first, then you can move it.'); return }
+  if (!multiStory.value && isDirty()) { alert('Save your changes first, then move the story.'); return }
+  movingStory.value = s
+}
+async function onMoveSelect(targetRecordId) {
+  const s = movingStory.value
+  movingStory.value = null
+  if (!s || !targetRecordId) return
+  const target = store.locations.find((l) => l.recordId === targetRecordId)
+  try {
+    await store.moveStory(s, targetRecordId)
+    // moving the story out may drop this location back to a single (or no) story
+    if (stories.value.length <= 1) seedStoryForm()
+    flash.value = `Moved “${s.heading || 'story'}” to “${target?.title || 'the other location'}” ✓`
+    clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => { flash.value = '' }, 5000)
+  } catch (e) { alert('Move failed: ' + (e?.message || e)) }
 }
 </script>
 
