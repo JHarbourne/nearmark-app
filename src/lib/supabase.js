@@ -466,6 +466,28 @@ export const db = {
       { story_id: storyId, contact_email: contact_email || null, contact_mobile: contact_mobile || null },
       { onConflict: 'story_id' },
     ).select()),
+  // Every participant (owner) with its story + venue and approval state, for the
+  // admin Approvals overview + the per-location badges. Admin-only by RLS.
+  listApprovals: async () => {
+    const { data, error } = await supabase.from('participants').select(
+      'story_id, status, approved_at, name, approval_note, address_changed, contact_email, contact_mobile, token, stories!inner(heading, sort_order, location_id, locations!inner(title, slug))',
+    )
+    if (error) throw new Error(error.message)
+    return (data || []).map((r) => ({
+      storyId: r.story_id,
+      heading: r.stories?.heading || 'Untitled',
+      locationRecordId: r.stories?.location_id || null,   // locations.id (uuid) – maps to a location's recordId
+      locationTitle: r.stories?.locations?.title || '',
+      slug: r.stories?.locations?.slug || '',
+      status: r.status || 'pending',
+      approved: r.status === 'approved' || !!r.approved_at,
+      approvedAt: r.approved_at || null,
+      approvedBy: r.name || '',
+      note: r.approval_note || '',
+      addressChanged: !!r.address_changed,
+      hasContact: !!(r.contact_email || r.contact_mobile),
+    }))
+  },
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),
