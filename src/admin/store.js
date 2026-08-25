@@ -24,6 +24,7 @@ export const store = reactive({
 
   locations: [],
   tours: [],
+  approvals: [], // per-story owner-approval records (participatory tours); empty where the participants table isn't used
   loading: false,
   error: '',
   activity: [],
@@ -217,12 +218,19 @@ export const store = reactive({
       if (this.liveBackend) {
         this.role = await db.myRole().catch(() => null)
         this.notifications = await db.listNotifications().catch(() => [])
+        this.approvals = await db.listApprovals().catch(() => [])
       }
     } catch (e) {
       this.error = e.message
     } finally {
       this.loading = false
     }
+  },
+  // Re-pull just the owner-approval records (e.g. when the Approvals screen opens),
+  // so a fresh approval shows without a full reload. Safe no-op off a live backend.
+  async loadApprovals() {
+    if (!this.liveBackend) { this.approvals = []; return }
+    try { this.approvals = await db.listApprovals() } catch { /* keep what we have */ }
   },
   logActivity(action, title) {
     this.activity.unshift({ action, title, who: this.user?.email || 'admin', at: new Date() })
