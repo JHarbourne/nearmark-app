@@ -11,7 +11,10 @@
         <h1>{{ isNew ? 'New story' : 'Edit story' }}</h1>
         <p class="muted" style="margin:2px 0 0; font-size:13px;">for <strong>{{ location?.title || 'location' }}</strong></p>
       </div>
-      <button class="btn btn-ghost" @click="back">← Back to location</button>
+      <div style="display:flex; gap:8px; flex-shrink:0;">
+        <button class="btn btn-ghost" @click="back">← Back to location</button>
+        <button v-if="nextStory" class="btn btn-ghost" @click="goNext" :title="`Go to: ${nextStory.heading || 'next story'}`">Next story →</button>
+      </div>
     </div>
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:start;">
@@ -26,6 +29,7 @@
           <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save story' }}</button>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to location</button>
+          <button v-if="nextStory" class="btn btn-ghost btn-sm" @click="goNext" :title="`Go to: ${nextStory.heading || 'next story'}`">Next story →</button>
         </div>
       </div>
 
@@ -167,4 +171,14 @@ async function save() {
   } catch (e) { alert('Save failed: ' + e.message) } finally { saving.value = false }
 }
 function back() { store.go('locationEditor', { id: location.value?.id }) }
+
+// paging: the next story in this location (in sort order) → the "Next story" button,
+// so you can work through a multi-story venue without going back to the list each time.
+const siblings = computed(() => [...(location.value?.stories || [])].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)))
+const nextStory = computed(() => {
+  const i = siblings.value.findIndex((s) => s.storyId === form.storyId)
+  return i >= 0 ? siblings.value[i + 1] || null : null
+})
+// go() runs the unsaved-changes guard first, exactly like "Back to location".
+function goNext() { if (nextStory.value) store.go('story', { locationId: store.params.locationId, storyId: nextStory.value.storyId }) }
 </script>

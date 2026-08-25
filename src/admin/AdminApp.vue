@@ -48,7 +48,7 @@
       <div v-if="!store.liveBackend" class="demo-banner">
         Supabase is not configured – set <code>VITE_SUPABASE_URL</code> / <code>VITE_SUPABASE_ANON_KEY</code> to enable login and editing.
       </div>
-      <component :is="view" />
+      <component :is="view" :key="viewKey" />
     </main>
 
     <!-- unsaved-changes guard: a clear Save / Don't save / Cancel choice (replaces the
@@ -133,6 +133,9 @@ const nav = [
 ]
 const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement }
 const view = computed(() => views[store.route] || Dashboard)
+// Remount the view when the record it edits changes, so navigating record→record
+// within the same route (e.g. Story editor's "Next story") re-seeds the editor.
+const viewKey = computed(() => `${store.route}:${store.params.storyId || store.params.id || store.params.locationId || ''}`)
 
 // mobile drawer
 const menuOpen = ref(false)
