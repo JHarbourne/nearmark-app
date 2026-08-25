@@ -110,8 +110,10 @@
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11 L11 3 M5 3 H11 V9" stroke="var(--ink-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
 
+          <!-- Links list — no "Further reading" heading: the links are often social
+               (e.g. an Instagram profile), for which that label doesn't fit. The
+               admin field keeps its "Links / further reading" label. -->
           <div v-if="loc.linkList && loc.linkList.length" style="margin-top: 20px;">
-            <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 1.3px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 9px;">Further reading</div>
             <a v-for="(lnk, i) in loc.linkList" :key="i" :href="lnk.url" target="_blank" rel="noopener" :style="furtherLink" @click="track('further_reading_clicked', { location_id: loc.id, url: lnk.url })">
               <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ lnk.label }}</span>
               <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 11 L11 3 M5 3 H11 V9" stroke="var(--ink-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
