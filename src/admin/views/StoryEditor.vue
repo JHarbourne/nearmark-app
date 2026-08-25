@@ -16,7 +16,7 @@
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:start;">
       <div class="card" style="padding:22px;">
-        <StoryFields ref="fields" :story="form" :contact="contact" />
+        <StoryFields ref="fields" :story="form" :contact="contact" hide-contact />
 
         <div style="display:flex; align-items:center; gap:12px; margin-top:22px; flex-wrap:wrap;">
           <div class="seg-toggle" role="group" aria-label="Visibility">
@@ -40,6 +40,13 @@
             <StoryCard :loc="previewLoc" embedded :audio-on="false" />
           </div>
         </div>
+
+        <!-- Owner contact + approval for this story — in the right column (mirrors
+             the single-story layout in the Location editor) so it's reachable
+             without scrolling to the bottom of the content form. -->
+        <div class="card" style="padding:18px;">
+          <OwnerContact :contact="contact" />
+        </div>
       </div>
     </div>
   </div>
@@ -51,6 +58,7 @@ import { store } from '../store.js'
 import { HUE_OPTIONS } from '../../lib/tokens.js'
 import { parseLinks } from '../../lib/supabase.js'
 import StoryFields from '../components/StoryFields.vue'
+import OwnerContact from '../components/OwnerContact.vue'
 import StoryCard from '../../components/StoryCard.vue'
 import { config } from '../../config.js'
 
