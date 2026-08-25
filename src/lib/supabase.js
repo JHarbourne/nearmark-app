@@ -454,6 +454,10 @@ export const db = {
   updateStory: (storyId, s) => run(supabase.from('stories').update(storyToRow(s)).eq('id', storyId).select()),
   deleteStory: (storyId) => run(supabase.from('stories').delete().eq('id', storyId)),
   setStoryOrder: (storyId, order) => run(supabase.from('stories').update({ sort_order: order }).eq('id', storyId)),
+  // Reassign a story to a different location (keeps all its content + owner/approval,
+  // which travel with the story row). `order` places it at the end of the target.
+  moveStory: (storyId, toLocationRecordId, order) =>
+    run(supabase.from('stories').update({ location_id: toLocationRecordId, sort_order: order }).eq('id', storyId).select()),
   // ── participants (private per-story owner contact; migration 032) ──
   // Private by RLS: authenticated admins only, never the anon/public API.
   getParticipant: async (storyId) => {
