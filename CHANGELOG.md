@@ -8,6 +8,33 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.11.0] — 2026-08-25
+
+Admin tools for running a participatory tour at scale — seeing approvals at a
+glance, and moving content around freely.
+
+### Added
+- **Approvals overview.** A new **Approvals** screen (appears once a tour has
+  owner-approval records) shows every artist story with an approved/pending
+  summary + progress bar, an All/Pending/Approved filter, who approved and when,
+  a note flag and a re-pin flag, and an Open-to-story link — so an organiser can
+  see the whole board instead of opening each story. The **Locations list** also
+  gains a per-location `✅ 2/2` / `⏳ 1/3` roll-up column.
+- **Move a story to another location.** Stories can be reassigned (not just
+  deleted and rebuilt) via a **Move** button and a searchable location picker;
+  the story's content and its owner/approval record travel with it.
+- **"Next story" button** in the story editor, beside "Back to location", to page
+  through a multi-story venue without returning to the list each time.
+- **Preview card in the single-location editor.** The inline single-story editor
+  now has the same "Preview as story card" panel the standalone story editor has.
+
+### Changed
+- The **"Participatory tour" toggle** is bigger and framed, so a control that
+  changes a whole tour's public behaviour no longer reads as an afterthought.
+- The public story card **no longer shows a "Further reading" heading** above its
+  links — the label read oddly above a social/Instagram link. The links are
+  unchanged; the admin field keeps its "Links / further reading" label.
+
 ## [1.10.0] — 2026-08-24
 
 Artist / resident **self-service approval** for owner-managed tours (arts trails,
