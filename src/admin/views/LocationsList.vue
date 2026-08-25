@@ -29,11 +29,11 @@
     <div class="card">
       <table>
         <thead>
-          <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th class="right">Actions</th></tr>
+          <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th v-if="hasApprovals">Approvals</th><th class="right">Actions</th></tr>
         </thead>
         <tbody v-for="g in groups" :key="g.key">
           <tr v-if="g.title" class="group-head">
-            <th colspan="6" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
+            <th :colspan="hasApprovals ? 7 : 6" style="text-align:left; background:var(--bg2, rgba(0,0,0,0.03)); padding:0;">
               <button type="button" @click="toggle(g.key)" :aria-expanded="String(!collapsed[g.key])"
                 style="width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:10px 14px; font-size:14px; font-weight:700; color:inherit; display:flex; align-items:center; gap:8px;">
                 <span style="width:12px;">{{ collapsed[g.key] ? '▸' : '▾' }}</span>
@@ -57,6 +57,16 @@
               <td data-label="City">{{ l.city }}</td>
               <td class="muted" data-label="Period">{{ l.period }}</td>
               <td data-label="Status"><span class="badge" :class="l.status">{{ l.status }}</span></td>
+              <td v-if="hasApprovals" data-label="Approvals">
+                <span v-if="locApproval(l).total" class="badge"
+                  :style="locApproval(l).approved === locApproval(l).total
+                    ? { background:'var(--green,#1f9d57)', color:'#fff' }
+                    : { background:'var(--amber-soft,#fff6df)', color:'var(--amber-ink,#8a6d00)', border:'1px solid var(--amber,#E0A800)' }"
+                  :title="`${locApproval(l).approved} of ${locApproval(l).total} owner${locApproval(l).total > 1 ? 's' : ''} approved`">
+                  {{ locApproval(l).approved === locApproval(l).total ? '✅' : '⏳' }} {{ locApproval(l).approved }}/{{ locApproval(l).total }}
+                </span>
+                <span v-else class="muted">—</span>
+              </td>
               <td class="right" style="white-space:nowrap;" data-label="Actions">
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
@@ -69,7 +79,7 @@
           </template>
         </tbody>
         <tbody v-if="!totalShown">
-          <tr><td colspan="6" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
+          <tr><td :colspan="hasApprovals ? 7 : 6" class="muted" style="text-align:center; padding:30px;">No locations match.</td></tr>
         </tbody>
       </table>
     </div>
@@ -105,6 +115,21 @@ function toggle(k) { collapsed[k] = !collapsed[k] }
 
 const cities = computed(() => [...new Set(store.locations.map((l) => l.city))])
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
+
+// Owner-approval roll-up (participatory tours). The column + badges only appear
+// where there are approval records; a location's badge counts approved / total
+// among its stories that have an owner (a participant row).
+const hasApprovals = computed(() => store.approvals.length > 0)
+const apprByStory = computed(() => new Map(store.approvals.map((a) => [a.storyId, a])))
+function locApproval(l) {
+  let total = 0
+  let approved = 0
+  for (const s of l.stories || []) {
+    const a = s.storyId && apprByStory.value.get(s.storyId)
+    if (a) { total++; if (a.approved) approved++ }
+  }
+  return { total, approved }
+}
 
 function passes(l) {
   if (q.value && !l.title.toLowerCase().includes(q.value.toLowerCase())) return false

@@ -118,20 +118,24 @@ import TourEditor from './views/TourEditor.vue'
 import MediaLibrary from './views/MediaLibrary.vue'
 import Analytics from './views/Analytics.vue'
 import UserManagement from './views/UserManagement.vue'
+import Approvals from './views/Approvals.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
 const platformName = config.platformName
 const platformUrl = config.platformUrl
 const version = __APP_VERSION__
-const nav = [
+// Approvals is only relevant where owners approve their own listings (participatory
+// tours), so the link appears only once there are approval records to show.
+const nav = computed(() => [
   { route: 'dashboard', label: 'Dashboard' },
   { route: 'locations', label: 'Locations' },
   { route: 'tours', label: 'Tours' },
+  ...(store.approvals.length ? [{ route: 'approvals', label: 'Approvals' }] : []),
   { route: 'media', label: 'Media library' },
   { route: 'analytics', label: 'Analytics' },
   { route: 'users', label: 'User management' },
-]
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement }
+])
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals }
 const view = computed(() => views[store.route] || Dashboard)
 // Remount the view when the record it edits changes, so navigating record→record
 // within the same route (e.g. Story editor's "Next story") re-seeds the editor.

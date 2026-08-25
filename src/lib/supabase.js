@@ -454,6 +454,10 @@ export const db = {
   updateStory: (storyId, s) => run(supabase.from('stories').update(storyToRow(s)).eq('id', storyId).select()),
   deleteStory: (storyId) => run(supabase.from('stories').delete().eq('id', storyId)),
   setStoryOrder: (storyId, order) => run(supabase.from('stories').update({ sort_order: order }).eq('id', storyId)),
+  // Reassign a story to a different location (keeps all its content + owner/approval,
+  // which travel with the story row). `order` places it at the end of the target.
+  moveStory: (storyId, toLocationRecordId, order) =>
+    run(supabase.from('stories').update({ location_id: toLocationRecordId, sort_order: order }).eq('id', storyId).select()),
   // ── participants (private per-story owner contact; migration 032) ──
   // Private by RLS: authenticated admins only, never the anon/public API.
   getParticipant: async (storyId) => {
@@ -466,6 +470,28 @@ export const db = {
       { story_id: storyId, contact_email: contact_email || null, contact_mobile: contact_mobile || null },
       { onConflict: 'story_id' },
     ).select()),
+  // Every participant (owner) with its story + venue and approval state, for the
+  // admin Approvals overview + the per-location badges. Admin-only by RLS.
+  listApprovals: async () => {
+    const { data, error } = await supabase.from('participants').select(
+      'story_id, status, approved_at, name, approval_note, address_changed, contact_email, contact_mobile, token, stories!inner(heading, sort_order, location_id, locations!inner(title, slug))',
+    )
+    if (error) throw new Error(error.message)
+    return (data || []).map((r) => ({
+      storyId: r.story_id,
+      heading: r.stories?.heading || 'Untitled',
+      locationRecordId: r.stories?.location_id || null,   // locations.id (uuid) – maps to a location's recordId
+      locationTitle: r.stories?.locations?.title || '',
+      slug: r.stories?.locations?.slug || '',
+      status: r.status || 'pending',
+      approved: r.status === 'approved' || !!r.approved_at,
+      approvedAt: r.approved_at || null,
+      approvedBy: r.name || '',
+      note: r.approval_note || '',
+      addressChanged: !!r.address_changed,
+      hasContact: !!(r.contact_email || r.contact_mobile),
+    }))
+  },
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),
