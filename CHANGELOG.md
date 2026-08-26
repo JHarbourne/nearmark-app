@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.11.1] — 2026-08-25
+
+### Fixed
+- **Intro screens now scroll on short phones.** The location intro (Splash) and the "Discover" cover screen were fixed-height with no inner scroll. On Android phones — where the browser toolbar eats into the usable height — content could fall below the fold with no way to reach it, including the **Enable location** button and the Guided Tour / Discovery cards. Both screens now scroll when their content is taller than the viewport. Reported by a Tollesbury tester on Android.
+
 ## [1.11.0] — 2026-08-25
 
 Admin tools for running a participatory tour at scale — seeing approvals at a
