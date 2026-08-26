@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.11.2] — 2026-08-25
+
+### Fixed
+- **Settings gear icon looked lumpy / distorted.** Replaced the cog icon (on the cover screen and the map) with a cleaner, symmetric gear that reads crisply at small sizes on a phone.
+
 ## [1.11.1] — 2026-08-25
 
 ### Fixed
