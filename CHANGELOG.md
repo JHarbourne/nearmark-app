@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.2] — 2026-08-25
+
+### Fixed
+- **iPhone install steps match current iOS Safari's exact wording.** Corrected from a tester's device: *tap **Share** (or **•••** then **Share**) → find **"Add to Home Screen"** (tap **"View More"** or scroll if needed) → **"Add to Home Screen"**, then **Add***. Previous wording ("More", "Add") didn't match what's on screen.
+
 ## [1.12.1] — 2026-08-25
 
 ### Fixed

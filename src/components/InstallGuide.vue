@@ -36,21 +36,21 @@
           <ol :style="steps">
             <li :style="step">
               <span :style="num">1</span>
-              <span>In Safari's toolbar, tap the <strong>Share</strong>
+              <span>Tap the <strong>Share</strong>
                 <span :style="chip" aria-hidden="true"><svg width="11" height="13" viewBox="0 0 14 18" fill="none" style="vertical-align:-2px;"><path d="M7 1 L7 11 M3.5 4.5 L7 1 L10.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8 H1.5 V16.5 H12.5 V8 H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                or <strong>•••</strong>
+                button in Safari. If you don't see it, tap <strong>•••</strong>
                 <span :style="chip" aria-hidden="true"><svg width="15" height="6" viewBox="0 0 16 6" fill="currentColor"><circle cx="3" cy="3" r="1.7"/><circle cx="8" cy="3" r="1.7"/><circle cx="13" cy="3" r="1.7"/></svg></span>
-                button.</span>
+                then <strong>Share</strong>.</span>
             </li>
             <li :style="step">
               <span :style="num">2</span>
-              <span>Tap <strong>“Add to Home Screen”</strong>
+              <span>Find <strong>“Add to Home Screen”</strong>
                 <span :style="chip" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px;"><rect x="4" y="4" width="16" height="16" rx="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 9 V15 M9 12 H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-                – you may need to <strong>scroll down</strong> or tap <strong>“More”</strong> to see it.</span>
+                in the list – you may need to tap <strong>“View More”</strong> or scroll down to see it.</span>
             </li>
             <li :style="step">
               <span :style="num">3</span>
-              <span>Tap <strong>Add</strong>. It's now on your home screen, like any app.</span>
+              <span>Tap <strong>“Add to Home Screen”</strong>, then <strong>Add</strong> (top-right).</span>
             </li>
           </ol>
           <p :style="footnote">On iPhone this only works in <strong>Safari</strong>, not other browsers.</p>
