@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.1] — 2026-08-25
+
+### Fixed
+- **Install guide labels the phone and lets you switch.** The first version showed a single set of manual steps, which were wrong for some devices — newer iOS Safari uses a **•••** button (not a visible Share icon), and Android browsers each word it differently (Samsung Internet hides "Add to Home screen" behind "More ▾"). The guide now shows **iPhone / Android tabs** — defaulting to the detected phone but switchable — with honest, non-prescriptive steps (iPhone: *Share or ••• → "Add to Home Screen", scroll/"More"*; Android: *browser menu → "Add to Home screen"/"Install app"*). The real one-tap install still takes over wherever the browser offers it. Found during on-device testing.
+
 ## [1.12.0] — 2026-08-25
 
 ### Added
