@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.11.4] — 2026-08-25
+
+### Changed
+- **Install banner reassures it's the full app.** Some testers assumed a "real app" had to come from the App Store. The install prompt now says *"no App Store needed"* (iOS: "No App Store needed. Tap Share then Add to Home Screen"; other: "The full app – no App Store needed. Works offline.").
+
 ## [1.11.3] — 2026-08-25
 
 ### Fixed
