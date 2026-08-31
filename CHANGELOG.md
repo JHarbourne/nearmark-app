@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.11.3] — 2026-08-25
+
+### Fixed
+- **The location intro is now shown once, then remembered.** The "Enable location" splash appeared on *every* visit, which testers found nagging. It now shows only on a first visit; on return visits the app opens straight to Discover — and quietly resumes live location if it was granted before. Location is still re-offered at the moment a tour or Discovery mode actually needs it. Reported by Tollesbury testers.
+
 ## [1.11.2] — 2026-08-25
 
 ### Fixed

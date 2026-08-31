@@ -16,7 +16,7 @@
       </div>
 
       <template v-else>
-        <SplashScreen v-if="screen==='splash'" @grant="grantLocation" @skip="goCity" />
+        <SplashScreen v-if="screen==='splash'" @grant="grantLocation" @skip="skipLocation" />
 
         <CityScreen v-else-if="screen==='city'" :cities="cities" @select="selectCity" />
 
@@ -199,7 +199,16 @@ const mapCenter = computed(() => ({ lat: activeCity.value.lat, lng: activeCity.v
 const mapZoom = ref(config.mapZoom)
 
 onMounted(async () => {
-  geo.refreshPermission()
+  await geo.refreshPermission()
+  // Ask about location once, then remember it. On return visits skip the splash
+  // intro entirely: resume live location if it was granted before, otherwise just
+  // open the app (location is re-offered at the moment a mode actually needs it).
+  let locChoice = null
+  try { locChoice = localStorage.getItem('nearmark-loc-choice') } catch { /* private mode */ }
+  if (geo.permission.value === 'granted' || locChoice === 'enabled') geo.start()
+  if ((locChoice || geo.permission.value === 'granted') && screen.value === 'splash') {
+    screen.value = cities.length > 1 ? 'city' : 'cover'
+  }
   // Warm the vector basemap for offline use (fire-and-forget; see lib/precache.js), and
   // ask the browser to keep the cache from being evicted.
   requestPersistentStorage()
@@ -362,7 +371,9 @@ watch(screen, (s) => {
 })
 
 // ── navigation ──
-function grantLocation() { geo.start(); goCity() }
+function rememberLocChoice(v) { try { localStorage.setItem('nearmark-loc-choice', v) } catch { /* private mode */ } }
+function grantLocation() { geo.start(); rememberLocChoice('enabled'); goCity() }
+function skipLocation() { rememberLocChoice('skipped'); goCity() }
 function goCity() { screen.value = cities.length > 1 ? 'city' : 'cover' }
 function selectCity(c) { activeCity.value = c; screen.value = 'cover' }
 
