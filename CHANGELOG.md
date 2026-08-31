@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.0] — 2026-08-25
+
+### Added
+- **Prominent "Add to home screen" guide.** Installing to the home screen was easy to miss, and on iPhone it can't be automated (Apple allows no programmatic install — it's always Share → "Add to Home Screen"). A new guide sheet makes it clear: on Android/Chrome it offers a one-tap **Install now**; on iOS it shows a clean, illustrated **3-step** walkthrough (Share → Add to Home Screen → Add) with a reassurance that it's the full app, no App Store needed. Opened by tapping the install banner, and from a new **"Add to home screen"** row in **Settings** so anyone can find it deliberately. Hidden once the app is installed.
+
 ## [1.11.4] — 2026-08-25
 
 ### Changed

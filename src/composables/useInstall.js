@@ -6,6 +6,7 @@ import { ref } from 'vue'
 
 const deferred = ref(null)   // the saved beforeinstallprompt event (Chrome/Edge/Android)
 const installed = ref(false)
+const guideOpen = ref(false) // controls the prominent "how to install" guide sheet
 
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -34,5 +35,7 @@ export function useInstall() {
     deferred.value = null
     return outcome // 'accepted' | 'dismissed'
   }
-  return { deferred, installed, isIOS, isSafari, isStandalone, promptInstall }
+  function openGuide() { guideOpen.value = true }
+  function closeGuide() { guideOpen.value = false }
+  return { deferred, installed, isIOS, isSafari, isStandalone, promptInstall, guideOpen, openGuide, closeGuide }
 }

@@ -118,6 +118,9 @@
           @enable-location="geo.start()"
         />
 
+        <!-- prominent "add to home screen" guide (opened from the banner + Settings) -->
+        <InstallGuide />
+
         <!-- location re-prompt when starting a mode without permission granted -->
         <LocationPrompt
           v-if="pendingMode"
@@ -145,6 +148,7 @@ import StoryCard from './components/StoryCard.vue'
 import StoryListScreen from './components/StoryListScreen.vue'
 import CompletionScreen from './components/CompletionScreen.vue'
 import SettingsSheet from './components/SettingsSheet.vue'
+import InstallGuide from './components/InstallGuide.vue'
 import AppNotices from './components/AppNotices.vue'
 
 import { fetchLocations, fetchTours } from './lib/supabase.js'

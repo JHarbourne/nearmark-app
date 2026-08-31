@@ -29,6 +29,11 @@
         <span style="font-size: 14px; font-weight: 700; color: var(--accent-warm);">{{ unitsLabel }}</span>
       </button>
 
+      <button v-if="showInstall" @click="openInstall" :style="row">
+        <span style="font-size: 15px; font-weight: 600;">Add to home screen</span>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true"><path d="M1 1 L7.5 7.5 L1 14" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
       <ShareButton variant="row" />
 
       <button @click="toggleAnalytics" :style="row" style="border-bottom: none; padding-bottom: 4px;">
@@ -50,13 +55,19 @@ import { computed, ref } from 'vue'
 import { isOptedOut, setAnalyticsOptOut } from '../lib/analytics.js'
 import { config } from '../config.js'
 import ShareButton from './ShareButton.vue'
+import { useInstall } from '../composables/useInstall.js'
 const sourcingNote = config.contentSourceNote
 const props = defineProps({
   audioOn: { type: Boolean, default: true },
   units: { type: String, default: 'mi' },
   permission: { type: String, default: 'prompt' },
 })
-defineEmits(['close', 'toggle-audio', 'toggle-units', 'enable-location'])
+const emit = defineEmits(['close', 'toggle-audio', 'toggle-units', 'enable-location'])
+
+// "Add to home screen" – opens the prominent install guide (hidden once installed)
+const { isStandalone, openGuide } = useInstall()
+const showInstall = computed(() => !isStandalone)
+function openInstall() { openGuide(); emit('close') }
 
 // usage-analytics opt-out (persisted in localStorage by setAnalyticsOptOut)
 const analyticsOn = ref(!isOptedOut())
