@@ -27,6 +27,20 @@
           <h2 style="font-family: var(--font-heading); font-weight: 700; font-size: 27px; line-height: 1.05; letter-spacing: -0.6px; margin: 0;">{{ typo(loc.title) }}</h2>
           <p style="font-size: 13.5px; color: var(--ink-muted); margin: 7px 0 0; font-weight: 500;">{{ typo(loc.significance) }}</p>
 
+          <!-- where it is: address + a "Directions" link that opens the device maps
+               app (Apple Maps on iOS, Google Maps elsewhere). Only shown when the
+               location has a public address or coordinates. -->
+          <div v-if="loc.address || hasCoords" style="display: flex; align-items: flex-start; gap: 9px; margin: 12px 0 0;">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px;"><path d="M8 1.5 c2.9 0 5 2.1 5 4.9 0 3.3-5 8.1-5 8.1 s-5-4.8-5-8.1 c0-2.8 2.1-4.9 5-4.9 Z" stroke="var(--accent-warm)" stroke-width="1.5" stroke-linejoin="round"/><circle cx="8" cy="6.4" r="1.8" stroke="var(--accent-warm)" stroke-width="1.5"/></svg>
+            <div style="flex: 1; min-width: 0;">
+              <span v-if="loc.address" style="display: block; font-size: 13.5px; line-height: 1.4; color: var(--ink-muted);">{{ typo(loc.address) }}</span>
+              <a v-if="hasCoords" :href="directionsHref" target="_blank" rel="noopener" @click="track('directions_clicked', { location_id: loc.id, title: loc.title })" style="display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 700; color: var(--accent-warm); text-decoration: none;" :style="{ marginTop: loc.address ? '3px' : '0' }">
+                Directions
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 11 L11 3 M5 3 H11 V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+
           <!-- audio player (hidden if no narration available) -->
           <div v-if="showAudio" style="margin: 20px 0 22px; padding: 13px 14px; background: var(--raised); border-radius: 16px; display: flex; align-items: center; gap: 13px;">
             <button @click="onPlay" :style="playBtn" :aria-label="audio.playing.value ? 'Pause audio narration' : 'Play audio narration'">
@@ -176,6 +190,19 @@ const props = defineProps({
   allowFeedback: { type: Boolean, default: true },
 })
 const emit = defineEmits(['close', 'open-related', 'continue'])
+
+// ── "Directions" link (#10): open the device maps app to the stop. Apple Maps on
+// iOS (its default), Google Maps elsewhere. Only when the stop has coordinates.
+const hasCoords = computed(() => props.loc.lat != null && props.loc.lng != null)
+const directionsHref = computed(() => {
+  if (!hasCoords.value) return ''
+  const dest = `${props.loc.lat},${props.loc.lng}`
+  const label = encodeURIComponent(props.loc.title || 'Destination')
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  return isIOS
+    ? `https://maps.apple.com/?daddr=${dest}&q=${label}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${dest}`
+})
 
 // ── "Suggest a correction" mailto (no form, no backend; works offline). Hidden
 // unless VITE_FEEDBACK_EMAIL is set. Subject: "<App> feedback – <Place> / <Story>"
@@ -437,9 +464,10 @@ const continueBtn = {
 <style scoped>
 /* rendered story body: paragraphs, bullets and inline bold/italic (see richtext.js).
    :deep() so scoped styles reach the v-html-injected elements. */
-.story-body :deep(p) { font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0 0 16px; }
+.story-body :deep(p) { font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0 0 16px; overflow-wrap: anywhere; }
 .story-body :deep(ul) { margin: 0 0 16px; padding-left: 22px; }
-.story-body :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; }
+.story-body :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; overflow-wrap: anywhere; }
+.story-body :deep(a) { overflow-wrap: anywhere; }
 .story-body :deep(strong) { font-weight: 700; }
 .story-body :deep(em) { font-style: italic; }
 .story-body :deep(:last-child) { margin-bottom: 0; }

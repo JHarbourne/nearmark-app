@@ -40,7 +40,7 @@ defineProps({ location: { type: Object, required: true } })
 defineEmits(['open', 'close'])
 
 const wrap = { position: 'absolute', inset: 0, zIndex: 60, background: 'var(--bg)', color: 'var(--ink)', display: 'flex', flexDirection: 'column' }
-const header = { display: 'flex', alignItems: 'flex-start', gap: '14px', padding: 'calc(18px + env(safe-area-inset-top)) 22px 14px' }
+const header = { display: 'flex', alignItems: 'center', gap: '14px', padding: 'calc(18px + env(safe-area-inset-top)) 22px 14px' }
 const eyebrow = { fontSize: '12px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--ink-muted)' }
 const title = { fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 'clamp(24px, 7vw, 30px)', lineHeight: 1.1, letterSpacing: '-0.5px', margin: '4px 0 0', color: 'var(--ink)' }
 const backBtn = { flexShrink: 0, width: '38px', height: '38px', borderRadius: '50%', background: 'var(--raised)', color: 'var(--ink)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }

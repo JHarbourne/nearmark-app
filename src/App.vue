@@ -391,7 +391,13 @@ const pendingMode = ref(null) // 'guided' | 'discovery' while the prompt is open
 function startTour() { gateStart('guided') }
 function startDiscovery() { gateStart('discovery') }
 function gateStart(mode) {
-  if (geo.permission.value === 'granted' || geo.permission.value === 'unsupported') return doStart(mode)
+  // Granted or unsupported → just start. Denied → don't dead-end on a re-prompt:
+  // you can't re-grant location from the web once it's blocked, so the sheet can
+  // only say "turn it on in settings", which reads like an error and left testers
+  // stuck on the tour page ("Start tour did nothing"). Go straight to the map – it
+  // already carries its own dismissible "LOCATION OFF" banner. Only 'prompt'
+  // (undecided) still gets the re-ask, where "Enable location" actually works.
+  if (geo.permission.value !== 'prompt') return doStart(mode)
   pendingMode.value = mode
 }
 function doStart(mode) {

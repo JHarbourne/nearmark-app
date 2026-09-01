@@ -64,6 +64,10 @@ export const config = {
   // (mailto:) to this address. Blank hides the link, so an unconfigured fork
   // ships no contact address. Per deployment: e.g. jonathan@lgbthistoryuk.org.
   feedbackEmail: pick(env.VITE_FEEDBACK_EMAIL, ''),
+  // Public "Report a fault" link in Settings → opens the device mail app to this
+  // address (general app feedback, not tied to a story). Defaults to the platform
+  // support inbox so every deployment has a working path; override per brand.
+  faultEmail: pick(env.VITE_FAULT_EMAIL, 'hello@nearmark.co.uk'),
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
   // link for the "Powered by …" name. Defaults to nearmark.app for the default brand;
   // a white-label deploy (custom VITE_PLATFORM_NAME) stays plain text unless it sets a URL.

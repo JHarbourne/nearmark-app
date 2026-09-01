@@ -36,6 +36,14 @@
 
       <ShareButton variant="row" />
 
+      <a v-if="faultHref" :href="faultHref" :style="rowLink">
+        <span>
+          <span style="display: block; font-size: 15px; font-weight: 600;">Report a fault</span>
+          <span style="display: block; font-size: 12.5px; color: var(--ink-muted); margin-top: 2px;">Tell us about a problem or something that looks wrong.</span>
+        </span>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true" style="flex-shrink: 0;"><path d="M1 1 L7.5 7.5 L1 14" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+
       <button @click="toggleAnalytics" :style="row" style="border-bottom: none; padding-bottom: 4px;">
         <span style="padding-right: 14px;">
           <span style="display: block; font-size: 15px; font-weight: 600;">Usage analytics</span>
@@ -68,6 +76,19 @@ const emit = defineEmits(['close', 'toggle-audio', 'toggle-units', 'enable-locat
 const { isStandalone, openGuide } = useInstall()
 const showInstall = computed(() => !isStandalone)
 function openInstall() { openGuide(); emit('close') }
+
+// "Report a fault" – opens the device mail app (no form, no backend; works
+// offline). Pre-fills the app name, version and device so we can reproduce it.
+// Hidden if no support address is configured.
+const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : ''
+const faultHref = computed(() => {
+  if (!config.faultEmail) return ''
+  const subject = `${config.appName} – report a fault`
+  const body = `Hi,\n\nI found a problem with the ${config.appName} app:\n\n\n\n`
+    + `— Please leave the details below so we can look into it —\n`
+    + `App version: ${version}\nDevice: ${navigator.userAgent}`
+  return `mailto:${config.faultEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+})
 
 // usage-analytics opt-out (persisted in localStorage by setAnalyticsOptOut)
 const analyticsOn = ref(!isOptedOut())
@@ -123,4 +144,5 @@ const row = {
   borderBottom: '1px solid var(--line)', borderLeft: 'none', borderRight: 'none', borderTop: 'none',
   background: 'none', cursor: 'pointer', color: 'inherit', textAlign: 'left',
 }
+const rowLink = { ...row, textDecoration: 'none', gap: '14px' }
 </script>

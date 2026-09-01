@@ -8,6 +8,18 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.5] — 2026-09-02
+
+### Added
+- **"Report a fault" in Settings.** A general feedback path (not tied to a single stop) that opens the device mail app pre-filled with the app version and device details, so problems are easy to report and quick to reproduce. Goes to the deployment's support inbox (`VITE_FAULT_EMAIL`, defaults to Nearmark support). Raised in on-device testing — there was previously no way to flag a problem that wasn't about one specific location.
+- **"Directions" on the story card.** Each stop now shows its address (when public) and a **Directions** link that opens the walker's maps app — Apple Maps on iOS, Google Maps elsewhere — so "where is this?" is answerable from the story itself. Reported in on-device testing.
+
+### Fixed
+- **Guided "Start tour" now opens the map even when location is switched off.** On a device that had blocked location, tapping *Start tour* popped a sheet titled "Location is switched off" whose only options were "Continue without location" or "Dismiss" — which read as an error, so testers thought the button did nothing and never reached the tour. Because location can't be re-granted from the web once blocked, that sheet was a dead-end: the app now skips it and goes straight to the map (which still shows its own dismissible "location off" banner). The re-prompt is kept only when location hasn't been decided yet, where "Enable location" still works. Reported on Android and an older iPhone in on-device testing.
+- **Long web addresses no longer overflow the story card.** A pasted URL in a story's text (seen on *The Centre*) could run off the right edge of the screen; body text now wraps long words and links.
+- **Tour titles that are too long to fit now wrap instead of being cut off.** The tour-detail heading (e.g. "Tollesbury Arts Trail 2026") was truncated with an ellipsis; it now wraps onto a second line.
+- **Back arrow on the multi-stop picker sits level with the title.** On the story picker (multi-artist venues) the round back button was pinned to the top of the heading block, making it look raised; it's now vertically centred. Reported on iPhone SE.
+
 ## [1.12.4] — 2026-08-25
 
 ### Fixed
