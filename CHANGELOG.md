@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.3] — 2026-08-25
+
+### Fixed
+- **Publishing a single-story location now publishes its story too.** The single-location editor has one Published/Draft toggle meant to govern the whole place — but a pre-existing *draft* story kept its draft status on save, so the editor said "Saved · Published ✓" while the public app still hid the pin (a location only appears once it has a *published* story). The inline story now follows the location's Published/Draft state. Found while publishing the Arts Trail tour, where locations were published + consented but their stories were still drafts.
+
 ## [1.12.2] — 2026-08-25
 
 ### Fixed

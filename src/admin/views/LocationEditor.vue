@@ -390,7 +390,11 @@ async function saveInlineStory() {
   fields.value?.normalize()
   s.locationId = form.recordId
   s.heading = form.title
-  if (!s.status) s.status = 'published'
+  // Single-story mode has one Published/Draft toggle (the location's), which is
+  // meant to govern visibility – so the inline story must follow it. Previously a
+  // pre-existing draft story kept its draft status, so publishing the location
+  // left the story hidden and the pin never appeared.
+  s.status = form.status
   if (!s.sortOrder) s.sortOrder = 1
   const saved = await store.saveStory({ ...s })
   if (!s.storyId && saved?.id) s.storyId = saved.id
