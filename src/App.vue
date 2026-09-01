@@ -192,6 +192,7 @@ const openStoryKey = ref(null)     // storyId of the specific story shown in tha
 const storyListLoc = ref(null)     // location whose story-picker list is open (2+ stories)
 const proximityId = ref(null)
 const shownDiscovery = ref([])
+const dismissedStops = ref([])     // guided stops the user backed out of, so standing at one doesn't instantly re-open it
 const settingsOpen = ref(false)
 let tourStart = 0
 
@@ -350,7 +351,7 @@ watch(
     if (!pos || !isMap.value) return
     if (mapMode.value === 'guided') {
       const s = nextStop.value
-      if (s && !openId.value && !visited.value.includes(s.id)) {
+      if (s && !openId.value && !visited.value.includes(s.id) && !dismissedStops.value.includes(s.id)) {
         if (distanceMeters(pos, s) <= (s.triggerRadius || 80)) openStory(s.id)
       }
     } else {
@@ -404,6 +405,7 @@ function onContinueWithout() { doStart(pendingMode.value) }
 function beginTour() {
   visited.value = []
   nextIdx.value = 0
+  dismissedStops.value = []
   mapMode.value = 'guided'
   tourStart = Date.now()
   screen.value = 'map'
@@ -425,7 +427,7 @@ function goCover() { resetSession(); screen.value = 'cover' }
 function goTours() { openId.value = null; openStoryKey.value = null; storyListLoc.value = null; screen.value = 'tourList' }
 function resetSession() {
   openId.value = null; openStoryKey.value = null; storyListLoc.value = null; visited.value = []; nextIdx.value = 0
-  proximityId.value = null; shownDiscovery.value = []; settingsOpen.value = false
+  proximityId.value = null; shownDiscovery.value = []; dismissedStops.value = []; settingsOpen.value = false
 }
 
 // Tapping a location: 1 story → open its card directly (the fast path, identical
@@ -455,6 +457,11 @@ function closeStory() {
   // If the location has 2+ stories, step back to its story picker rather than
   // dropping the user all the way out to the map/tour.
   const l = byId.value[openId.value]
+  // Guided tours auto-open a stop on arrival; if the walker backs out while still
+  // standing at it, remember that so the next GPS fix doesn't instantly re-open it.
+  if (mapMode.value === 'guided' && openId.value) {
+    dismissedStops.value = [...new Set([...dismissedStops.value, openId.value])]
+  }
   openStoryKey.value = null
   openId.value = null
   if (l && (l.stories || []).length > 1) storyListLoc.value = l

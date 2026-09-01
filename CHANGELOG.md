@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.4] — 2026-08-25
+
+### Fixed
+- **Guided tour: backing out of a stop no longer bounces you straight back in.** On arrival a stop's story auto-opens; if the walker tapped back while still standing at the stop, the next GPS fix immediately re-opened it — trapping them. A dismissed-stop guard now remembers you've stepped out, so *back* stays back (until you start a new tour). Discovery mode already had the equivalent guard; guided didn't. Reported in on-device testing (iPhone SE).
+
 ## [1.12.3] — 2026-08-25
 
 ### Fixed
