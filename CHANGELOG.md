@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.7] — 2026-09-04
+
+### Fixed
+- **Tour cover credit no longer forces "Photo:" when you've labelled it yourself.** A cover credit that already starts with its own label (e.g. "Illustration: Jane Smith", "Map: …") now shows verbatim instead of becoming "Photo: Illustration: …". A plain name still gets the "Photo:" prefix, so existing photo credits are unchanged. The tour editor hint now explains this.
+
 ## [1.12.6] — 2026-09-04
 
 ### Fixed

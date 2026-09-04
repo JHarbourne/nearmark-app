@@ -53,8 +53,8 @@
 
         <div class="field-row" v-if="form.coverImageUrl">
           <div>
-            <label for="tour-cover-credit">Photo credit <span class="hint">e.g. Jane Doe / Unsplash</span></label>
-            <input id="tour-cover-credit" type="text" v-model="form.coverCredit" placeholder="Photographer / source" />
+            <label for="tour-cover-credit">Cover credit <span class="hint">shows as “Photo: …” unless you add your own label, e.g. “Illustration: Jane Doe”</span></label>
+            <input id="tour-cover-credit" type="text" v-model="form.coverCredit" placeholder="Jane Doe — or Illustration: Jane Doe" />
           </div>
           <div>
             <label for="tour-cover-credit-link">Photo credit link <span class="hint">optional</span></label>

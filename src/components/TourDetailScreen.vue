@@ -15,8 +15,8 @@
       <div style="position: relative; padding: 0 24px 22px;">
         <span :style="eyebrowPill">Walking Tour</span>
         <h1 style="font-family: var(--font-heading); font-weight: 700; font-size: clamp(24px, 8.3vw, 34px); line-height: 1.05; letter-spacing: -1px; margin: 10px 0 0; color: #fff; overflow-wrap: anywhere;">{{ typo(tour.title) }}</h1>
-        <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">Photo: {{ tour.coverCredit }}</a>
-        <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">Photo: {{ tour.coverCredit }}</span>
+        <a v-if="tour.coverCredit && tour.showCoverCredit !== false && tour.coverCreditUrl" :href="tour.coverCreditUrl" target="_blank" rel="noopener" :style="creditLine">{{ coverCreditText }}</a>
+        <span v-else-if="tour.coverCredit && tour.showCoverCredit !== false" :style="creditLine">{{ coverCreditText }}</span>
       </div>
     </div>
 
@@ -65,6 +65,14 @@ const props = defineProps({
   distanceLabel: { type: String, default: '1.4mi' },
 })
 defineEmits(['start', 'back', 'open-stop'])
+
+// Cover credit: if the admin already gave it their own label (e.g. "Illustration:
+// Jane Smith", "Map: …"), show it verbatim; otherwise default to a "Photo:" prefix.
+// Avoids a doubled "Photo: Illustration: …" when the cover isn't a photograph.
+const coverCreditText = computed(() => {
+  const c = (props.tour.coverCredit || '').trim()
+  return /^\s*[a-z]+\s*:/i.test(c) ? c : `Photo: ${c}`
+})
 
 const heroStyle = computed(() => {
   const base = { minHeight: '226px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }
