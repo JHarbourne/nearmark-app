@@ -111,7 +111,7 @@
 
           <!-- second in-body photo (a person, a detail, anything) – not full-bleed -->
           <figure v-if="loc.portraitUrl" :style="portraitFig">
-            <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" />
+            <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" decoding="async" />
             <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ typo(loc.portraitCaption) }}</figcaption>
             <figcaption v-if="loc.portraitCredit" :style="portraitCreditLine"><component :is="loc.portraitCreditUrl ? 'a' : 'span'" :href="loc.portraitCreditUrl || null" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Photo: {{ loc.portraitCredit }}</component></figcaption>
           </figure>

@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.6] — 2026-09-04
+
+### Fixed
+- **Second story photo no longer loads with the bottom half blank.** The in-body photo could be painted before it had finished decoding on iOS (top half visible, bottom blank, and only sometimes) — a decode/paint race. The image now decodes fully before it is shown (`decoding="async"`). Reported in on-device testing; if a very large source image ever recurs, the next step is serving it downscaled.
+
 ## [1.12.5] — 2026-09-02
 
 ### Added
