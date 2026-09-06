@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.15] — 2026-09-06
+
+### Changed
+- **Distances now default to metric and read more clearly.** Short distances show "456 m" instead of "456 YD" — clearer for walking, and the next-stop readout no longer uppercases the unit (so it's "456 m", not "456 M"), with a space between the number and unit. The default is now configurable per deployment via `VITE_DEFAULT_UNITS` (`km` default, or `mi` for yards/miles); a visitor can still switch in Settings. **Note:** deployments that want imperial should set `VITE_DEFAULT_UNITS=mi`.
+
 ## [1.12.14] — 2026-09-06
 
 ### Changed

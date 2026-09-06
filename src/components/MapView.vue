@@ -104,7 +104,7 @@
       <div style="display: flex; align-items: center; gap: 13px;">
         <span v-if="nextStop.stopLabel" :style="badgeStyle(nextStop.hue)">{{ nextStop.stopLabel }}</span>
         <span style="flex: 1; min-width: 0;">
-          <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--ink-muted); text-transform: uppercase;">Next stop · {{ nextStopDistance }}</span>
+          <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--ink-muted); text-transform: uppercase;">Next stop · <span style="text-transform: none;">{{ nextStopDistance }}</span></span>
           <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 16.5px; margin-top: 1px;">{{ nextStop.title }}</span>
         </span>
       </div>

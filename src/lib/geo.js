@@ -20,13 +20,13 @@ export function distanceMeters(a, b) {
 export function formatDistance(meters, units = 'mi') {
   if (!isFinite(meters)) return '–'
   if (units === 'km') {
-    if (meters < 1000) return `${Math.round(meters)}m`
-    return `${(meters / 1000).toFixed(1)}km`
+    if (meters < 1000) return `${Math.round(meters)} m`
+    return `${(meters / 1000).toFixed(1)} km`
   }
   // miles / yards
   const yards = meters * 1.09361
-  if (yards < 1000) return `${Math.round(yards)}yd`
-  return `${(meters / 1609.34).toFixed(1)}mi`
+  if (yards < 1000) return `${Math.round(yards)} yd`
+  return `${(meters / 1609.34).toFixed(1)} mi`
 }
 
 // Total walking distance along an ordered list of stops, in metres.

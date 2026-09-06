@@ -3,6 +3,7 @@
 //   units    – 'mi' | 'km' distance units
 
 import { reactive, watch } from 'vue'
+import { config } from '../config.js'
 
 const KEY = 'nearmark-settings'
 
@@ -18,7 +19,7 @@ const stored = load()
 
 export const settings = reactive({
   audioOn: stored.audioOn ?? true,
-  units: stored.units ?? 'mi',
+  units: stored.units ?? config.defaultUnits,
 })
 
 watch(

@@ -197,6 +197,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_THEME_COLOR` | Browser UI / PWA splash colour (hex); also the static first-paint page background, so a light theme doesn't flash dark while the app boots |
 | `VITE_THEME` | Named palette in [`src/themes`](src/themes) (e.g. `tollesbury`); blank = default dark |
 | `VITE_PUBLIC_URL` | Canonical URL for the "Share this app" feature (blank = current site origin) |
+| `VITE_DEFAULT_UNITS` | Default distance units for a new visitor: `km` (metres/km, the default) or `mi` (yards/miles). Visitors can still switch in Settings |
 | `VITE_GSC_VERIFICATION` | Google Search Console verification token (or the whole pasted `<meta>` tag) → an inert `<meta name="google-site-verification">` on the public page; no cookies. Blank = not emitted |
 | `VITE_COVER_HEADLINE` | Big cover headline; `{city}` is replaced with the city name |
 | `VITE_COVER_INTRO` | Cover intro line; supports `{city}` |

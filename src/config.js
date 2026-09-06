@@ -43,6 +43,10 @@ export const config = {
   description: pick(env.VITE_APP_DESCRIPTION, 'A walking guide to the history hidden in your city’s streets.'),
   themeName: pick(env.VITE_THEME, 'default'),               // named palette in src/themes (e.g. 'tollesbury')
   publicUrl: pick(env.VITE_PUBLIC_URL, ''),                 // canonical URL for the "Share" feature; blank → window.location.origin
+  // Default distance units for a new visitor: 'km' (metres/km) or 'mi' (yards/miles).
+  // Metric by default – clearer for short walking distances; a visitor can still
+  // switch in Settings. Override per deployment with VITE_DEFAULT_UNITS=mi.
+  defaultUnits: env.VITE_DEFAULT_UNITS === 'mi' ? 'mi' : 'km',
 
   // ── copy ({city} is substituted with the active city; \n becomes a line break) ──
   coverHeadline: nl(env.VITE_COVER_HEADLINE, 'Hidden {city}'),
