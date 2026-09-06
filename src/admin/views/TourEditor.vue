@@ -279,9 +279,19 @@ async function recalcRoute() {
 const addable = computed(() =>
   store.locations.filter((l) => l.status === 'published' && l.city === form.city && !form.stopIds.includes(l.id))
 )
-const routePoints = computed(() =>
-  form.stopIds.map((id, i) => { const l = byId.value[id]; return l ? { lat: l.lat, lng: l.lng, hue: l.hue, num: i + 1 } : null }).filter(Boolean)
-)
+// Preview badges mirror the public map: a stop's map label when set, else the
+// position number — or no badge (plain pin) for a blank stop once the tour uses
+// labels. Keeps the back-office route preview matching what walkers will see.
+const routePoints = computed(() => {
+  const ov = form.stopOverrides || {}
+  const lettered = form.stopIds.some((id) => (ov[id]?.label || '').trim())
+  return form.stopIds.map((id, i) => {
+    const l = byId.value[id]
+    if (!l) return null
+    const marker = (ov[id]?.label || '').trim() || (lettered ? null : String(i + 1))
+    return { lat: l.lat, lng: l.lng, hue: l.hue, num: marker }
+  }).filter(Boolean)
+})
 const routeKey = computed(() => form.stopIds.join('|'))
 const autoMins = computed(() => {
   const stops = form.stopIds.map((id) => byId.value[id]).filter(Boolean)

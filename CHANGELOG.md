@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.14] — 2026-09-06
+
+### Changed
+- **The tour editor's route-preview map now shows map markers**, matching what walkers see — a stop's letter when set, the number otherwise, or a plain pin for a blank stop once the tour uses letters (previously it always showed position numbers). So you can verify the marker scheme in the back office without switching to the end-user view.
+
 ## [1.12.13] — 2026-09-06
 
 ### Changed
