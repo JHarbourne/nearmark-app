@@ -194,7 +194,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   falls back to raster OpenStreetMap (online-only), so a deployment renders either way.
   Hue-coloured pins badged by stop position, or by a per-stop **map label** when set (a letter
   or short code to match physical signs / a paper map — see the tour editor); dark/white badge
-  text chosen per hue for contrast. "You are here" GPS marker, GeoJSON route line. See `docs/maplibre-migration.md`.
+  text chosen per hue for contrast. Once a tour uses any map labels, a stop left without one
+  shows a **plain pin, no badge** — for amenities like a car park or café that aren't part of
+  the lettered trail. "You are here" GPS marker, GeoJSON route line. See `docs/maplibre-migration.md`.
 - **Share.** A sheet with a brand-coloured **QR code** (primary, for in-person sharing),
   copy-link, and a native "Share…" button where supported. URL = `VITE_PUBLIC_URL`.
 - **Settings.** A sheet for location permission, audio on/off, distance units, "Add to home
@@ -254,7 +256,8 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   (e.g. "Illustration: …") and is otherwise prefixed "Photo:"; a **description** taking the
   same Markdown subset + auto-linked URLs as story text; drag/keyboard stop reordering; per-stop
   overrides (title / blurb / **map label** — a letter or short code shown on the badge instead of
-  the number, to match signs or a paper map, independent of walking order); **Calculate walking
+  the number, to match signs or a paper map, independent of walking order; in a tour that uses
+  labels, a stop left blank shows a plain pin with no badge); **Calculate walking
   route** button + route preview; collapsible event window.
 - **Media library.** Lists everything in the bucket (folders + root); edit metadata; upload,
   replace, delete.

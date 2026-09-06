@@ -242,16 +242,22 @@ onMounted(async () => {
 const tourStops = computed(() => {
   if (!activeTour.value) return []
   const ov = activeTour.value.stopOverrides || {}
+  // Once a tour uses any map labels (e.g. an Arts Trail lettered A–N), it's a
+  // "lettered" tour: unlabelled stops (a car park, café, info hub) get NO badge —
+  // a plain pin — rather than a stray number among the letters. A tour with no
+  // labels at all stays numbered, so blank = the position number as before.
+  const lettered = activeTour.value.stopIds.some((id) => (ov[id]?.label || '').trim())
   return activeTour.value.stopIds
     .map((id, i) => {
       const l = byId.value[id]
       if (!l) return null
       const s = (l.stories || [])[0] || {} // primary story supplies period/summary for the route row
       const o = ov[id] // per-tour title/blurb; fall back to the story's own
-      // stopLabel = the badge shown to the walker: a per-stop "map label" (to match
-      // physical signs, e.g. A / F / "F/G") when set, otherwise the position number.
+      // stopLabel = the badge shown to the walker: the per-stop "map label" when set;
+      // else the position number (numbered tour) or '' = no badge (lettered tour).
       // tourNum stays the positional index and still drives the guided logic.
-      return { ...l, tourNum: i + 1, stopLabel: (o?.label || '').trim() || String(i + 1), period: s.period || '', title: o?.title || l.title, summary: o?.blurb || s.summary || '' }
+      const stopLabel = (o?.label || '').trim() || (lettered ? '' : String(i + 1))
+      return { ...l, tourNum: i + 1, stopLabel, period: s.period || '', title: o?.title || l.title, summary: o?.blurb || s.summary || '' }
     })
     .filter(Boolean)
 })

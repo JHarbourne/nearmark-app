@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.12] — 2026-09-06
+
+### Added
+- **Unlabelled stops in a lettered tour get a plain pin (no badge).** Once a tour uses any map labels, a stop left without one shows no number or letter — a plain pin — on the map, route list and next-stop card. This lets amenities and hubs (a car park, café or info centre) sit on the map without looking like part of the lettered trail. Plain **numbered** tours (no labels anywhere) are unchanged: a blank stop keeps its position number.
+
 ## [1.12.11] — 2026-09-06
 
 ### Changed

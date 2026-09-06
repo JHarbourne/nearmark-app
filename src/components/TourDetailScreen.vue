@@ -35,7 +35,7 @@
       <button v-for="s in stops" :key="s.id" type="button" @click="$emit('open-stop', s.id)" :style="stopRow" :aria-label="`Preview ${s.title}`">
         <span style="position: relative; flex-shrink: 0; width: 56px; height: 56px;">
           <span :style="thumb(s)"></span>
-          <span :style="badge(s)">{{ s.stopLabel }}</span>
+          <span v-if="s.stopLabel" :style="badge(s)">{{ s.stopLabel }}</span>
         </span>
         <span style="flex: 1; min-width: 0;">
           <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 16px;">{{ s.title }}</span>

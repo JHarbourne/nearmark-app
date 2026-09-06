@@ -46,7 +46,7 @@
           <button @click="selectFromList(loc)" :style="listItem">
             <span :style="listDot(loc)" aria-hidden="true"></span>
             <span style="flex: 1; text-align: left;">
-              <span style="display: block; font-weight: 600;">{{ (loc.tourNum && guided) ? (loc.stopLabel || loc.tourNum) + '. ' : '' }}{{ loc.title }}</span>
+              <span style="display: block; font-weight: 600;">{{ (loc.stopLabel && guided) ? loc.stopLabel + '. ' : '' }}{{ loc.title }}</span>
               <span style="display: block; font-size: 12px; color: var(--ink-muted);">{{ loc.period }}</span>
             </span>
           </button>
@@ -102,7 +102,7 @@
     <!-- GUIDED next-stop card -->
     <div v-if="showNextCard" :style="nextCard">
       <div style="display: flex; align-items: center; gap: 13px;">
-        <span :style="badgeStyle(nextStop.hue)">{{ nextStop.stopLabel }}</span>
+        <span v-if="nextStop.stopLabel" :style="badgeStyle(nextStop.hue)">{{ nextStop.stopLabel }}</span>
         <span style="flex: 1; min-width: 0;">
           <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--ink-muted); text-transform: uppercase;">Next stop · {{ nextStopDistance }}</span>
           <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 16.5px; margin-top: 1px;">{{ nextStop.title }}</span>
@@ -272,7 +272,10 @@ function pinHtml(loc) {
   const h = (w * 4) / 3
   const pin = badgeColors(isVisited ? '#9a93a3' : loc.hue)
   const fill = pin.bg
-  const badge = isTour ? (isVisited ? '✓' : String(loc.stopLabel || loc.tourNum)) : ''
+  // A guided stop with no map label (a car park, café, info hub in a lettered tour)
+  // gets a plain pin with no badge; otherwise the label/number, or ✓ once visited.
+  const hasBadge = isTour && !!loc.stopLabel
+  const badge = hasBadge ? (isVisited ? '✓' : String(loc.stopLabel)) : ''
   const fontSize = isNext ? 15 : 13
   const ring = isNext
     ? `<span style="position:absolute;left:50%;top:${h * 0.34}px;width:${w * 0.82}px;height:${w * 0.82}px;border-radius:50%;border:2px solid ${loc.hue};transform:translate(-50%,-50%);animation:pulsering 1.9s ease-out infinite;"></span>`
@@ -302,7 +305,7 @@ function pinEl(loc) {
   // accessible list panel is the primary path, this is the secondary one)
   el.tabIndex = 0
   el.setAttribute('role', 'button')
-  el.setAttribute('aria-label', (loc.tourNum && props.guided ? `Stop ${loc.stopLabel || loc.tourNum}: ` : '') + loc.title)
+  el.setAttribute('aria-label', (loc.stopLabel && props.guided ? `Stop ${loc.stopLabel}: ` : '') + loc.title)
   el.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() }
   })
