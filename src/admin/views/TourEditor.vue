@@ -112,13 +112,15 @@
             @dragend="dragIdx = null"
           >
             <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: badgeColors(byId[id]?.hue || '#ccc').bg, color: badgeColors(byId[id]?.hue || '#ccc').ink }">{{ i + 1 }}</span>
-            <span style="flex:1;">{{ byId[id]?.title || id }}<span v-if="ov(id).title || ov(id).blurb" class="hint" style="margin-left:6px;">· custom text</span></span>
+            <span style="flex:1;">{{ byId[id]?.title || id }}<span v-if="ov(id).label" class="hint" style="margin-left:6px;">· label {{ ov(id).label }}</span><span v-else-if="ov(id).title || ov(id).blurb" class="hint" style="margin-left:6px;">· custom text</span></span>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="moveStop(i, -1)" :aria-label="`Move ${byId[id]?.title || id} up`">▲</button>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
             <button type="button" class="btn btn-ghost btn-sm" @click="overrideOpen[id] = !overrideOpen[id]" :aria-expanded="String(!!overrideOpen[id])" :aria-label="`Tour-specific text for ${byId[id]?.title || id}`">Tour text</button>
             <button type="button" class="btn btn-ghost btn-sm" @click="removeStop(i)" :aria-label="`Remove ${byId[id]?.title || id}`">Remove</button>
           </div>
           <div v-if="overrideOpen[id]" style="margin:-2px 0 10px; padding:12px 14px; border:1px solid var(--line); border-radius:10px;">
+            <label :for="`ov-label-${id}`">Map label <span class="hint">optional · the badge shown on the map/list to match a sign or paper map, e.g. A, F, “F/G” · blank = the number ({{ i + 1 }})</span></label>
+            <input :id="`ov-label-${id}`" type="text" :value="ov(id).label || ''" @input="setOv(id, 'label', $event.target.value)" :placeholder="String(i + 1)" maxlength="10" style="max-width:160px;" />
             <label :for="`ov-title-${id}`">Title for this tour <span class="hint">optional · defaults to the location's title</span></label>
             <input :id="`ov-title-${id}`" type="text" :value="ov(id).title || ''" @input="setOv(id, 'title', $event.target.value)" :placeholder="byId[id]?.title" />
             <label :for="`ov-blurb-${id}`">Blurb for this tour <span class="hint">optional · replaces the location's summary on the story card</span></label>
@@ -217,7 +219,7 @@ const overrideOpen = reactive({})
 function ov(id) { return form.stopOverrides[id] || {} }
 function setOv(id, field, value) {
   const o = { ...(form.stopOverrides[id] || {}), [field]: value }
-  if (!o.title && !o.blurb) delete form.stopOverrides[id]
+  if (!o.title && !o.blurb && !(o.label || '').trim()) delete form.stopOverrides[id]
   else form.stopOverrides[id] = o
 }
 

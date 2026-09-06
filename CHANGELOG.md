@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.10] — 2026-09-06
+
+### Added
+- **Per-stop map labels.** Each stop in a tour can now have an optional "map label" (set in the tour editor, per stop) that replaces the number on its badge everywhere it appears — the route list, the map pins and the "next stop" card. Use it to match physical signs or a paper map (e.g. `A`, `F`, or `F/G` for one venue that hosts two artists). It's independent of the walking order, so you can keep a sensible route while the badges match the signs; leave it blank and the stop keeps its position number as before. Longer labels shrink to fit the badge/pin.
+
 ## [1.12.9] — 2026-09-06
 
 ### Added

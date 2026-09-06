@@ -248,7 +248,10 @@ const tourStops = computed(() => {
       if (!l) return null
       const s = (l.stories || [])[0] || {} // primary story supplies period/summary for the route row
       const o = ov[id] // per-tour title/blurb; fall back to the story's own
-      return { ...l, tourNum: i + 1, period: s.period || '', title: o?.title || l.title, summary: o?.blurb || s.summary || '' }
+      // stopLabel = the badge shown to the walker: a per-stop "map label" (to match
+      // physical signs, e.g. A / F / "F/G") when set, otherwise the position number.
+      // tourNum stays the positional index and still drives the guided logic.
+      return { ...l, tourNum: i + 1, stopLabel: (o?.label || '').trim() || String(i + 1), period: s.period || '', title: o?.title || l.title, summary: o?.blurb || s.summary || '' }
     })
     .filter(Boolean)
 })

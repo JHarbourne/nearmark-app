@@ -35,7 +35,7 @@
       <button v-for="s in stops" :key="s.id" type="button" @click="$emit('open-stop', s.id)" :style="stopRow" :aria-label="`Preview ${s.title}`">
         <span style="position: relative; flex-shrink: 0; width: 56px; height: 56px;">
           <span :style="thumb(s)"></span>
-          <span :style="badge(s)">{{ s.tourNum }}</span>
+          <span :style="badge(s)">{{ s.stopLabel }}</span>
         </span>
         <span style="flex: 1; min-width: 0;">
           <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 16px;">{{ s.title }}</span>
@@ -132,10 +132,12 @@ function thumb(s) {
 }
 function badge(s) {
   const c = badgeColors(s.hue)
+  const len = String(s.stopLabel ?? s.tourNum ?? '').length
   return {
-    position: 'absolute', top: '-6px', left: '-6px', width: '28px', height: '28px', borderRadius: '9px',
+    position: 'absolute', top: '-6px', left: '-6px', minWidth: '28px', height: '28px',
+    padding: '0 6px', boxSizing: 'border-box', borderRadius: '9px', whiteSpace: 'nowrap',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 800, fontSize: '15px', color: c.ink, background: c.bg,
+    fontWeight: 800, fontSize: len > 2 ? '12px' : '15px', color: c.ink, background: c.bg,
     border: '2px solid var(--bg)', boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
   }
 }

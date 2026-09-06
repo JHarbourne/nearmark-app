@@ -46,7 +46,7 @@
           <button @click="selectFromList(loc)" :style="listItem">
             <span :style="listDot(loc)" aria-hidden="true"></span>
             <span style="flex: 1; text-align: left;">
-              <span style="display: block; font-weight: 600;">{{ (loc.tourNum && guided) ? loc.tourNum + '. ' : '' }}{{ loc.title }}</span>
+              <span style="display: block; font-weight: 600;">{{ (loc.tourNum && guided) ? (loc.stopLabel || loc.tourNum) + '. ' : '' }}{{ loc.title }}</span>
               <span style="display: block; font-size: 12px; color: var(--ink-muted);">{{ loc.period }}</span>
             </span>
           </button>
@@ -102,7 +102,7 @@
     <!-- GUIDED next-stop card -->
     <div v-if="showNextCard" :style="nextCard">
       <div style="display: flex; align-items: center; gap: 13px;">
-        <span :style="badgeStyle(nextStop.hue)">{{ nextStop.tourNum }}</span>
+        <span :style="badgeStyle(nextStop.hue, nextStop.stopLabel)">{{ nextStop.stopLabel }}</span>
         <span style="flex: 1; min-width: 0;">
           <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--ink-muted); text-transform: uppercase;">Next stop · {{ nextStopDistance }}</span>
           <span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 16.5px; margin-top: 1px;">{{ nextStop.title }}</span>
@@ -272,8 +272,10 @@ function pinHtml(loc) {
   const h = (w * 4) / 3
   const pin = badgeColors(isVisited ? '#9a93a3' : loc.hue)
   const fill = pin.bg
-  const badge = isTour ? (isVisited ? '✓' : String(loc.tourNum)) : ''
-  const fontSize = isNext ? 15 : 13
+  const badge = isTour ? (isVisited ? '✓' : String(loc.stopLabel || loc.tourNum)) : ''
+  const baseFont = isNext ? 15 : 13
+  // shrink the font so a longer map label (e.g. "F/G") still fits the pin head
+  const fontSize = badge.length > 2 ? Math.round(baseFont * 0.6) : (badge.length === 2 ? Math.round(baseFont * 0.85) : baseFont)
   const ring = isNext
     ? `<span style="position:absolute;left:50%;top:${h * 0.34}px;width:${w * 0.82}px;height:${w * 0.82}px;border-radius:50%;border:2px solid ${loc.hue};transform:translate(-50%,-50%);animation:pulsering 1.9s ease-out infinite;"></span>`
     : ''
@@ -302,7 +304,7 @@ function pinEl(loc) {
   // accessible list panel is the primary path, this is the secondary one)
   el.tabIndex = 0
   el.setAttribute('role', 'button')
-  el.setAttribute('aria-label', (loc.tourNum && props.guided ? `Stop ${loc.tourNum}: ` : '') + loc.title)
+  el.setAttribute('aria-label', (loc.tourNum && props.guided ? `Stop ${loc.stopLabel || loc.tourNum}: ` : '') + loc.title)
   el.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() }
   })
@@ -440,12 +442,14 @@ const nav = { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 35, he
 function navBtn(color) {
   return { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color, background: 'none', border: 'none', cursor: 'pointer' }
 }
-function badgeStyle(hue) {
+function badgeStyle(hue, label) {
   const c = badgeColors(hue)
+  const len = String(label ?? '').length
   return {
-    flexShrink: 0, width: '40px', height: '40px', borderRadius: '12px', display: 'flex',
+    flexShrink: 0, minWidth: '40px', height: '40px', padding: '0 8px', boxSizing: 'border-box',
+    borderRadius: '12px', display: 'flex', whiteSpace: 'nowrap',
     alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 700, fontSize: '17px', color: c.ink, background: c.bg,
+    fontWeight: 700, fontSize: len > 2 ? '13px' : '17px', color: c.ink, background: c.bg,
   }
 }
 </script>
