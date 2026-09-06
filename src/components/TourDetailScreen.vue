@@ -132,12 +132,10 @@ function thumb(s) {
 }
 function badge(s) {
   const c = badgeColors(s.hue)
-  const len = String(s.stopLabel ?? s.tourNum ?? '').length
   return {
-    position: 'absolute', top: '-6px', left: '-6px', minWidth: '28px', height: '28px',
-    padding: '0 6px', boxSizing: 'border-box', borderRadius: '9px', whiteSpace: 'nowrap',
+    position: 'absolute', top: '-6px', left: '-6px', width: '28px', height: '28px', borderRadius: '9px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-heading)",
-    fontWeight: 800, fontSize: len > 2 ? '12px' : '15px', color: c.ink, background: c.bg,
+    fontWeight: 800, fontSize: '15px', color: c.ink, background: c.bg,
     border: '2px solid var(--bg)', boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
   }
 }

@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.11] — 2026-09-06
+
+### Changed
+- **Map labels are single-character by design.** Badges keep their fixed size (reverting the auto-resize from 1.12.10). A venue hosting two artists is entered as two separate locations (each with its own letter), rather than one badge like "F/G".
+
 ## [1.12.10] — 2026-09-06
 
 ### Added
