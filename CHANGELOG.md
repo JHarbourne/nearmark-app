@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.13] — 2026-09-06
+
+### Changed
+- **Simpler map-marker editing in the tour editor.** The map marker is now a single inline field on each stop row, right after the number — no more "Tour text" button or expandable box. The per-tour title/blurb overrides (which no tour used) have been removed, so each stop shows just: number · marker field · name · reorder · remove.
+
 ## [1.12.12] — 2026-09-06
 
 ### Added

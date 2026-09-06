@@ -100,7 +100,7 @@
 
         <hr style="border:none; border-top:1px solid var(--line); margin:22px 0;" />
 
-        <span class="field-label" style="margin-top:0;">Stops <span class="hint">drag, or use the ▲ ▼ buttons, to reorder</span></span>
+        <span class="field-label" style="margin-top:0;">Stops <span class="hint">drag, or use ▲ ▼, to reorder. The box after each number is that stop’s <b>map marker</b> – a letter to match a sign or paper map. Leave it blank for the number, or a plain pin (no badge) once the tour uses letters.</span></span>
         <div v-for="(id, i) in form.stopIds" :key="id">
           <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- drag is a pointer enhancement; the ▲/▼ buttons provide the keyboard-accessible reorder (WCAG 2.5.7) -->
           <div
@@ -111,20 +111,22 @@
             @drop="drop(i)"
             @dragend="dragIdx = null"
           >
-            <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px;" :style="{ background: badgeColors(byId[id]?.hue || '#ccc').bg, color: badgeColors(byId[id]?.hue || '#ccc').ink }">{{ i + 1 }}</span>
-            <span style="flex:1;">{{ byId[id]?.title || id }}<span v-if="ov(id).label" class="hint" style="margin-left:6px;">· label {{ ov(id).label }}</span><span v-else-if="ov(id).title || ov(id).blurb" class="hint" style="margin-left:6px;">· custom text</span></span>
+            <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;" :style="{ background: badgeColors(byId[id]?.hue || '#ccc').bg, color: badgeColors(byId[id]?.hue || '#ccc').ink }">{{ i + 1 }}</span>
+            <input
+              type="text"
+              :value="ov(id).label || ''"
+              @input="setLabel(id, $event.target.value)"
+              @dragstart.prevent.stop
+              @mousedown.stop
+              :placeholder="String(i + 1)"
+              maxlength="10"
+              :aria-label="`Map marker for ${byId[id]?.title || id} – a letter to match the sign; blank shows ${i + 1}`"
+              style="width:46px; flex-shrink:0; text-align:center; padding:6px 4px;"
+            />
+            <span style="flex:1; min-width:0;">{{ byId[id]?.title || id }}</span>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click="moveStop(i, -1)" :aria-label="`Move ${byId[id]?.title || id} up`">▲</button>
             <button type="button" class="btn btn-ghost btn-sm" :disabled="i === form.stopIds.length - 1" @click="moveStop(i, 1)" :aria-label="`Move ${byId[id]?.title || id} down`">▼</button>
-            <button type="button" class="btn btn-ghost btn-sm" @click="overrideOpen[id] = !overrideOpen[id]" :aria-expanded="String(!!overrideOpen[id])" :aria-label="`Tour-specific text for ${byId[id]?.title || id}`">Tour text</button>
             <button type="button" class="btn btn-ghost btn-sm" @click="removeStop(i)" :aria-label="`Remove ${byId[id]?.title || id}`">Remove</button>
-          </div>
-          <div v-if="overrideOpen[id]" style="margin:-2px 0 10px; padding:12px 14px; border:1px solid var(--line); border-radius:10px;">
-            <label :for="`ov-label-${id}`">Map label <span class="hint">optional · the badge shown on the map/list to match a sign or paper map, e.g. A, F, “F/G” · blank = the number ({{ i + 1 }})</span></label>
-            <input :id="`ov-label-${id}`" type="text" :value="ov(id).label || ''" @input="setOv(id, 'label', $event.target.value)" :placeholder="String(i + 1)" maxlength="10" style="max-width:160px;" />
-            <label :for="`ov-title-${id}`">Title for this tour <span class="hint">optional · defaults to the location's title</span></label>
-            <input :id="`ov-title-${id}`" type="text" :value="ov(id).title || ''" @input="setOv(id, 'title', $event.target.value)" :placeholder="byId[id]?.title" />
-            <label :for="`ov-blurb-${id}`">Blurb for this tour <span class="hint">optional · replaces the location's summary on the story card</span></label>
-            <textarea :id="`ov-blurb-${id}`" rows="3" :value="ov(id).blurb || ''" @input="setOv(id, 'blurb', $event.target.value)" :placeholder="(byId[id]?.summary || '').slice(0, 90)"></textarea>
           </div>
         </div>
         <p v-if="!form.stopIds.length" class="muted" style="font-size:13px;">No stops yet – add published locations below.</p>
@@ -215,11 +217,14 @@ function setTakedown(v) { form.takedownAt = v ? new Date(v + 'T23:59:59').toISOS
 // keep the event window collapsed unless this tour already uses one
 const showEventWindow = ref(!!(form.eventStart || form.eventEnd || form.takedownAt))
 
-const overrideOpen = reactive({})
 function ov(id) { return form.stopOverrides[id] || {} }
-function setOv(id, field, value) {
-  const o = { ...(form.stopOverrides[id] || {}), [field]: value }
-  if (!o.title && !o.blurb && !(o.label || '').trim()) delete form.stopOverrides[id]
+// Per-stop map label (the only per-stop override now). Kept in stop_overrides so
+// a location can carry a different marker in different tours.
+function setLabel(id, value) {
+  const o = { ...(form.stopOverrides[id] || {}) }
+  if ((value || '').trim()) o.label = value
+  else delete o.label
+  if (!o.label && !o.title && !o.blurb) delete form.stopOverrides[id]
   else form.stopOverrides[id] = o
 }
 
