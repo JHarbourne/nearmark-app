@@ -2,7 +2,7 @@
 
 A reference for what the platform does and how it's put together. For **setup and
 deployment** see the [README](../README.md); this document describes **behaviour, data and
-architecture**. It reflects the app as of migration 029 (v1.8.0).
+architecture**. It reflects the app as of migration 033 (v1.12.11).
 
 ---
 
@@ -105,7 +105,8 @@ A location with **one** story opens it directly; **two or more** show a picker l
 An ordered collection of stops. Keyed by `slug`. Fields: `title`, `city`, `theme`,
 `description`; cover imagery + credit (`cover_image_url`, `cover_position`, `cover_credit`,
 `show_cover_credit`, `cover_alt`); `stop_ids` (ordered slugs); `stop_overrides`
-(per-tour title/blurb per stop); `route_geometry` (stored road-following path,
+(per-tour, per-stop `title` / `blurb` / `label` — the last is an optional **map label**
+that replaces the stop's number on its badge); `route_geometry` (stored road-following path,
 `[[lat,lng],…]`); `duration_override_mins`; `sort_order`; event window (`event_start`,
 `event_end`, `takedown_at`).
 
@@ -157,24 +158,30 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **Two modes.**
   - **Guided tour** — follow an ordered route; the map draws the route line (road-following
     when a tour has `route_geometry`, else straight), tracks the next stop, and auto-opens
-    a story on GPS arrival within `trigger_radius`.
+    a story on GPS arrival within `trigger_radius`. Starting a tour asks for location only when
+    it hasn't been decided yet; if the visitor has *blocked* it (can't be re-granted from the
+    web), Start tour goes straight to the map — which carries its own dismissible "location off"
+    banner — rather than dead-ending on a re-prompt.
   - **Discovery** — wander freely; stories surface by proximity. Stops flagged
     `guided_tour_only` are hidden here and appear only inside a guided tour.
 - **Stories.** Tapping a pin opens its story card **directly** when the location has a single
   story (the common case — identical to before). With **two or more**, a **story picker** list
   shows first (heading + thumbnail), then the chosen card opens.
 - **Story card.** Hero photo (with focal point), category/period tag, title, narrative (a safe
-  **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets, plus **soft line breaks** within a
-  paragraph for verse/quotes: end a line with a backslash `\`, two trailing spaces, or a literal
-  `<br>`. Rendered with fixed paragraph spacing; a plain new line still starts a new paragraph, so
-  existing text is unaffected), an
+  **Markdown subset** — `**bold**`, `*italic*`, `- ` bullets, **auto-linked `http(s)` URLs**
+  (opened in a new tab; only http/https, escaped, so nothing to sanitise), plus **soft line
+  breaks** within a paragraph for verse/quotes: end a line with a backslash `\`, two trailing
+  spaces, or a literal `<br>`. Rendered with fixed paragraph spacing; a plain new line still
+  starts a new paragraph, so existing text is unaffected. The **same renderer powers the tour
+  description**, so a tour can link to its own website from its description), an
   optional **before/after slider** (its own before + after photos, independent of the hero;
   after falls back to the hero if unset), second photo, optional **video** (a direct `.mp4`/`.webm` plays as
   the muted looping hero; a **YouTube** link embeds as a player in the body, with an optional
   **caption** beneath it — a non-playable link is ignored so it can't blank the hero), audio
   narration (with a collapsible **"Show transcript"** panel when a transcript exists —
   `[bracketed]` non-speech cues rendered muted/italic), credits (respecting the show/hide
-  toggles), an external link (label = `link_label` or the app default `VITE_STORY_LINK_LABEL`),
+  toggles), the stop's **address + a "Directions" link** (when set — opens the walker's maps app,
+  Apple Maps on iOS and Google Maps elsewhere), an external link (label = `link_label` or the app default `VITE_STORY_LINK_LABEL`),
   "nearby stories", and a small, low-contrast **"Suggest a correction"** link at the foot that
   opens the reader's mail app (a plain `mailto:` — no backend, works offline) pre-addressed to
   `VITE_FEEDBACK_EMAIL` with the app name + location/story in the subject (hidden when that var is
@@ -185,10 +192,15 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   per-deployment `.pmtiles` file set via `VITE_MAP_PMTILES_URL` and read through the
   `pmtiles://` protocol (HTTP range requests; offline-cacheable). If the var is unset it
   falls back to raster OpenStreetMap (online-only), so a deployment renders either way.
-  Hue-coloured numbered pins (dark/white number chosen per hue for contrast), "you are
-  here" GPS marker, GeoJSON route line. See `docs/maplibre-migration.md`.
+  Hue-coloured pins badged by stop position, or by a per-stop **map label** when set (a letter
+  or short code to match physical signs / a paper map — see the tour editor); dark/white badge
+  text chosen per hue for contrast. "You are here" GPS marker, GeoJSON route line. See `docs/maplibre-migration.md`.
 - **Share.** A sheet with a brand-coloured **QR code** (primary, for in-person sharing),
   copy-link, and a native "Share…" button where supported. URL = `VITE_PUBLIC_URL`.
+- **Settings.** A sheet for location permission, audio on/off, distance units, "Add to home
+  screen", share, an analytics opt-out, and **"Report a fault"** — a general feedback path (not
+  tied to one stop) that opens the reader's mail app pre-filled with the app version + device,
+  addressed to `VITE_FAULT_EMAIL` (defaults to the platform support inbox).
 - **Deep links.** `?story=<slug>` opens a story; `?tour=<slug>` opens a tour detail —
   shareable, and used by the admin Preview buttons. Drafts resolve when an admin is signed
   in in the same browser (shared session).
@@ -238,8 +250,12 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   screen (2+ stories) and inline in the Location editor (0–1 stories). Tour titles are capped at
   21 characters so the hero title stays on one line.
 - **Tours list & editor.** Drag-to-reorder tours; editor with cover image (same icon
-  controls), drag/keyboard stop reordering, per-stop tour overrides, **Calculate walking
-  route** button + numbered route preview, collapsible event window.
+  controls) and a **cover credit** that shows verbatim when it starts with its own label
+  (e.g. "Illustration: …") and is otherwise prefixed "Photo:"; a **description** taking the
+  same Markdown subset + auto-linked URLs as story text; drag/keyboard stop reordering; per-stop
+  overrides (title / blurb / **map label** — a letter or short code shown on the badge instead of
+  the number, to match signs or a paper map, independent of walking order); **Calculate walking
+  route** button + route preview; collapsible event window.
 - **Media library.** Lists everything in the bucket (folders + root); edit metadata; upload,
   replace, delete.
 - **User management.** Invite/list/remove admins + manage own 2FA (needs the `admin-users`
