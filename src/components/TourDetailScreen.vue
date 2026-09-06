@@ -27,7 +27,8 @@
         <span :style="stat"><span :style="statNum">{{ distanceLabel }}</span><span :style="statLbl">distance</span></span>
       </div>
 
-      <p style="font-family: var(--font-body); font-size: 17px; line-height: 1.62; color: var(--ink-soft); margin: 0 0 26px;">{{ typo(tour.description) }}</p>
+      <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em>/<br> are emitted -->
+      <div class="tour-desc" v-html="descriptionHtml"></div>
 
       <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 14px;">The Route</div>
 
@@ -58,6 +59,7 @@
 import { computed } from 'vue'
 import { badgeColors } from '../lib/tokens.js'
 import { typo } from '../lib/typography.js'
+import { renderBody } from '../lib/richtext.js'
 const props = defineProps({
   tour: { type: Object, required: true },
   stops: { type: Array, default: () => [] },
@@ -73,6 +75,10 @@ const coverCreditText = computed(() => {
   const c = (props.tour.coverCredit || '').trim()
   return /^\s*[a-z]+\s*:/i.test(c) ? c : `Photo: ${c}`
 })
+
+// The tour description supports the same lightweight formatting as story bodies
+// (**bold**, *italic*, "- " bullets, paragraphs) via the shared renderBody.
+const descriptionHtml = computed(() => renderBody(props.tour.description))
 
 const heroStyle = computed(() => {
   const base = { minHeight: '226px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }
@@ -134,3 +140,16 @@ function badge(s) {
   }
 }
 </script>
+
+<style scoped>
+/* Tour description – same lightweight formatting as story bodies. :deep() so the
+   scoped rules reach the v-html-injected elements. Matches the previous plain
+   paragraph look (17px / 1.62). */
+.tour-desc { margin: 0 0 26px; }
+.tour-desc :deep(p) { font-family: var(--font-body); font-size: 17px; line-height: 1.62; color: var(--ink-soft); margin: 0 0 16px; overflow-wrap: anywhere; }
+.tour-desc :deep(ul) { margin: 0 0 16px; padding-left: 22px; }
+.tour-desc :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; overflow-wrap: anywhere; }
+.tour-desc :deep(strong) { font-weight: 700; }
+.tour-desc :deep(em) { font-style: italic; }
+.tour-desc :deep(:last-child) { margin-bottom: 0; }
+</style>

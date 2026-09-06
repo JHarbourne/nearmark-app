@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.8] — 2026-09-06
+
+### Fixed
+- **Tour description now supports the same formatting as story descriptions.** The tour-detail description was rendered as plain text, so `**bold**`, `*italic*`, `- ` bullet lists and paragraph breaks showed as literal characters. It now goes through the shared rich-text renderer (same as story bodies), including house typography. Plain descriptions look unchanged.
+
 ## [1.12.7] — 2026-09-04
 
 ### Fixed
