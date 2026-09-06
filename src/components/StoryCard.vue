@@ -84,7 +84,7 @@
           </div>
 
           <!-- story text (all of it) sits above the slider; Markdown subset: **bold**, *italic*, - bullets -->
-          <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em> are emitted -->
+          <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em>/<br>/<a> are emitted (links built from escaped http(s) URLs only) -->
           <div class="story-body" v-html="bodyHtml"></div>
 
           <!-- before/after reveal slider, below the hero + text (only when both a today + a historic image exist) -->
@@ -467,7 +467,7 @@ const continueBtn = {
 .story-body :deep(p) { font-family: var(--font-body); font-size: 17px; line-height: 1.66; color: var(--ink-soft); margin: 0 0 16px; overflow-wrap: anywhere; }
 .story-body :deep(ul) { margin: 0 0 16px; padding-left: 22px; }
 .story-body :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; overflow-wrap: anywhere; }
-.story-body :deep(a) { overflow-wrap: anywhere; }
+.story-body :deep(a) { overflow-wrap: anywhere; color: var(--accent-warm); text-decoration: underline; text-underline-offset: 2px; }
 .story-body :deep(strong) { font-weight: 700; }
 .story-body :deep(em) { font-style: italic; }
 .story-body :deep(:last-child) { margin-bottom: 0; }

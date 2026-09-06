@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.9] — 2026-09-06
+
+### Added
+- **Web links in descriptions.** Paste an `http(s)://…` address into a tour or story description and it now renders as a clickable link (opens in a new tab). Safe by construction — only http/https is linked, the URL is escaped, and trailing sentence punctuation stays outside the link. This means a tour (e.g. the Arts Trail) can link to its own website straight from the description, without a separate field.
+
 ## [1.12.8] — 2026-09-06
 
 ### Fixed

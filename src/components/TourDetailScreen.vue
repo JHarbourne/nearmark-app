@@ -27,7 +27,7 @@
         <span :style="stat"><span :style="statNum">{{ distanceLabel }}</span><span :style="statLbl">distance</span></span>
       </div>
 
-      <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em>/<br> are emitted -->
+      <!-- eslint-disable-next-line vue/no-v-html -- input is HTML-escaped in renderBody; only <p>/<ul>/<li>/<strong>/<em>/<br>/<a> are emitted (links built from escaped http(s) URLs only) -->
       <div class="tour-desc" v-html="descriptionHtml"></div>
 
       <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 14px;">The Route</div>
@@ -151,5 +151,6 @@ function badge(s) {
 .tour-desc :deep(li) { font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 6px; overflow-wrap: anywhere; }
 .tour-desc :deep(strong) { font-weight: 700; }
 .tour-desc :deep(em) { font-style: italic; }
+.tour-desc :deep(a) { color: var(--accent-warm); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .tour-desc :deep(:last-child) { margin-bottom: 0; }
 </style>

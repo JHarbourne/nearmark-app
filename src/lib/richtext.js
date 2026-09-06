@@ -1,8 +1,9 @@
-// Minimal, safe Markdown subset for story body text: **bold**, *italic*, and
-// "- " / "* " bullet lists, plus paragraphs and single line breaks. Deliberately
-// tiny — no headings, links, images or raw HTML — so there are no styles to abuse
-// and nothing to sanitise: every line is HTML-escaped first, and we only ever
-// emit <p>, <ul>, <li>, <strong>, <em>, <br>. House-style typography (typo) is
+// Minimal, safe Markdown subset for body text: **bold**, *italic*, "- " / "* "
+// bullet lists, paragraphs, single line breaks, and auto-linked bare http(s)
+// URLs. Deliberately tiny — no headings, images or raw HTML, and links are only
+// ever built from an escaped http/https URL — so there are no styles to abuse and
+// nothing to sanitise: every line is HTML-escaped first, and we only ever emit
+// <p>, <ul>, <li>, <strong>, <em>, <br>, <a>. House-style typography (typo) is
 // applied inline.
 import { typo } from './typography.js'
 
@@ -10,6 +11,15 @@ function inline(s) {
   return typo(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/&lt;br\s*\/?&gt;/gi, '<br>')            // allow a literal <br> for a manual line break
+    // auto-link bare http(s) URLs. The text is already HTML-escaped; we only ever
+    // match http/https (no javascript:/data:), disallow quotes/angle brackets in
+    // the URL (no attribute breakout), and leave trailing sentence punctuation
+    // outside the link — so there is still nothing to sanitise.
+    .replace(/\bhttps?:\/\/[^\s<"]+/g, (u) => {
+      const tail = (u.match(/[.,!?)\]}]+$/) || [''])[0]
+      const url = tail ? u.slice(0, -tail.length) : u
+      return `<a href="${url}" target="_blank" rel="noopener nofollow">${url}</a>${tail}`
+    })
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // bold first
     .replace(/\*(.+?)\*/g, '<em>$1</em>')             // then italic
 }
