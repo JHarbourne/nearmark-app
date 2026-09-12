@@ -445,6 +445,37 @@ function resetSession() {
   proximityId.value = null; shownDiscovery.value = []; dismissedStops.value = []; settingsOpen.value = false
 }
 
+// ── phone / browser Back button ──────────────────────────────────────────────
+// The app is a single page with screen state, so without this the phone's Back
+// (gesture / hardware / browser) would leave the app entirely instead of stepping
+// back through it (reported by a tester backing out of a story). We keep one
+// "guard" entry in history: each Back closes the topmost layer via closeOneLayer()
+// and re-arms, mirroring the in-app back controls, until we reach the cover.
+
+// Close the topmost open layer, most-nested first. Returns true if it changed
+// anything (so we know whether to keep intercepting Back or let it exit).
+function closeOneLayer() {
+  if (settingsOpen.value) { settingsOpen.value = false; return true }
+  if (openId.value) { closeStory(); return true }            // story card → picker or underlying screen
+  if (storyListLoc.value) { storyListLoc.value = null; return true } // story picker
+  if (isMap.value) { exitMap(); return true }                // map → tour detail / cover
+  if (screen.value === 'completion') { goCover(); return true }
+  if (screen.value === 'tourDetail') { screen.value = 'tourList'; return true }
+  if (screen.value === 'tourList') { screen.value = 'cover'; return true }
+  return false // at the cover / top level – let Back leave the app
+}
+
+function onPopState() {
+  const changed = closeOneLayer()
+  // Re-arm the guard so the next Back is caught too; if nothing was left to close
+  // we're at the top, so we let the browser Back through (the app can exit).
+  if (changed) history.pushState({ nmBack: 1 }, '')
+}
+onMounted(() => {
+  history.pushState({ nmBack: 1 }, '') // prime one guard entry
+  window.addEventListener('popstate', onPopState)
+})
+
 // Tapping a location: 1 story → open its card directly (the fast path, identical
 // to before); 2+ stories → show the picker list first, then open the chosen story.
 function openStory(id) {

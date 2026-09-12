@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.16] — 2026-09-12
+
+### Added
+- **The phone's Back button now steps back through the app** instead of leaving it. Back closes an open story (dropping to its picker or the map), then exits the map to the tour, then walks tour detail → tour list → cover; only at the cover does Back leave the app. Reported by a tester who found that backing out of a story threw them out entirely. Implemented with the History API and a re-arming guard entry, mirroring the in-app back controls. (Best confirmed on a real device — iOS Safari, Android, and the installed PWA.)
+
 ## [1.12.15] — 2026-09-06
 
 ### Changed
