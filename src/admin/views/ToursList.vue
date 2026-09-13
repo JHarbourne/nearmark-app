@@ -8,7 +8,7 @@
 
     <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle to reorder – this sets the order tours appear in the app.</p>
     <div class="card">
-      <table>
+      <table class="compact-list tours">
         <thead>
           <tr><th></th><th>Tour title</th><th>City</th><th>Stops</th><th>Distance</th><th>Duration</th><th>Status</th><th class="right">Actions</th></tr>
         </thead>

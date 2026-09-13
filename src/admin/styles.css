@@ -150,25 +150,41 @@ tr.row-clickable:hover { background: var(--line); }
   .card > table td[colspan] { display: block; }
   .card > table td[colspan]::before { content: none; }
 
-  /* Compact mobile card for the Locations list – the generic label-stacked layout
-     ran to ~12 lines per row; this lays each out as thumbnail + title / city ·
-     status / actions (≈4 lines). Period & Approvals are hidden on mobile. */
+  /* Compact mobile cards for the Locations & Tours lists – the generic label-stacked
+     layout ran to ~12 lines per row. Shared base, then a per-list grid (~4 lines). */
   .card > table.compact-list td { padding: 0; }
   .card > table.compact-list td::before { content: none; }
   .card > table.compact-list tr.row-clickable {
-    display: grid;
-    grid-template-columns: 48px auto 1fr;
-    grid-template-areas: "photo title title" "photo city status" "actions actions actions";
-    column-gap: 12px; row-gap: 3px; align-items: center;
+    display: grid; column-gap: 12px; row-gap: 3px; align-items: center;
     padding: 12px 2px; border-bottom: 1px solid var(--line);
   }
-  .card > table.compact-list td[data-label="Photo"]   { grid-area: photo; }
-  .card > table.compact-list td[data-label="Title"]   { grid-area: title; font-weight: 600; }
-  .card > table.compact-list td[data-label="City"]    { grid-area: city; color: var(--muted); font-size: 13px; }
-  .card > table.compact-list td[data-label="Status"]  { grid-area: status; justify-self: start; }
   .card > table.compact-list td[data-label="Actions"] { grid-area: actions; margin-top: 6px; white-space: normal !important; }
-  .card > table.compact-list td[data-label="Period"],
-  .card > table.compact-list td[data-label="Approvals"] { display: none; }
+
+  /* Locations: thumbnail | title / city · status / actions */
+  .card > table.compact-list.loc tr.row-clickable {
+    grid-template-columns: 48px auto 1fr;
+    grid-template-areas: "photo title title" "photo city status" "actions actions actions";
+  }
+  .card > table.compact-list.loc td[data-label="Photo"]  { grid-area: photo; }
+  .card > table.compact-list.loc td[data-label="Title"]  { grid-area: title; font-weight: 600; }
+  .card > table.compact-list.loc td[data-label="City"]   { grid-area: city; color: var(--muted); font-size: 13px; }
+  .card > table.compact-list.loc td[data-label="Status"] { grid-area: status; justify-self: start; }
+  .card > table.compact-list.loc td[data-label="Period"],
+  .card > table.compact-list.loc td[data-label="Approvals"] { display: none; }
+
+  /* Tours: ⠿ | title · status / city · N stops / actions (distance & duration hidden) */
+  .card > table.compact-list.tours tr.row-clickable {
+    grid-template-columns: 18px auto 1fr;
+    grid-template-areas: "handle title status" "handle city stops" "actions actions actions";
+  }
+  .card > table.compact-list.tours td[data-label="Order"]  { grid-area: handle; }
+  .card > table.compact-list.tours td[data-label="Tour"]   { grid-area: title; font-weight: 600; }
+  .card > table.compact-list.tours td[data-label="City"]   { grid-area: city; color: var(--muted); font-size: 13px; }
+  .card > table.compact-list.tours td[data-label="Stops"]  { grid-area: stops; color: var(--muted); font-size: 13px; justify-self: end; }
+  .card > table.compact-list.tours td[data-label="Stops"]::after { content: " stops"; }
+  .card > table.compact-list.tours td[data-label="Status"] { grid-area: status; justify-self: end; }
+  .card > table.compact-list.tours td[data-label="Distance"],
+  .card > table.compact-list.tours td[data-label="Duration"] { display: none; }
 }
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .demo-banner { background: #fff7e6; border: 1px solid #f3d98a; color: #8a6400; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }

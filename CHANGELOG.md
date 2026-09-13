@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.3] — 2026-09-13
+
+### Changed
+- **The Tours list gets the same compact mobile card** as the Locations list: title · status, then city · stop-count, then the actions. Distance and duration are hidden at phone width.
+
 ## [1.14.2] — 2026-09-13
 
 ### Changed
