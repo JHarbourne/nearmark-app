@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.3] — 2026-09-13
+
+### Changed
+- **The Locations-list "City" filter is hidden when the data only spans one city** — matching the editor change in 1.13.2, so single-city deployments don't show a filter with nothing to filter. It reappears automatically if locations ever span multiple cities.
+
 ## [1.13.2] — 2026-09-13
 
 ### Changed

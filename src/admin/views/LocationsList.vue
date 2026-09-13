@@ -11,7 +11,8 @@
 
     <div class="toolbar">
       <input type="text" v-model="q" placeholder="Search by title…" aria-label="Search locations by title" style="max-width:260px;" />
-      <select v-model="cityFilter" aria-label="Filter by city" style="max-width:160px;">
+      <!-- Only offer the city filter when the data actually spans more than one city. -->
+      <select v-if="cities.length > 1" v-model="cityFilter" aria-label="Filter by city" style="max-width:160px;">
         <option value="">All cities</option>
         <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
       </select>
