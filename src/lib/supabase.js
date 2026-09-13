@@ -278,38 +278,36 @@ const typeFromName = (name) => {
 export async function listStorageMedia() {
   const out = []
   const seen = new Set()
-  const add = (path, type, f) => {
+  const add = (path, f) => {
     if (seen.has(path)) return
     seen.add(path)
     out.push({
       path,
       url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl,
-      type,
+      type: typeFromName(f.name), // classify by extension, wherever the file lives
       defaultName: f.name.replace(/^\d+-/, ''), // strip the timestamp prefix
       sizeBytes: f.metadata?.size || null,
       createdAt: f.created_at || null,
     })
   }
-  // The app's own uploader files things under type subfolders.
-  for (const folder of ['image', 'audio', 'video']) {
-    const { data, error } = await supabase.storage.from('media').list(folder, {
+  // Walk the whole bucket, recursing into EVERY folder, so nothing is hidden.
+  // Files live under the uploader's type folders (image/ audio/ video/), the
+  // bucket root, AND named folders like arts-trail-2026/ (bulk/dashboard uploads)
+  // — a hard-coded folder list used to miss those. In Supabase Storage a folder
+  // entry has no `metadata`; a file has it. Placeholders start with a dot.
+  async function walk(prefix, depth) {
+    const { data, error } = await supabase.storage.from('media').list(prefix, {
       limit: 1000, sortBy: { column: 'created_at', order: 'desc' },
     })
-    if (error || !data) continue
+    if (error || !data) return
     for (const f of data) {
-      if (f.name) add(`${folder}/${f.name}`, folder, f)
+      if (!f.name || f.name.startsWith('.')) continue
+      const path = prefix ? `${prefix}/${f.name}` : f.name
+      if (f.metadata) add(path, f)                       // a file
+      else if (depth < 4) await walk(path, depth + 1)    // a folder → recurse
     }
   }
-  // Also surface files uploaded straight to the bucket root (e.g. via the
-  // Supabase dashboard), classified by extension. Folder entries (image/…)
-  // come back with no metadata, and placeholders start with a dot — skip both.
-  const { data: root } = await supabase.storage.from('media').list('', {
-    limit: 1000, sortBy: { column: 'created_at', order: 'desc' },
-  })
-  for (const f of root || []) {
-    if (!f.name || !f.metadata || f.name.startsWith('.')) continue
-    add(f.name, typeFromName(f.name), f)
-  }
+  await walk('', 0)
   return out
 }
 export async function listMediaMeta() {

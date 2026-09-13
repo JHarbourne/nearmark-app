@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.17] — 2026-09-13
+
+### Fixed
+- **Media Library now shows every image in the bucket.** It previously listed only the uploader's `image/`, `audio/`, `video/` folders and the bucket root, so files bulk-uploaded into a named folder (e.g. `arts-trail-2026/`, ~70 images including the artists' photos) were used on pages but invisible in the library — so you couldn't reuse them elsewhere. The listing now walks the whole bucket recursively, classifying each file by its extension.
+
 ## [1.12.16] — 2026-09-12
 
 ### Added
