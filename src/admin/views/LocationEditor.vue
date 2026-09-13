@@ -5,7 +5,11 @@
   <div>
     <div class="pagehead">
       <h1>{{ isNew ? 'New location' : 'Edit location' }}</h1>
-      <button class="btn btn-ghost" @click="back">← Back to list</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous: ${prevLoc.title}`">← Previous</button>
+        <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next: ${nextLoc.title}`">Next →</button>
+        <button class="btn btn-ghost" @click="back">← Back to list</button>
+      </div>
     </div>
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:start;">
@@ -125,7 +129,11 @@
         <button class="btn btn-primary" @click="save()" :disabled="saving || !canEdit">{{ saving ? 'Saving…' : 'Save' }}</button>
         <span v-if="!canEdit" class="muted" role="status" style="font-size:13px;">Read-only — this location belongs to someone else; only its owner or a Super Admin can edit it.</span>
         <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
-        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous: ${prevLoc.title}`">← Previous</button>
+          <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next: ${nextLoc.title}`">Next →</button>
+          <button class="btn btn-ghost btn-sm" @click="back">← Back to list</button>
+        </div>
       </div>
       </div>
 
@@ -191,6 +199,14 @@ const isNew = !existing
 // shares into their tour is visible but read-only. RLS is the real boundary; this
 // just stops the UI offering a Save the DB would reject.
 const canEdit = computed(() => isNew || store.canEditLocation(existing))
+
+// Page through locations without going back to the list. Follows the store's
+// location order (same as the flat list). store.go runs the unsaved-changes guard,
+// and the view is keyed by id so it re-initialises on each move.
+const curIdx = computed(() => existing ? store.locations.findIndex((l) => l.id === existing.id) : -1)
+const prevLoc = computed(() => curIdx.value > 0 ? store.locations[curIdx.value - 1] : null)
+const nextLoc = computed(() => (curIdx.value >= 0 && curIdx.value < store.locations.length - 1) ? store.locations[curIdx.value + 1] : null)
+function goToLoc(l) { if (l) store.go('locationEditor', { id: l.id }) }
 
 const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),

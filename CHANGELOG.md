@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.6] — 2026-09-13
+
+### Added
+- **Previous / Next buttons in the Location editor** (top and bottom), so you can page straight through your locations without returning to the list each time. They follow the list order and run the usual unsaved-changes prompt, mirroring the story editor's "Next story".
+
 ## [1.14.5] — 2026-09-13
 
 ### Changed
