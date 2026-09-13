@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.8] — 2026-09-13
+
+### Fixed
+- **New-location and new-tour maps open on the area you're working in, not London.** The admin map for a new location (and a new tour's route preview) now defaults to the centre of the deployment's existing locations — Tollesbury, London, wherever your content is — instead of the platform's generic London fallback. Existing locations still centre on their own pin. (A brand-new deployment with no locations yet still uses `VITE_MAP_CENTER_LAT/LNG`.)
+
 ## [1.14.7] — 2026-09-13
 
 ### Fixed

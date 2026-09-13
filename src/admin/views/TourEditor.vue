@@ -157,7 +157,7 @@
 
       <div class="card map-sticky" style="padding:18px;">
         <span class="field-label" style="margin-top:0;">Route preview</span>
-        <PlaceMap route-only :route-points="routePoints" :route-geometry="form.routeGeometry || []" :key="routeKey" />
+        <PlaceMap route-only :route-points="routePoints" :route-geometry="form.routeGeometry || []" :center="store.defaultMapCenter" :key="routeKey" />
         <p class="muted" style="font-size:13px; margin-top:10px;">Stops: {{ form.stopIds.length }} · auto duration ≈ {{ autoMins }} min</p>
 
         <div style="margin-top:12px; padding-top:14px; border-top:1px solid var(--line);">

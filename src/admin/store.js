@@ -6,6 +6,7 @@
 import { reactive } from 'vue'
 import { supabaseConfigured, db, auth, uploadMedia, replaceMediaFile, removeMedia, listStorageMedia, listMediaMeta, saveMediaMeta, deleteMediaAsset, computeWalkingRoute } from '../lib/supabase.js'
 import { compressImage } from '../lib/image.js'
+import { config } from '../config.js'
 
 export const store = reactive({
   liveBackend: supabaseConfigured,
@@ -51,6 +52,17 @@ export const store = reactive({
   canEditStory(loc) { return this.canEditLocation(loc) },                                         // follows the parent location
   canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id || this.myTourIds.includes(tour?.recordId) }, // owner + assigned + SA
   canDeleteTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },     // owner + SA only (not assigned)
+  // Where a NEW location/tour map should open: the centre of the locations this
+  // deployment already covers (so it lands on Tollesbury, London, … automatically),
+  // falling back to the configured default only when there's no content yet.
+  get defaultMapCenter() {
+    const pts = this.locations.filter((l) => l.lat != null && l.lng != null)
+    if (!pts.length) return config.mapCenter
+    return {
+      lat: pts.reduce((s, l) => s + l.lat, 0) / pts.length,
+      lng: pts.reduce((s, l) => s + l.lng, 0) / pts.length,
+    }
+  },
   async refreshNotifications() { if (this.liveBackend) this.notifications = await db.listNotifications().catch(() => []) },
   async markNotificationsRead() {
     await db.markNotificationsRead().catch(() => {})

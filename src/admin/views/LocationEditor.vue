@@ -191,7 +191,9 @@ import MoveStoryDialog from '../components/MoveStoryDialog.vue'
 import StoryCard from '../../components/StoryCard.vue'
 
 const cities = config.cities
-const mapCenter = config.mapCenter
+// New locations open on the area this deployment already covers (see store), not
+// the platform's London default. Existing locations still centre on their own pin.
+const mapCenter = computed(() => store.defaultMapCenter)
 
 const existing = store.params.id ? store.locations.find((l) => l.id === store.params.id) : null
 const isNew = !existing
