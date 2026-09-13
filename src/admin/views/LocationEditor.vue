@@ -15,8 +15,12 @@
         <label for="loc-title">Title <span class="hint">the place name (shown on the map pin + list)</span></label>
         <input id="loc-title" type="text" v-model="form.title" placeholder="e.g. St Mary’s Church" />
 
-        <label for="loc-city">City</label>
-        <select id="loc-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
+        <!-- City is a deployment-level setting (VITE_CITY_NAME/VITE_CITIES). Only offer it
+             when there's a genuine choice; single-city deployments set it automatically. -->
+        <template v-if="cities.length > 1">
+          <label for="loc-city">City</label>
+          <select id="loc-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
+        </template>
 
         <!-- privacy / publication (migration 011) -->
         <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">

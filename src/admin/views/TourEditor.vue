@@ -17,8 +17,12 @@
         <label for="tour-title">Title <span class="hint">keep it short so it fits on one line ({{ (form.title || '').length }}/21)</span></label>
         <input id="tour-title" type="text" v-model="form.title" maxlength="21" />
 
-        <label for="tour-city">City</label>
-        <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
+        <!-- City is a deployment-level setting (VITE_CITY_NAME/VITE_CITIES). Only offer it
+             when there's a genuine choice; single-city deployments set it automatically. -->
+        <template v-if="cities.length > 1">
+          <label for="tour-city">City</label>
+          <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
+        </template>
 
         <label for="tour-theme">Theme <span class="hint">short descriptor</span></label>
         <input id="tour-theme" type="text" v-model="form.theme" placeholder="Resistance & resilience 1890–1999" />

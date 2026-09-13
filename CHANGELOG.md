@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.2] — 2026-09-13
+
+### Changed
+- **The City field is hidden in the tour & location editors when a deployment has only one city** (the usual case — set via `VITE_CITY_NAME`). It was a pull-down with a single, unchangeable option; the value is now set automatically behind the scenes. The picker still appears for a genuine multi-city site (`VITE_CITIES` with 2+).
+
 ## [1.13.1] — 2026-09-13
 
 ### Fixed
