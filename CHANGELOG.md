@@ -8,6 +8,12 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.19] — 2026-09-13
+
+### Changed
+- **One map library instead of two.** The admin map (`PlaceMap`) moved from Leaflet to **MapLibre GL** (raster OpenStreetMap basemap; the public map already used MapLibre), and **Leaflet was removed entirely**. This halves the admin JS chunk (~86 → ~43 KB gzipped) and drops a dependency, with no change to how the admin map behaves. Tech-stack docs updated.
+- **Added a bundle-size budget** (`npm run size`) that builds and fails if the JS grows past budget (gzipped) — a guard against a heavy dependency or a lost code-split slipping in. See `scripts/check-bundle-size.mjs`.
+
 ## [1.12.18] — 2026-09-13
 
 ### Fixed

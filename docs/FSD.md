@@ -21,8 +21,9 @@ Two front-ends share one build:
 | `admin.html` | `/admin` | Content-management backoffice |
 
 **Stack:** Vue 3 (`<script setup>`) + Vite · Supabase (Postgres + Auth + Storage + Edge
-Functions) · MapLibre GL + self-hosted Protomaps/PMTiles vector basemap (public map; the
-admin map is still Leaflet) · hosted on Vercel · optional OpenRouteService and PostHog.
+Functions) · MapLibre GL for all maps — the public map on a self-hosted Protomaps/PMTiles
+vector basemap, the admin map on raster OpenStreetMap tiles · hosted on Vercel · optional
+OpenRouteService and PostHog.
 
 ---
 

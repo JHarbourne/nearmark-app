@@ -89,10 +89,4 @@ body {
   .app-stage { background: var(--bg); }
 }
 
-/* Leaflet overrides so the live map matches the prototype's flat parchment look */
-.leaflet-container { background: var(--map-paper); font-family: var(--font-ui); }
-.leaflet-control-attribution {
-  font-size: 9px;
-  background: rgba(255,255,255,0.7);
-}
 .marker-pin { background: none; border: none; }

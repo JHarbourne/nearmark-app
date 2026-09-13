@@ -112,7 +112,12 @@ locally to check:
 
 ```bash
 npm run dev      # public app → http://localhost:5173/   admin → /admin.html
+npm run size     # build, then check the JS bundle against its size budget (gzipped)
 ```
+
+`npm run size` fails if the bundle grows past the budget in `scripts/check-bundle-size.mjs`
+— a guard against a heavy dependency or a lost code-split creeping in. Wire it into CI to
+enforce it automatically.
 
 Sign in to `/admin.html` with the user you created and add a location or two. (With no
 Supabase configured, the app falls back to bundled example content so you can preview the

@@ -1,6 +1,6 @@
 {
   "name": "nearmark",
-  "version": "1.12.18",
+  "version": "1.12.19",
   "private": true,
   "description": "Nearmark — a location-aware heritage walking-tour platform (mobile PWA + admin backoffice). Deploy your own city guide.",
   "type": "module",
@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "size": "npm run build && node scripts/check-bundle-size.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:a11y": "playwright test",
@@ -18,7 +19,6 @@
     "@protomaps/basemaps": "^5.7.2",
     "@supabase/supabase-js": "^2.108.2",
     "img-comparison-slider": "^8.0.7",
-    "leaflet": "^1.9.4",
     "maplibre-gl": "^5.24.0",
     "pmtiles": "^4.4.1",
     "pmtiles-protocol": "^1.1.2",

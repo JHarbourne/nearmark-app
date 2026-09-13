@@ -37,7 +37,9 @@ Leaflet.
 |---|---|
 | `src/components/MapView.vue` | Full rewrite: Leaflet → MapLibre GL + `pmtiles` + `@protomaps/basemaps` |
 | `src/config.js` | Added `mapPmtilesUrl` (`VITE_MAP_PMTILES_URL`) |
-| `src/main.js` | Public entry: `leaflet.css` → `maplibre-gl.css` (admin keeps Leaflet) |
+| `src/main.js` | Public entry: `leaflet.css` → `maplibre-gl.css` |
+
+**Update 2026-09-13:** the **admin map (`PlaceMap.vue`) also moved to MapLibre GL** (raster OpenStreetMap basemap), and **Leaflet was removed entirely** — one map library now, not two. `src/admin/main.js` swapped `leaflet.css` → `maplibre-gl.css`; the `leaflet` dependency is gone.
 | `package.json` | Added `maplibre-gl`, `pmtiles`, `@protomaps/basemaps` |
 
 Basemap style: `@protomaps/basemaps` `layers('protomaps', LIGHT, {lang:'en'})`; glyphs +
