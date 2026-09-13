@@ -8,11 +8,6 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
-## [1.13.2] — 2026-09-13
-
-### Changed
-- **The "Assigned editors" remove control now uses the trash icon**, matching the delete buttons used elsewhere in the admin (locations, tours) instead of a text "Remove" button. The tour owner still shows as "owner" with no remove control.
-
 ## [1.13.1] — 2026-09-13
 
 ### Fixed

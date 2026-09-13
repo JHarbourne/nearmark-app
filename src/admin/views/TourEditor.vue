@@ -173,9 +173,7 @@
           <li v-for="a in assignees" :key="a.userId" style="display:flex; align-items:center; gap:10px;">
             <span style="flex:1;">{{ profileName(a.userId) }}</span>
             <span v-if="a.userId === existing.createdBy" class="muted" style="font-size:12px;">owner</span>
-            <button v-else class="btn btn-danger btn-sm" :disabled="assignBusy" @click="unassign(a.userId)" aria-label="Remove editor" title="Remove editor">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
-            </button>
+            <button v-else class="btn btn-ghost btn-sm" :disabled="assignBusy" @click="unassign(a.userId)">Remove</button>
           </li>
         </ul>
         <p v-else class="muted" style="font-size:13px; margin:0 0 12px;">No editors assigned yet.</p>
