@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.0] — 2026-09-13
+
+### Changed
+- **Assigned editors can now edit any stop in their tour** – not only the locations they created – so a team can build and maintain a shared tour together. Editing a stop's content is allowed for the tour's owner, any editor assigned to a tour the stop is in, and Super Admins. **Deleting** a location still requires being its owner or a Super Admin. Sharing a location into a tour remains a Super-Admin action, so this can't be used to reach a location that isn't already a stop in your tour. Enforced in the database (`migration-037-editors-edit-tour-stops.sql`) and mirrored in the admin (a stop in your tour now shows "Edit", not "View"). Dormant until the migration is run on a project.
+
 ## [1.13.5] — 2026-09-13
 
 ### Added

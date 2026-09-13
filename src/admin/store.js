@@ -41,8 +41,13 @@ export const store = reactive({
   get isEditor() { return this.role === 'editor' },
   get isSuperAdmin() { return this.role === 'super_admin' },
   get unreadCount() { return this.notifications.filter((n) => !n.readAt).length },
-  canEditLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },     // owner + SA
-  canDeleteLocation(loc) { return this.canEditLocation(loc) },                                    // owner + SA
+  // owner + SA + any assigned editor whose tour this location is a stop in (migration 037)
+  canEditLocation(loc) {
+    if (this.role !== 'editor') return true
+    if (loc?.createdBy === this.user?.id) return true
+    return this.tours.some((t) => this.myTourIds.includes(t.recordId) && (t.stopIds || []).includes(loc?.id))
+  },
+  canDeleteLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },    // owner + SA only (delete stays strict)
   canEditStory(loc) { return this.canEditLocation(loc) },                                         // follows the parent location
   canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id || this.myTourIds.includes(tour?.recordId) }, // owner + assigned + SA
   canDeleteTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },     // owner + SA only (not assigned)

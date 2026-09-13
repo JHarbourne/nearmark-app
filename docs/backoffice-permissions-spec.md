@@ -114,10 +114,13 @@ location). The Super Admin is unaffected — still sees and does everything.
   that are a stop in one of their assigned tours (via `stop_ids`); stories under any location they
   can see. Helpers `slug_in_my_tours()` / `can_see_location_id()` (SECURITY DEFINER) express this
   without RLS recursion. Anon/public policies are untouched.
-- **EDIT is owner-only for editors.** An editor edits/deletes only locations & stories they **own**;
-  a location the Super Admin shares into their tour is **read-only** to them. (This replaces the
-  collaborative "anyone edits, owner notified" for locations/stories.) An editor may edit a tour they
-  own **or are assigned to** (fields + stop order); tour **delete** stays owner + SA.
+- **EDIT follows the tour (migration 037).** An editor may edit **any stop in a tour they're
+  assigned to** – its location and stories – plus anything they own; editability now matches
+  visibility, so a team can build a shared tour together. An editor may also edit the tour record
+  itself (fields + stop order) for tours they own or are assigned to. **DELETE stays strict:** only
+  the owner or a Super Admin can delete a location or a tour. (037 supersedes 036's original
+  owner-only edit; sharing a location into a tour is still SA-only, so "edit any stop in my tour"
+  can only reach locations the SA put there or the editor created.)
 - **Cross-tour location sharing stays a Super-Admin privilege, enforced at the write layer.** A
   `before insert/update` trigger on `tours` rejects any slug added to `stop_ids` by a non-SA that
   they don't own (`errcode 42501`). This closes the escalation where an editor could gain sight of a
@@ -197,7 +200,8 @@ exists, show a non-blocking dialog:
 |---|---|---|---|
 | **1** | `profiles`/roles, `created_by` + backfill, per-action RLS (locations, **stories**, tours), auto-owner + immutability triggers | `migration-030-rbac-ownership.sql` | ✅ **BUILT + verified on staging** (app v1.9.0). Dormant on prod until run. |
 | **2** | `notifications` + de-duped edit-notify triggers (locations & stories) + admin **bell** UI | `migration-031-notifications.sql` | ✅ **BUILT + verified on staging** (app v1.9.1). Dormant on prod until run. |
-| **1b** | `tour_editors` assignment table + scoped SELECT + owner-only edit + SA-only-sharing trigger + assignment UI | `migration-036-tour-editor-scoping.sql` | ✅ **BUILT + verified on staging** (app v1.13.0). Dormant on prod until run. |
+| **1b** | `tour_editors` assignment table + scoped SELECT + owner-only edit + SA-only-sharing trigger + assignment UI | `migration-036-tour-editor-scoping.sql` | ✅ **BUILT + verified on staging** (app v1.13.0). Live on Tollesbury; LGBT dormant. |
+| **1c** | Assigned editors may edit **any stop in their tour** (edit now matches visibility; delete stays owner + SA) | `migration-037-editors-edit-tour-stops.sql` | ✅ **BUILT + verified on staging** (app v1.14.0). Dormant on prod until run. |
 | **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI | `migration-037-deletion-workflow.sql` (draft exists as **024** — renumber + extend to stories) | ⏭️ **NEXT — not yet built** |
 | 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `038` (to draft) | not built |
 | 5 | email notifications (Brevo) | Edge Function | not built |
