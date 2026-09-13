@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.5] — 2026-09-13
+
+### Added
+- **"Ask a question" link in the admin sidebar** — a light mailto channel so editors can reach a human without a full support desk (defaults to the platform inbox; set `VITE_HELP_EMAIL` to route questions to the site owner). Sits alongside the existing "Guide & help" (→ the guide on nearmark.co.uk) and "Suggest an improvement" links.
+
 ## [1.13.4] — 2026-09-13
 
 ### Security

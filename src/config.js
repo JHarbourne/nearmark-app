@@ -72,6 +72,10 @@ export const config = {
   // address (general app feedback, not tied to a story). Defaults to the platform
   // support inbox so every deployment has a working path; override per brand.
   faultEmail: pick(env.VITE_FAULT_EMAIL, 'hello@nearmark.co.uk'),
+  // Admin "Ask a question" mailto – a light way for editors to reach a human without
+  // a full support desk. Defaults to the platform inbox; a deployment can point it at
+  // the site owner's own email via VITE_HELP_EMAIL. Blank hides the link.
+  helpEmail: pick(env.VITE_HELP_EMAIL, 'hello@nearmark.co.uk'),
   platformName: pick(env.VITE_PLATFORM_NAME, 'Nearmark'),       // "Powered by …" attribution
   // link for the "Powered by …" name. Defaults to nearmark.app for the default brand;
   // a white-label deploy (custom VITE_PLATFORM_NAME) stays plain text unless it sets a URL.

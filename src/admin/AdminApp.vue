@@ -38,6 +38,7 @@
         </button>
         <a href="/" target="_blank" class="navlink" style="display:block; margin-top:10px; padding-left:0;">View live<span style="white-space:nowrap;">app<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
         <a v-if="guideUrl" :href="guideUrl" target="_blank" rel="noopener" class="navlink" style="display:block; padding-left:0;">Guide &amp; <span style="white-space:nowrap;">help<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
+        <a v-if="askUrl" :href="askUrl" class="navlink" style="display:block; padding-left:0;">Ask a <span style="white-space:nowrap;">question<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span></a>
         <a v-if="feedbackUrl" :href="feedbackUrl + '?area=admin'" target="_blank" rel="noopener" class="navlink" style="display:block; padding-left:0;">Suggest an <span style="white-space:nowrap;">improvement<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-left:5px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></span></a>
         <button class="navlink" style="padding-left:0;" @click="store.signOut()">Sign out</button>
         <p class="muted" style="font-size:11.5px; margin:16px 0 0; color:var(--ink-faint);">Powered by <a v-if="platformUrl" :href="platformUrl" target="_blank" rel="noopener" style="color:inherit;">{{ platformName }}</a><span v-else>{{ platformName }}</span> · v{{ version }}</p>
@@ -103,6 +104,10 @@ import { store } from './store.js'
 import { config } from '../config.js'
 const feedbackUrl = config.feedbackUrl
 const guideUrl = config.guideUrl
+// "Ask a question" mailto – prefilled subject so replies are easy to triage.
+const askUrl = config.helpEmail
+  ? `mailto:${config.helpEmail}?subject=${encodeURIComponent(config.appName + ' admin – question')}`
+  : ''
 
 // focus the Save button when the unsaved-changes dialog opens (Enter = Save, Esc = Cancel)
 const saveBtn = ref(null)
