@@ -115,6 +115,7 @@
             @drop="drop(i)"
             @dragend="dragIdx = null"
           >
+            <span style="color:var(--muted); cursor:grab; flex-shrink:0;" title="Drag to reorder" aria-hidden="true">⠿</span>
             <span style="font-family:'Bricolage Grotesque'; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;" :style="{ background: badgeColors(byId[id]?.hue || '#ccc').bg, color: badgeColors(byId[id]?.hue || '#ccc').ink }">{{ i + 1 }}</span>
             <input
               type="text"

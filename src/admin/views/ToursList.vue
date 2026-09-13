@@ -27,6 +27,8 @@
             <td class="muted" data-label="Duration">{{ t.durationLabel }}</td>
             <td data-label="Status"><span class="badge" :class="t.status">{{ t.status }}</span></td>
             <td class="right" style="white-space:nowrap;" data-label="Actions">
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="moveTour(i, -1)" :aria-label="`Move ${t.title} up`">▲</button>
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === rows.length - 1" @click.stop="moveTour(i, 1)" :aria-label="`Move ${t.title} down`">▼</button>
               <button class="btn btn-ghost btn-sm" @click.stop="store.go('tourEditor', { id: t.id })">{{ store.canEditTour(t) ? 'Edit' : 'View' }}</button>
               <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview</button>
               <button class="btn btn-ghost btn-sm" @click.stop="duplicate(t)">Duplicate</button>
@@ -62,6 +64,15 @@ function drop(i) {
   const [moved] = arr.splice(dragIdx.value, 1)
   arr.splice(i, 0, moved)
   dragIdx.value = null
+  store.reorderTours()
+}
+// Keyboard/touch-accessible reorder (the ▲▼ buttons); mirrors the drag path.
+function moveTour(i, dir) {
+  const j = i + dir
+  const arr = store.tours
+  if (j < 0 || j >= arr.length) return
+  const [moved] = arr.splice(i, 1)
+  arr.splice(j, 0, moved)
   store.reorderTours()
 }
 

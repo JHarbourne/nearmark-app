@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.4] — 2026-09-13
+
+### Changed
+- **Consistent reordering across every admin list.** Tours, Stops and Stories now all offer the same two ways to reorder: drag-and-drop (with a ⠿ handle) *and* ▲▼ buttons. Drag was added to the Stories list, ▲▼ arrows to the Tours list, and a ⠿ handle to the Stops list. The arrows are the keyboard- and touch-accessible path (WCAG 2.5.7); drag is the quick pointer shortcut.
+
 ## [1.14.3] — 2026-09-13
 
 ### Changed

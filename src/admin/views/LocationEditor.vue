@@ -86,7 +86,8 @@
           </div>
           <ul style="list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;">
             <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
-            <li v-for="(s, i) in stories" :key="s.storyId" class="story-row" @click="editStory(s)" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer;">
+            <li v-for="(s, i) in stories" :key="s.storyId" class="story-row" draggable="true" @click="editStory(s)" @dragstart="storyDragIdx = i" @dragover.prevent @drop="dropStory(i)" @dragend="storyDragIdx = null" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer;" :style="{ opacity: storyDragIdx === i ? 0.4 : 1 }">
+              <span style="color:var(--muted); cursor:grab; flex-shrink:0;" title="Drag to reorder" aria-hidden="true" @click.stop>⠿</span>
               <span :style="{ flexShrink:0, width:'26px', height:'26px', borderRadius:'7px', background: s.hue || '#8a7d97', opacity: s.status === 'draft' ? 0.4 : 1 }"></span>
               <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600;">{{ s.heading || '(untitled story)' }}<span v-if="s.status === 'draft'" class="badge draft" style="margin-left:8px; font-weight:600;">Hidden</span></span>
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" aria-label="Move up">▲</button>
@@ -445,6 +446,16 @@ async function move(i, dir) {
   const j = i + dir
   if (j < 0 || j >= list.length) return
   ;[list[i], list[j]] = [list[j], list[i]]
+  try { await store.reorderStories(list) } catch (e) { alert('Reorder failed: ' + e.message) }
+}
+// Drag-and-drop reorder (pointer path; the ▲▼ buttons are the keyboard/touch path).
+const storyDragIdx = ref(null)
+async function dropStory(i) {
+  if (storyDragIdx.value == null || storyDragIdx.value === i) return
+  const list = [...stories.value]
+  const [moved] = list.splice(storyDragIdx.value, 1)
+  list.splice(i, 0, moved)
+  storyDragIdx.value = null
   try { await store.reorderStories(list) } catch (e) { alert('Reorder failed: ' + e.message) }
 }
 
