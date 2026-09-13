@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.12.18] — 2026-09-13
+
+### Fixed
+- **Story-card photo credits no longer force "Photo:" over your own label.** A credit that already starts with its own label (e.g. "Artist: Emma Ford, by kind permission…", "Illustration: …") now shows verbatim instead of "Photo: Artist: …". Applies to all four card credits — hero, both before/after slider images, and the second photo — matching the tour cover credit. A plain name still gets the "Photo:" prefix. (Shared `creditText` helper, also now used by the tour cover credit.)
+
 ## [1.12.17] — 2026-09-13
 
 ### Fixed

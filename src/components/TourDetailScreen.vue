@@ -60,6 +60,7 @@ import { computed } from 'vue'
 import { badgeColors } from '../lib/tokens.js'
 import { typo } from '../lib/typography.js'
 import { renderBody } from '../lib/richtext.js'
+import { creditText } from '../lib/credit.js'
 const props = defineProps({
   tour: { type: Object, required: true },
   stops: { type: Array, default: () => [] },
@@ -71,10 +72,7 @@ defineEmits(['start', 'back', 'open-stop'])
 // Cover credit: if the admin already gave it their own label (e.g. "Illustration:
 // Jane Smith", "Map: …"), show it verbatim; otherwise default to a "Photo:" prefix.
 // Avoids a doubled "Photo: Illustration: …" when the cover isn't a photograph.
-const coverCreditText = computed(() => {
-  const c = (props.tour.coverCredit || '').trim()
-  return /^\s*[a-z]+\s*:/i.test(c) ? c : `Photo: ${c}`
-})
+const coverCreditText = computed(() => creditText(props.tour.coverCredit))
 
 // The tour description supports the same lightweight formatting as story bodies
 // (**bold**, *italic*, "- " bullets, paragraphs) via the shared renderBody.

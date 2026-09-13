@@ -19,7 +19,7 @@
           </button>
           <span :style="period">{{ loc.period }}</span>
           <!-- photographer / source credit for the header image -->
-          <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">Photo: {{ loc.photoCredit }}</component>
+          <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="credit">{{ creditText(loc.photoCredit) }}</component>
         </div>
 
         <div style="padding: 18px 22px max(26px, env(safe-area-inset-bottom));">
@@ -99,8 +99,8 @@
                 <figcaption v-if="loc.imageLabel" class="ics-label ics-right">{{ loc.imageLabel }}</figcaption>
               </figure>
             </img-comparison-slider>
-            <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">Photo: {{ loc.historicCredit }}</component>
-            <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderR">Photo: {{ loc.photoCredit }}</component>
+            <component v-if="loc.historicCredit" :is="loc.historicCreditUrl ? 'a' : 'span'" :href="loc.historicCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderL">{{ creditText(loc.historicCredit) }}</component>
+            <component v-if="loc.photoCredit && loc.showPhotoCredit !== false" :is="loc.photoCreditUrl ? 'a' : 'span'" :href="loc.photoCreditUrl || null" target="_blank" rel="noopener" :style="creditSliderR">{{ creditText(loc.photoCredit) }}</component>
           </figure>
 
           <!-- embedded YouTube player (when the Video URL is a YouTube link, not a file) -->
@@ -113,7 +113,7 @@
           <figure v-if="loc.portraitUrl" :style="portraitFig">
             <img :src="loc.portraitUrl" :alt="loc.portraitAlt || (loc.title + ' – photo')" :style="portraitImg" decoding="async" />
             <figcaption v-if="loc.portraitCaption" :style="portraitCap">{{ typo(loc.portraitCaption) }}</figcaption>
-            <figcaption v-if="loc.portraitCredit" :style="portraitCreditLine"><component :is="loc.portraitCreditUrl ? 'a' : 'span'" :href="loc.portraitCreditUrl || null" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Photo: {{ loc.portraitCredit }}</component></figcaption>
+            <figcaption v-if="loc.portraitCredit" :style="portraitCreditLine"><component :is="loc.portraitCreditUrl ? 'a' : 'span'" :href="loc.portraitCreditUrl || null" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">{{ creditText(loc.portraitCredit) }}</component></figcaption>
           </figure>
 
           <a v-if="loc.wikiUrl" :href="loc.wikiUrl" target="_blank" rel="noopener" :style="wikiLink" @click="track('wiki_clicked', { location_id: loc.id, title: loc.title })">
@@ -167,6 +167,7 @@ import { track } from '../lib/analytics.js'
 import { isFileVideo, youtubeEmbed } from '../lib/video.js'
 import { typo } from '../lib/typography.js'
 import { renderBody } from '../lib/richtext.js'
+import { creditText } from '../lib/credit.js'
 import { config } from '../config.js'
 // No custom link label? Show the link's web address (host) rather than a generic
 // app-wide default, so it's always accurate (a church isn't an "artist's website").
