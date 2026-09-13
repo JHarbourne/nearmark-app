@@ -5,9 +5,9 @@
          single-story location is edited on one screen like it was before Stories.
      It mutates the `story` object it is given (a reactive object owned by the
      parent), and exposes normalize()/sessionUploads for the parent's save().
-     Field order follows the story card top-to-bottom: heading → period →
-     significance → hero → text → (in-body: slider, 2nd photo, audio/video) →
-     links → accent → related → notes. -->
+     Field order follows the end-user card top-to-bottom: hero photo → date →
+     photo credit/link/caption/alt → heading → significance → text → (in-body:
+     slider, 2nd photo, audio/video) → links → accent → related → notes. -->
 <template>
   <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4" /><path d="m6 10 6-6 6 6" /><path d="M4 20h16" /></symbol>
@@ -15,19 +15,8 @@
   </svg>
 
   <div>
-    <template v-if="showHeading">
-      <label for="st-heading">Heading <span class="hint">the story card title</span></label>
-      <input id="st-heading" type="text" v-model="form.heading" placeholder="Story card heading" />
-    </template>
-
-    <label for="st-period">Period / date <span class="hint">free text</span></label>
-    <input id="st-period" type="text" v-model="form.period" placeholder="1890s · 1967 · c. 1985" />
-
-    <label for="st-significance">Historical significance <span class="hint">one-line subtitle</span></label>
-    <input id="st-significance" type="text" v-model="form.significance" />
-
-    <!-- Hero image -->
-    <p class="muted" style="font-size:12px; margin:14px 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
+    <!-- 1. Hero image (the photo shown at the top of the card) -->
+    <p class="muted" style="font-size:12px; margin:0 0 8px;">Images are optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller) rather than a full-resolution phone photo.</p>
     <label for="st-hero-url">Hero image <span class="hint">the main photo, shown at the top</span></label>
     <div class="media-row">
       <div class="media-input">
@@ -49,10 +38,14 @@
         <span :style="focalDot(form.heroPosition)"></span>
       </div>
       <p class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set the focal point.</p>
-      <label for="st-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set below</span></label>
-      <input id="st-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
-      <label for="st-caption">Image caption <span class="hint">under the photo</span></label>
-      <input id="st-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
+    </template>
+
+    <!-- 2. Date / period -->
+    <label for="st-period">Period / date <span class="hint">free text</span></label>
+    <input id="st-period" type="text" v-model="form.period" placeholder="1890s · 1967 · c. 1985" />
+
+    <!-- 3. Photo credit + link, caption, alt (the photo's metadata) -->
+    <template v-if="form.heroImageUrl">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin:16px 0 6px;">
         <label for="st-hero-credit" style="margin:0;">Photo credit <span class="hint">photographer / source</span></label>
         <label style="display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;" title="Off = kept on record, hidden in the app">
@@ -62,8 +55,23 @@
       <input id="st-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />
       <label for="st-hero-credit-link">Credit link <span class="hint">optional</span></label>
       <input id="st-hero-credit-link" type="url" v-model="form.photoCreditUrl" placeholder="https://…" />
+      <label for="st-caption">Image caption <span class="hint">under the photo</span></label>
+      <input id="st-caption" type="text" v-model="form.caption" placeholder="e.g. The Sail Lofts, on their concrete piers" />
+      <label for="st-hero-alt">Alt text <span class="hint">screen readers · skipped if a caption is set</span></label>
+      <input id="st-hero-alt" type="text" v-model="form.imageAlt" placeholder="e.g. The Café Royal frontage, Regent Street" />
     </template>
 
+    <!-- 4. Title (heading) -->
+    <template v-if="showHeading">
+      <label for="st-heading">Heading <span class="hint">the story card title</span></label>
+      <input id="st-heading" type="text" v-model="form.heading" placeholder="Story card heading" />
+    </template>
+
+    <!-- 5. Historical significance -->
+    <label for="st-significance">Historical significance <span class="hint">one-line subtitle</span></label>
+    <input id="st-significance" type="text" v-model="form.significance" />
+
+    <!-- 6. Text (body) -->
     <label for="st-summary">Text <span class="hint">~80–100 words</span></label>
     <textarea id="st-summary" v-model="form.summary" rows="9"></textarea>
     <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph. For a line break <em>within</em> a paragraph (verse, quotes), end the line with a backslash <code>\</code> or type <code>&lt;br&gt;</code>.</p>

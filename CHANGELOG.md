@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.5] — 2026-09-13
+
+### Changed
+- **Editor fields now follow the end-user card order.** In the story editor the fields run photo → date/period → photo credit + link → caption → alt text → title → historical significance → text (the in-body extras — before/after slider, second photo, audio/video — stay below the text, where they appear). The tour editor likewise now leads with the cover image and its credit/alt, before title, theme and description. So what you edit top-to-bottom matches what a visitor sees.
+
 ## [1.14.4] — 2026-09-13
 
 ### Changed

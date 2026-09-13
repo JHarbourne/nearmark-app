@@ -14,22 +14,7 @@
 
     <div class="editor-cols" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start;">
       <div class="card" style="padding:22px;">
-        <label for="tour-title">Title <span class="hint">keep it short so it fits on one line ({{ (form.title || '').length }}/21)</span></label>
-        <input id="tour-title" type="text" v-model="form.title" maxlength="21" />
-
-        <!-- City is a deployment-level setting (VITE_CITY_NAME/VITE_CITIES). Only offer it
-             when there's a genuine choice; single-city deployments set it automatically. -->
-        <template v-if="cities.length > 1">
-          <label for="tour-city">City</label>
-          <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
-        </template>
-
-        <label for="tour-theme">Theme <span class="hint">short descriptor</span></label>
-        <input id="tour-theme" type="text" v-model="form.theme" placeholder="Resistance & resilience 1890–1999" />
-
-        <label for="tour-description">Description</label>
-        <textarea id="tour-description" v-model="form.description" rows="3"></textarea>
-
+        <!-- Cover image first – matches the end-user card (photo at the top) -->
         <label for="tour-cover-url">Cover image <span class="hint">shown on the tour list</span></label>
         <p class="muted" style="font-size:12px; margin:2px 0 6px;">Optimised automatically on upload. For a quick upload, use a web-sized landscape JPG (around 1400&nbsp;px wide, or smaller), not a full-resolution phone photo.</p>
         <div class="media-input">
@@ -50,11 +35,6 @@
         </div>
         <p v-if="form.coverImageUrl" class="muted" style="font-size:11.5px; margin:4px 0 0;">Click, or use arrow keys, to set what stays in view when cropped.</p>
 
-        <template v-if="form.coverImageUrl">
-          <label for="tour-cover-alt">Alt text <span class="hint">describe the cover image for screen readers</span></label>
-          <input id="tour-cover-alt" type="text" v-model="form.coverAlt" placeholder="Describe the cover photo" />
-        </template>
-
         <div class="field-row" v-if="form.coverImageUrl">
           <div>
             <label for="tour-cover-credit">Cover credit <span class="hint">shows as “Photo: …” unless you add your own label, e.g. “Illustration: Jane Doe”</span></label>
@@ -69,6 +49,27 @@
           <input type="checkbox" v-model="form.showCoverCredit" />
           <span>Show this credit on the cover <span class="hint">off = kept on record, hidden in the app</span></span>
         </label>
+        <template v-if="form.coverImageUrl">
+          <label for="tour-cover-alt">Alt text <span class="hint">describe the cover image for screen readers</span></label>
+          <input id="tour-cover-alt" type="text" v-model="form.coverAlt" placeholder="Describe the cover photo" />
+        </template>
+
+        <!-- Then the text content: title, theme, description -->
+        <label for="tour-title">Title <span class="hint">keep it short so it fits on one line ({{ (form.title || '').length }}/21)</span></label>
+        <input id="tour-title" type="text" v-model="form.title" maxlength="21" />
+
+        <!-- City is a deployment-level setting (VITE_CITY_NAME/VITE_CITIES). Only offer it
+             when there's a genuine choice; single-city deployments set it automatically. -->
+        <template v-if="cities.length > 1">
+          <label for="tour-city">City</label>
+          <select id="tour-city" v-model="form.city"><option v-for="c in cities" :key="c" :value="c">{{ c }}</option></select>
+        </template>
+
+        <label for="tour-theme">Theme <span class="hint">short descriptor</span></label>
+        <input id="tour-theme" type="text" v-model="form.theme" placeholder="Resistance & resilience 1890–1999" />
+
+        <label for="tour-description">Description</label>
+        <textarea id="tour-description" v-model="form.description" rows="3"></textarea>
 
         <label class="participatory-toggle">
           <input type="checkbox" v-model="form.participatory" class="big-check" />
