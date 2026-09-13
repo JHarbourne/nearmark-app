@@ -2,7 +2,7 @@
 
 A reference for what the platform does and how it's put together. For **setup and
 deployment** see the [README](../README.md); this document describes **behaviour, data and
-architecture**. It reflects the app as of migration 033 (v1.12.11).
+architecture**. It reflects the app as of migration 037 (v1.14.6).
 
 ---
 
@@ -146,9 +146,16 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 027 | location `address` (for geocoding) |
 | 028 | per-story `status` (draft/published) — hide an individual story |
 | 029 | per-story `video_caption` (caption shown under an embedded video) |
-| 030 | RBAC Phase 1 — `profiles` (roles), `created_by` ownership, auto-owner insert trigger, per-action RLS on locations/stories/tours — **live on staging; dormant on prod until applied** |
-| 031 | RBAC Phase 2 — `notifications` table + edit-notify triggers (locations & stories, de-duped) — **live on staging; dormant on prod until applied** |
-| 032–033 | RBAC Phases 3–4 (soft-delete/archive workflow, duplicate-title handling) — **not yet built** |
+| 030 | RBAC Phase 1 — `profiles` (roles), `created_by` ownership, auto-owner insert trigger, per-action RLS on locations/stories/tours |
+| 031 | RBAC Phase 2 — `notifications` table + edit-notify triggers (locations & stories, de-duped) |
+| 032 | `participants` table — private owner/artist contact per story (admin-only; never public) |
+| 033 | owner self-approval flow — token-keyed approval card + submit RPCs (participatory tours) |
+| 034 | approval fields (status, note, address-changed flag, timestamps) |
+| 035 | tour `participatory` flag (owners approve their own cards; hides the public "Suggest a correction" link) |
+| 036 | RBAC per-tour scoping — `tour_editors` assignment table, scoped SELECT, Super-Admin-only location-sharing trigger, auto-assign the tour creator |
+| 037 | RBAC — assigned editors may edit **any stop in their tour** (edit now matches visibility; delete stays owner + SA) |
+
+RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied there. The soft-delete/archive and duplicate-title phases are **not yet built** — their migrations will be numbered **>037** (the old 032–034 numbers the permissions spec first used are now the approval flow above).
 
 ---
 
@@ -241,19 +248,21 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
   **single-story** case (place + story + map, saved with one **Save** — like it was before the
   Stories split; the story's heading tracks the place title and the location's own draft/publish
   governs visibility). A location with **two or more** stories instead shows a **Stories list**
-  (up/down reorder, edit, delete, "+ Add story"), each edited on its own screen; **"+ Add another
-  story"** promotes a single-story location into the list.
-- **Story editor.** The content form for one story, fields in roughly the card's
-  top-to-bottom order (heading → period → significance → hero → text → before/after slider →
-  second photo → audio/video → links → related); compact **upload** + **media-library picker**
+  (drag or ▲▼ reorder, edit, delete, "+ Add story"), each edited on its own screen; **"+ Add another
+  story"** promotes a single-story location into the list. **Previous / Next** buttons page through
+  the locations without returning to the list. (City is only shown on multi-city deployments.)
+- **Story editor.** The content form for one story, fields in the end-user card's
+  top-to-bottom order (hero photo → period/date → photo credit + link/caption/alt → heading →
+  significance → text → before/after slider → second photo → audio/video → links → related);
+  compact **upload** + **media-library picker**
   icons, in-place replace, focal point, alt/caption/credits + credit toggle; audio with its
   **duration** beside the URL and a **transcript** field + missing-transcript accessibility
   warning; video with an optional **caption** beside the URL; accent picker; live story-card
   preview. The form itself is a shared **`StoryFields`** component, reused both on this standalone
   screen (2+ stories) and inline in the Location editor (0–1 stories). Tour titles are capped at
   21 characters so the hero title stays on one line.
-- **Tours list & editor.** Drag-to-reorder tours; editor with cover image (same icon
-  controls) and a **cover credit** that shows verbatim when it starts with its own label
+- **Tours list & editor.** Drag or ▲▼ to reorder tours; editor **leads with the cover image**
+  (same icon controls) and a **cover credit** that shows verbatim when it starts with its own label
   (e.g. "Illustration: …") and is otherwise prefixed "Photo:"; a **description** taking the
   same Markdown subset + auto-linked URLs as story text; drag/keyboard stop reordering; per-stop
   overrides (title / blurb / **map label** — a letter or short code shown on the badge instead of
@@ -265,14 +274,20 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 - **User management.** Invite/list/remove admins + manage own 2FA (needs the `admin-users`
   Edge Function). When RBAC is applied (below), also shows each admin's **role** and lets a Super
   Admin change it (reads the `profiles` table, so the role UI works even without the Edge Function).
-- **Roles & permissions (RBAC — rolling out).** Two roles (`super_admin` / `editor`) with per-record
-  **ownership** (`created_by`). Editors create anything and edit any location, but only **delete**
-  their own; **tours** are edit- and delete-locked to their owner or a Super Admin (others see them
-  read-only). The admin UI mirrors these rules, but the **database RLS is the real boundary**. A
-  non-owner edit notifies the owner via an in-app **bell** in the sidebar. Enforced by migrations
-  030 (Phase 1) + 031 (Phase 2), applied per project — **dormant (full access, exactly as before)
-  until applied**, so a project that hasn't opted in is unchanged. Phases 3–5 (soft-delete/archive,
-  duplicate-title handling, email digests) still to come — design in `docs/backoffice-permissions-spec.md`.
+- **Roles & permissions (RBAC).** Two roles (`super_admin` / `editor`) with per-record
+  **ownership** (`created_by`) and explicit **per-tour assignment** (`tour_editors`). An editor
+  sees and works in **only the tours they're assigned to** (plus anything they own); a Super Admin
+  sees and does everything. An editor may **edit any stop in a tour they're assigned to** — its
+  location and its stories — and edit the tour itself (fields + stop order); **deleting** a location
+  or a tour stays owner + Super Admin. **Sharing a location across tours is a Super-Admin action**,
+  enforced at the write layer (a non-SA can only add a location they own to a tour, so an editor
+  can't reach a location that isn't already a stop in their tour). The admin UI mirrors these rules,
+  but the **database RLS is the real boundary**. A non-owner edit notifies the owner via an in-app
+  **bell**. Assignment is managed from the tour editor (Super-Admin-only panel). Enforced by
+  migrations 030 (roles/ownership) + 031 (notifications) + 036 (per-tour scoping) + 037
+  (edit-any-stop), applied per project — **dormant (full access, exactly as before) until applied**.
+  Currently **live on Tollesbury; dormant on LGBT**. Soft-delete/archive, duplicate-title handling
+  and email digests are still to come (migrations >037) — design in `docs/backoffice-permissions-spec.md`.
 - **Safety.** An **unsaved-changes guard** warns before leaving a dirty editor (in-app
   navigation and browser close/reload).
 

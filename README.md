@@ -223,6 +223,7 @@ tokens (palette, fonts) live in [`src/theme.js`](src/theme.js) and
 | `VITE_REPO_URL` | "Source code" link in the admin (blank hides it) |
 | `VITE_GUIDE_URL` | "Guide & help" link in the admin sidebar (default `nearmark.co.uk/guide`; blank hides it) |
 | `VITE_FEEDBACK_URL` | Admin "Suggest an improvement" link (default `nearmark.co.uk/feedback`; blank hides it) |
+| `VITE_HELP_EMAIL` | Admin "Ask a question" `mailto:` link — a light way for editors to reach a human (default `hello@nearmark.co.uk`; blank hides it) |
 | `VITE_RELEASES_URL` | Admin version / "what's new" link (blank = `<VITE_REPO_URL>/releases`) |
 | `VITE_SUPABASE_URL` | Supabase project URL (backend) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase publishable/anon key (safe in the client) |

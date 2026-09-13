@@ -108,6 +108,11 @@ tr.row-clickable:hover { background: var(--line); }
 /* ── Responsive: single column + burger drawer on small screens (≤860px) ── */
 .admin-topbar { display: none; } /* desktop: no top bar */
 @media (max-width: 860px) {
+  /* Stop the page drifting sideways on phones: the off-canvas drawer sits just
+     off the left edge, and a card can round up a pixel or two wider than the
+     viewport. `clip` prevents any horizontal scroll without creating a scroll
+     container (so the sticky top bar keeps working, unlike overflow:hidden). */
+  html, body { overflow-x: clip; }
   .admin-shell { display: block; }
   .admin-topbar {
     display: flex; align-items: center; gap: 12px; padding: 10px 14px;

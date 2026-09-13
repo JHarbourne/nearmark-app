@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.7] — 2026-09-13
+
+### Fixed
+- **No more sideways drift on mobile.** The admin could rubber-band horizontally on phones (the off-canvas menu sits just off-screen, and a card could round up a pixel wider than the viewport). Horizontal overflow is now clipped at the root on small screens, using `overflow-x: clip` so the sticky top bar keeps working.
+
+### Docs
+- FSD, README and `.env.example` brought up to date (as of migration 037 / v1.14.x): RBAC per-tour scoping + edit-any-stop, consistent reordering, editor field order, Location prev/next, and the new `VITE_HELP_EMAIL`.
+
 ## [1.14.6] — 2026-09-13
 
 ### Added
