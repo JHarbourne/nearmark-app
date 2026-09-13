@@ -28,7 +28,7 @@
     </div>
 
     <div class="card">
-      <table>
+      <table class="compact-list">
         <thead>
           <tr style="white-space:nowrap;"><th>Photo</th><th>Title</th><th>City</th><th>Period</th><th>Status</th><th v-if="hasApprovals">Approvals</th><th class="right">Actions</th></tr>
         </thead>

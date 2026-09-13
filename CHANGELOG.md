@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.2] — 2026-09-13
+
+### Changed
+- **The Locations list is far more compact on mobile.** Each location was rendering as ~12 stacked label/value lines (the generic responsive-table fallback); it's now a tight card – thumbnail + title, then city · status, then the actions – roughly 4 lines, so the list is scannable without endless scrolling. Period and approvals are hidden at phone width to save space.
+
 ## [1.14.1] — 2026-09-13
 
 ### Changed

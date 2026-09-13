@@ -149,6 +149,26 @@ tr.row-clickable:hover { background: var(--line); }
   /* full-width "no results" message: no label column */
   .card > table td[colspan] { display: block; }
   .card > table td[colspan]::before { content: none; }
+
+  /* Compact mobile card for the Locations list – the generic label-stacked layout
+     ran to ~12 lines per row; this lays each out as thumbnail + title / city ·
+     status / actions (≈4 lines). Period & Approvals are hidden on mobile. */
+  .card > table.compact-list td { padding: 0; }
+  .card > table.compact-list td::before { content: none; }
+  .card > table.compact-list tr.row-clickable {
+    display: grid;
+    grid-template-columns: 48px auto 1fr;
+    grid-template-areas: "photo title title" "photo city status" "actions actions actions";
+    column-gap: 12px; row-gap: 3px; align-items: center;
+    padding: 12px 2px; border-bottom: 1px solid var(--line);
+  }
+  .card > table.compact-list td[data-label="Photo"]   { grid-area: photo; }
+  .card > table.compact-list td[data-label="Title"]   { grid-area: title; font-weight: 600; }
+  .card > table.compact-list td[data-label="City"]    { grid-area: city; color: var(--muted); font-size: 13px; }
+  .card > table.compact-list td[data-label="Status"]  { grid-area: status; justify-self: start; }
+  .card > table.compact-list td[data-label="Actions"] { grid-area: actions; margin-top: 6px; white-space: normal !important; }
+  .card > table.compact-list td[data-label="Period"],
+  .card > table.compact-list td[data-label="Approvals"] { display: none; }
 }
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .demo-banner { background: #fff7e6; border: 1px solid #f3d98a; color: #8a6400; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }
