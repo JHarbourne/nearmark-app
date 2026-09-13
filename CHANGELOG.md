@@ -8,6 +8,12 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.1] — 2026-09-13
+
+### Changed
+- **Consistent form controls in the admin.** Checkboxes and radio buttons now share one larger style with the violet accent, instead of a mix of default-blue boxes and various inline sizes (17/18/22px).
+- **User management: no more wrapped buttons.** The "Make Super Admin" button and the "Super Admin" role badge stay on one line instead of breaking across two.
+
 ## [1.14.0] — 2026-09-13
 
 ### Changed

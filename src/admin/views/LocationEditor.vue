@@ -26,8 +26,8 @@
         <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
           <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
             <div role="radiogroup" aria-label="Is this a public place or a private address?" style="display:flex; gap:20px;">
-              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="public" v-model="form.visibility" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" /> Public</label>
-              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="private" v-model="form.visibility" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" /> Private</label>
+              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="public" v-model="form.visibility" style="margin:0;" /> Public</label>
+              <label style="display:flex; align-items:center; gap:8px; font-weight:500; margin:0; cursor:pointer;"><input type="radio" value="private" v-model="form.visibility" style="margin:0;" /> Private</label>
             </div>
             <button type="button" @click="showVisHelp = !showVisHelp" :aria-expanded="showVisHelp" style="margin-left:auto; background:none; border:none; padding:0; font:inherit; font-size:12px; font-weight:600; color:var(--violet); cursor:pointer;">What’s the difference?</button>
           </div>
@@ -62,7 +62,7 @@
         <div style="margin:18px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px;">
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <label style="display:flex; align-items:center; gap:9px; font-weight:500; margin:0; cursor:pointer;">
-              <input type="checkbox" v-model="form.guidedTourOnly" style="width:18px; height:18px; margin:0; accent-color:var(--violet);" />
+              <input type="checkbox" v-model="form.guidedTourOnly" style="margin:0;" />
               <span>Guided tour only – hide from Discover mode</span>
             </label>
             <button type="button" @click="showTourHelp = !showTourHelp" :aria-expanded="showTourHelp" style="margin-left:auto; background:none; border:none; padding:0; font:inherit; font-size:12px; font-weight:600; color:var(--violet); cursor:pointer;">What does this do?</button>

@@ -56,7 +56,7 @@
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin:16px 0 6px;">
         <label for="st-hero-credit" style="margin:0;">Photo credit <span class="hint">photographer / source</span></label>
         <label style="display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;" title="Off = kept on record, hidden in the app">
-          <input type="checkbox" v-model="form.showPhotoCredit" style="width:17px; height:17px; margin:0; accent-color:var(--violet);" /> Show
+          <input type="checkbox" v-model="form.showPhotoCredit" style="margin:0;" /> Show
         </label>
       </div>
       <input id="st-hero-credit" type="text" v-model="form.photoCredit" placeholder="Photographer / source" />

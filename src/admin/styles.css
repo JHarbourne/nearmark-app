@@ -87,6 +87,11 @@ select {
   background-position: right 13px center;
 }
 select::-ms-expand { display: none; } /* hide the legacy arrow on old Edge */
+/* Checkboxes & radios: one consistent, larger style everywhere (violet accent),
+   instead of a mix of default-blue small boxes and various inline sizes. */
+input[type=checkbox], input[type=radio] {
+  width: 20px; height: 20px; accent-color: var(--violet); cursor: pointer; flex-shrink: 0;
+}
 textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 /* Two-up field pairs. Each cell (label + input) is a row-subgrid spanning two shared
    rows, so the inputs line up horizontally and share height even when one label wraps

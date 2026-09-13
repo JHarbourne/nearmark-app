@@ -475,8 +475,6 @@ function back() { store.go('tours') }
 }
 .participatory-toggle:hover { border-color: var(--violet); }
 .participatory-toggle .hint { font-weight: 400; }
-.big-check {
-  width: 22px; height: 22px; flex-shrink: 0; margin: 1px 0 0;
-  accent-color: var(--violet); cursor: pointer;
-}
+/* Only alignment now – size/colour/cursor come from the global checkbox rule. */
+.big-check { flex-shrink: 0; margin: 1px 0 0; }
 </style>

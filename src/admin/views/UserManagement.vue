@@ -34,13 +34,13 @@
         <tbody>
           <tr v-for="u in displayUsers" :key="u.id">
             <td style="font-weight:600;" data-label="Email">{{ u.email }}<span v-if="!u.confirmed" class="muted" style="font-weight:400; margin-left:6px;">· invited</span></td>
-            <td v-if="rbacActive" data-label="Role"><span class="badge" :class="u.role === 'super_admin' ? 'published' : 'draft'">{{ u.role === 'super_admin' ? 'Super Admin' : 'Editor' }}</span></td>
+            <td v-if="rbacActive" data-label="Role"><span class="badge" :class="u.role === 'super_admin' ? 'published' : 'draft'" style="white-space:nowrap;">{{ u.role === 'super_admin' ? 'Super Admin' : 'Editor' }}</span></td>
             <td class="muted" data-label="Last sign-in">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '–' }}</td>
             <td class="right" data-label="Access">
-              <template v-if="u.email !== store.user?.email">
-                <button v-if="rbacActive && store.isSuperAdmin" class="btn btn-ghost btn-sm" @click="toggleRole(u)" :disabled="roleBusy">{{ u.role === 'super_admin' ? 'Make editor' : 'Make Super Admin' }}</button>
+              <div v-if="u.email !== store.user?.email" style="display:flex; gap:8px; justify-content:flex-end; align-items:center; flex-wrap:nowrap;">
+                <button v-if="rbacActive && store.isSuperAdmin" class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="toggleRole(u)" :disabled="roleBusy">{{ u.role === 'super_admin' ? 'Make editor' : 'Make Super Admin' }}</button>
                 <button v-if="!u.fromProfiles" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
-              </template>
+              </div>
               <span v-else class="muted" style="font-size:13px;">you</span>
             </td>
           </tr>
