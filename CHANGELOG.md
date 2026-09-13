@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.1] — 2026-09-13
+
+### Fixed
+- **Dropdown chevrons no longer crowd the right edge.** Every admin `<select>` now uses a custom chevron with proper padding (via one shared rule in `styles.css`) instead of the browser's native arrow, which sat hard against the edge and looked different per browser. Fixes it everywhere at once — tour/location city pickers, list filters, the add-stop and assign-editor dropdowns.
+
 ## [1.13.0] — 2026-09-13
 
 ### Added

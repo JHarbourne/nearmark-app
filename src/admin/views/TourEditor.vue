@@ -178,7 +178,7 @@
         </ul>
         <p v-else class="muted" style="font-size:13px; margin:0 0 12px;">No editors assigned yet.</p>
         <div v-if="assignable.length" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <select v-model="pickUserId" class="input" style="flex:1; min-width:160px;" aria-label="Add an editor to this tour">
+          <select v-model="pickUserId" style="flex:1; min-width:160px;" aria-label="Add an editor to this tour">
             <option value="">Add an editor…</option>
             <option v-for="p in assignable" :key="p.user_id" :value="p.user_id">{{ p.display_name || p.email }}</option>
           </select>

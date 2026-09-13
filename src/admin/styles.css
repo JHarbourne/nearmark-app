@@ -75,6 +75,18 @@ input[type=text], input[type=email], input[type=tel], input[type=password], inpu
 /* single-line fields + selects share one height so text inputs and pulldowns line up
    (tel was missing here, which left Mobile shorter than the styled Email beside it) */
 input[type=text], input[type=email], input[type=tel], input[type=password], input[type=url], input[type=number], input[type=date], select { height: 42px; }
+/* Selects: replace the browser's native chevron (which sits hard against the edge and
+   differs per browser) with a custom one that has real breathing room. Applies to every
+   <select> in the admin, so the gap is consistent everywhere. */
+select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  padding-right: 36px; /* keep the option text clear of the chevron */
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+select::-ms-expand { display: none; } /* hide the legacy arrow on old Edge */
 textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 /* Two-up field pairs. Each cell (label + input) is a row-subgrid spanning two shared
    rows, so the inputs line up horizontally and share height even when one label wraps
