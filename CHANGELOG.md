@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.4] — 2026-09-13
+
+### Security
+- **Refreshed dependencies to clear 8 of 9 Dependabot alerts** (`npm audit fix`, lockfile-only — no app behaviour change, bundle unchanged). All were build-tooling-only (fast-uri, browserslist, baseline-browser-mapping) or non-exploitable transitive issues (nanoid via postcss, fflate via pmtiles). The remaining alert — maplibre-gl (a major 5→6 upgrade whose vulnerable HTML-sanitizer path this app never calls) — is deferred to a separate, map-tested upgrade.
+
 ## [1.13.3] — 2026-09-13
 
 ### Changed
