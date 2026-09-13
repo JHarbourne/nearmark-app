@@ -529,6 +529,30 @@ export const db = {
     return data
   },
   setRole: (userId, role) => run(supabase.from('profiles').update({ role }).eq('user_id', userId)),
+  // ── per-tour editor scoping (migration 036) ──
+  // Tour record-ids the signed-in user is assigned to; drives canEditTour for editors.
+  // Defensive: [] where the tour_editors table isn't there yet (pre-migration project).
+  myTourIds: async () => {
+    if (!supabase) return []
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return []
+    const { data, error } = await supabase.from('tour_editors').select('tour_id').eq('user_id', uid)
+    if (error) return []
+    return (data || []).map((r) => r.tour_id)
+  },
+  // Assignments for one tour: [{ userId, assignedAt }]. SA-only in practice (te_select
+  // lets an editor read only their own rows); the SA UI maps user_id → name via profiles.
+  listTourEditors: async (tourRecordId) => {
+    if (!supabase) return []
+    const { data, error } = await supabase.from('tour_editors')
+      .select('user_id, assigned_at').eq('tour_id', tourRecordId)
+    if (error) return []
+    return (data || []).map((r) => ({ userId: r.user_id, assignedAt: r.assigned_at }))
+  },
+  assignEditor: (tourRecordId, userId) =>
+    run(supabase.from('tour_editors').insert({ tour_id: tourRecordId, user_id: userId }).select()),
+  unassignEditor: (tourRecordId, userId) =>
+    run(supabase.from('tour_editors').delete().eq('tour_id', tourRecordId).eq('user_id', userId)),
   // ── notifications (migration 031). Defensive: [] if the table isn't there yet. ──
   listNotifications: async () => {
     if (!supabase) return []

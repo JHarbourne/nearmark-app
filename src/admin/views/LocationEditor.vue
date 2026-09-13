@@ -117,7 +117,8 @@
           <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
           <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
         </div>
-        <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+        <button class="btn btn-primary" @click="save()" :disabled="saving || !canEdit">{{ saving ? 'Saving…' : 'Save' }}</button>
+        <span v-if="!canEdit" class="muted" role="status" style="font-size:13px;">Read-only — this location belongs to someone else; only its owner or a Super Admin can edit it.</span>
         <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
         <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to list</button>
       </div>
@@ -181,6 +182,10 @@ const mapCenter = config.mapCenter
 
 const existing = store.params.id ? store.locations.find((l) => l.id === store.params.id) : null
 const isNew = !existing
+// Scoping (migration 036): editors edit only locations they own. A location the SA
+// shares into their tour is visible but read-only. RLS is the real boundary; this
+// just stops the UI offering a Save the DB would reject.
+const canEdit = computed(() => isNew || store.canEditLocation(existing))
 
 const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
@@ -357,6 +362,7 @@ const saving = ref(false)
 const flash = ref('')
 let flashTimer
 async function save() {
+  if (!canEdit.value) return // read-only (not owner/SA); RLS would reject anyway
   if (!form.title) { alert('Title is required.'); return }
   if (form.lat == null) { alert('Drop a pin on the map (or use “Find on map”) to set the location.'); return }
   if (form.status === 'published' && form.visibility === 'private' && !form.consentGiven) {
@@ -384,6 +390,7 @@ async function save() {
 // Persist the inline story. Heading tracks the place title, and visibility is
 // governed by the location's own Published/Draft (no separate story toggle here).
 async function saveInlineStory() {
+  if (!canEdit.value) return // read-only location (not owner/SA); stories follow the parent
   const s = storyForm
   const hasContent = !!(String(s.summary || '').trim() || s.heroImageUrl || s.audioUrl || s.videoUrl || s.historicImageUrl || s.portraitUrl)
   if (!s.storyId && !hasContent) { storyBaseline.value = JSON.stringify(s); return } // nothing worth saving yet

@@ -1,6 +1,6 @@
 # Back-office permissions (RBAC + ownership) — spec
 
-Status: **Phases 1 & 2 built + verified on staging (2026-07-16); Phase 3 next.** Live on prod only when the migrations are run per project (see Phasing below).
+Status: **Phases 1, 2 & per-tour scoping (1b) built + verified on staging (2026-09-13); deletion-workflow next.** Live on prod only when the migrations are run per project (see Phasing below).
 Applies to the Nearmark core, so every deployment (Tollesbury, LGBT History, …) inherits it.
 Super Admin for all current projects: **jharbourne@mac.com**.
 
@@ -101,6 +101,35 @@ create policy story_delete on public.stories for delete to authenticated
 ```
 Immutability trigger keeps `created_by` from being reassigned on `locations`/`tours` update.
 
+## 3b. Per-tour scoping (migration 036 — supersedes the "read all / anyone edits" rows above)
+Decided 2026-09-13: an editor should see and work in **only their assigned tour**, not the whole
+backoffice. This tightens the § 3 matrix (which let every admin *read* everything and *edit* any
+location). The Super Admin is unaffected — still sees and does everything.
+
+- **Assignment table** `tour_editors (tour_id, user_id, assigned_by, assigned_at)`. An editor is
+  scoped to a tour by a row here. The tour **creator is auto-assigned** (trigger) and every existing
+  tour's owner is backfilled, so the table is the single source of truth for scope. Managed from a
+  Super-Admin-only panel in the tour editor.
+- **SELECT is scoped.** An editor sees: tours they own or are assigned to; locations they own **or**
+  that are a stop in one of their assigned tours (via `stop_ids`); stories under any location they
+  can see. Helpers `slug_in_my_tours()` / `can_see_location_id()` (SECURITY DEFINER) express this
+  without RLS recursion. Anon/public policies are untouched.
+- **EDIT is owner-only for editors.** An editor edits/deletes only locations & stories they **own**;
+  a location the Super Admin shares into their tour is **read-only** to them. (This replaces the
+  collaborative "anyone edits, owner notified" for locations/stories.) An editor may edit a tour they
+  own **or are assigned to** (fields + stop order); tour **delete** stays owner + SA.
+- **Cross-tour location sharing stays a Super-Admin privilege, enforced at the write layer.** A
+  `before insert/update` trigger on `tours` rejects any slug added to `stop_ids` by a non-SA that
+  they don't own (`errcode 42501`). This closes the escalation where an editor could gain sight of a
+  location — including `consent_contact` / `notes_internal` — by pasting its slug into their tour.
+- **App layer** mirrors the RLS: `store.canEditLocation / canEditTour / canDeleteTour / canEditStory`
+  and `store.myTourIds`; read-only affordances in the location/story editors; the assignment panel.
+- **Residual (accepted for v1):** an assigned editor can *read* the full record — including sensitive
+  fields — of a location the SA deliberately shared into their tour (they can't edit it). If field-level
+  hiding is wanted later, expose shared stops through a safe-columns view. Verified on staging via SQL
+  role-impersonation (2026-09-13): editors see only own + assigned-tour content; the escalation is
+  blocked; the SA can share a location and the editor then sees it read-only.
+
 ## 4. Edit notifications
 `notifications` table: `recipient uuid`, `type`, `entity_type`, `entity_id`, `actor uuid`,
 `actor_name`, `message`, `created_at`, `read_at`.
@@ -168,18 +197,23 @@ exists, show a non-blocking dialog:
 |---|---|---|---|
 | **1** | `profiles`/roles, `created_by` + backfill, per-action RLS (locations, **stories**, tours), auto-owner + immutability triggers | `migration-030-rbac-ownership.sql` | ✅ **BUILT + verified on staging** (app v1.9.0). Dormant on prod until run. |
 | **2** | `notifications` + de-duped edit-notify triggers (locations & stories) + admin **bell** UI | `migration-031-notifications.sql` | ✅ **BUILT + verified on staging** (app v1.9.1). Dormant on prod until run. |
-| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI | `migration-032-deletion-workflow.sql` (draft exists as **024** — renumber + extend to stories) | ⏭️ **NEXT — not yet built** |
-| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `033` (to draft) | not built |
+| **1b** | `tour_editors` assignment table + scoped SELECT + owner-only edit + SA-only-sharing trigger + assignment UI | `migration-036-tour-editor-scoping.sql` | ✅ **BUILT + verified on staging** (app v1.13.0). Dormant on prod until run. |
+| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI | `migration-037-deletion-workflow.sql` (draft exists as **024** — renumber + extend to stories) | ⏭️ **NEXT — not yet built** |
+| 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `038` (to draft) | not built |
 | 5 | email notifications (Brevo) | Edge Function | not built |
 
-**Progress (2026-07-16):** Phases 1 & 2 are built (renumbered from the parked 022/023, with the
-stories-layer additions) and verified end-to-end on **nearmark-staging** — editor restrictions hold,
-and a non-owner edit notifies the owner via the bell. The app layer (`v1.9.1`) is deployed to all
-projects but **dormant** (full access) on any project without the migrations, so prod is unchanged.
-**To go live on a real app:** run migrations 030 then 031 in that project's SQL Editor (edit the SA
-email in 030), each followed by `notify pgrst, 'reload schema';`. Phase 3 (soft-delete/archive) is the
-remaining safety-critical piece — draft 024 needs renumbering to 032 and extending to stories, plus
-the Archive UI.
+> Migration numbers 032–035 are now the participants / owner-approval flow (consent intake), so the
+> deletion-workflow lands at **037**, not the 032 the older draft named.
+
+**Progress (2026-09-13):** Phases 1, 2 and per-tour scoping (1b) are built and verified end-to-end on
+**nearmark-staging** — editor restrictions hold (verified via SQL role-impersonation: editors see only
+own + assigned-tour content, the slug-injection escalation is blocked, and an SA-shared location is
+visible read-only), and a non-owner edit notifies the owner via the bell. The app layer (`v1.13.0`) is
+deployed to all projects but **dormant** (full access) on any project without the migrations, so prod
+is unchanged. **To go live on a real app:** run migrations `030` → `031` → `036` in that project's SQL
+Editor (edit the SA email in 030), each followed by `notify pgrst, 'reload schema';`. Phase 3
+(soft-delete/archive) is the remaining safety-critical piece — draft 024 needs renumbering to **037**
+and extending to stories, plus the Archive UI.
 
 Every migration is additive and must be run in **each** project (Tollesbury and LGBT),
 each followed by `notify pgrst, 'reload schema';`.

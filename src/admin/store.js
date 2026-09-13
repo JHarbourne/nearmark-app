@@ -30,16 +30,22 @@ export const store = reactive({
   activity: [],
   editors: [],
   role: null, // RBAC role of the signed-in user ('super_admin'|'editor'); null = no RBAC on this project (pre-migration) → full access, as before
+  myTourIds: [], // tour record-ids this editor is assigned to (migration 036); [] for SA / pre-migration
   notifications: [], // in-app notification feed (migration 031); empty where the table isn't there
 
-  // ── RBAC gates: mirror the migration-030 RLS so the UI never offers an action the
+  // ── RBAC gates: mirror the migration-030/036 RLS so the UI never offers an action the
   // DB will reject. role === null → no RBAC here → everything allowed (unchanged).
+  // Scoping (036): an editor edits only locations/stories they OWN, and edits a tour they
+  // OWN or are ASSIGNED to; delete stays owner + SA. A location the SA shares into their
+  // tour is visible but read-only. The Super Admin can do everything.
   get isEditor() { return this.role === 'editor' },
   get isSuperAdmin() { return this.role === 'super_admin' },
   get unreadCount() { return this.notifications.filter((n) => !n.readAt).length },
-  canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },      // tours: owner + SA only
-  canDeleteTour(tour) { return this.canEditTour(tour) },
-  canDeleteLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },   // locations: anyone edits, owner/SA delete
+  canEditLocation(loc) { return this.role !== 'editor' || loc?.createdBy === this.user?.id },     // owner + SA
+  canDeleteLocation(loc) { return this.canEditLocation(loc) },                                    // owner + SA
+  canEditStory(loc) { return this.canEditLocation(loc) },                                         // follows the parent location
+  canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id || this.myTourIds.includes(tour?.recordId) }, // owner + assigned + SA
+  canDeleteTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },     // owner + SA only (not assigned)
   async refreshNotifications() { if (this.liveBackend) this.notifications = await db.listNotifications().catch(() => []) },
   async markNotificationsRead() {
     await db.markNotificationsRead().catch(() => {})
@@ -217,6 +223,7 @@ export const store = reactive({
       this.tours = trs
       if (this.liveBackend) {
         this.role = await db.myRole().catch(() => null)
+        this.myTourIds = this.role === 'editor' ? await db.myTourIds().catch(() => []) : []
         this.notifications = await db.listNotifications().catch(() => [])
         this.approvals = await db.listApprovals().catch(() => [])
       }

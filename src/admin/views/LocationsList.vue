@@ -68,7 +68,7 @@
                 <span v-else class="muted">—</span>
               </td>
               <td class="right" style="white-space:nowrap;" data-label="Actions">
-                <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">Edit</button>
+                <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">{{ store.canEditLocation(l) ? 'Edit' : 'View' }}</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>
                 <button v-if="store.canDeleteLocation(l)" class="btn btn-danger btn-sm" @click.stop="remove(l)" aria-label="Delete location" title="Delete">

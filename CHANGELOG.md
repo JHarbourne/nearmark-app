@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.13.0] — 2026-09-13
+
+### Added
+- **Per-tour editor scoping (RBAC).** An editor login can now be **assigned to a specific tour** and sees and builds only that tour: its stops, the locations they own, and the stories under them. They can't see other tours or other editors' content. The Super Admin still sees and does everything. New assignment panel in the tour editor (Super Admin only) to add/remove editors on a tour. Enforced in the database (Row Level Security, `migration-036-tour-editor-scoping.sql`), mirrored in the UI so it never offers an action the database would reject.
+  - **Editing follows ownership:** an editor edits only the locations/stories they created; a location the Super Admin shares into their tour is **read-only** to them (shown as "View", with a read-only note in the editor).
+  - **Sharing a location across tours stays a Super-Admin privilege**, enforced at the write layer: a non-admin can only add locations they own to a tour, so an editor can't gain sight of a location by pasting its reference into their tour.
+  - **Dormant until enabled per project.** Like the earlier RBAC phases, this ships inert: on a project without the migrations, roles are absent and everyone keeps full access, exactly as before. Verified end-to-end on staging; run `030` → `031` → `036` in a project's SQL editor to switch it on.
+
 ## [1.12.19] — 2026-09-13
 
 ### Changed

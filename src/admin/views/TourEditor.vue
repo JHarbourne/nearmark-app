@@ -163,6 +163,29 @@
           <p v-else class="muted" style="font-size:12px; margin:8px 0 0;">Lines currently go straight between stops – calculate to snap them to roads and paths.</p>
         </div>
       </div>
+
+      <!-- Assigned editors (Super Admin only; migration 036). An assigned editor sees
+           and builds ONLY this tour; locations the SA adds to it are read-only to them. -->
+      <div v-if="store.isSuperAdmin && !isNew" class="card" style="padding:18px;">
+        <span class="field-label" style="margin-top:0;">Assigned editors</span>
+        <p class="muted" style="font-size:13px; margin:2px 0 12px;">Editors assigned here see and build only this tour. Locations you add to it stay read-only to them.</p>
+        <ul v-if="assignees.length" style="list-style:none; padding:0; margin:0 0 12px; display:flex; flex-direction:column; gap:8px;">
+          <li v-for="a in assignees" :key="a.userId" style="display:flex; align-items:center; gap:10px;">
+            <span style="flex:1;">{{ profileName(a.userId) }}</span>
+            <span v-if="a.userId === existing.createdBy" class="muted" style="font-size:12px;">owner</span>
+            <button v-else class="btn btn-ghost btn-sm" :disabled="assignBusy" @click="unassign(a.userId)">Remove</button>
+          </li>
+        </ul>
+        <p v-else class="muted" style="font-size:13px; margin:0 0 12px;">No editors assigned yet.</p>
+        <div v-if="assignable.length" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select v-model="pickUserId" class="input" style="flex:1; min-width:160px;" aria-label="Add an editor to this tour">
+            <option value="">Add an editor…</option>
+            <option v-for="p in assignable" :key="p.user_id" :value="p.user_id">{{ p.display_name || p.email }}</option>
+          </select>
+          <button class="btn btn-primary btn-sm" :disabled="!pickUserId || assignBusy" @click="assign">Assign</button>
+        </div>
+        <p v-else class="muted" style="font-size:12px; margin:0;">All editors are already assigned. Invite more from User management.</p>
+      </div>
     </div>
 
     <MediaPicker :open="picker.open" :current="picker.field ? form[picker.field] : ''" @select="onPickMedia" @close="picker.open = false" />
@@ -172,6 +195,7 @@
 <script setup>
 import { reactive, ref, computed, onMounted, onUnmounted } from 'vue'
 import { store } from '../store.js'
+import { db } from '../../lib/supabase.js'
 import { routeLength } from '../../lib/geo.js'
 import { config } from '../../config.js'
 import PlaceMap from '../components/PlaceMap.vue'
@@ -182,7 +206,36 @@ const cities = config.cities
 const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
 const existing = store.params.id ? store.tours.find((t) => t.id === store.params.id) : null
 const isNew = !existing
-const canEdit = computed(() => !existing || store.canEditTour(existing)) // tours: owner + SA only (mirrors migration-030 RLS)
+const canEdit = computed(() => !existing || store.canEditTour(existing)) // owner + assigned editor + SA (mirrors migration-030/036 RLS)
+
+// ── assigned editors (Super Admin only; migration 036) ──
+const assignees = ref([])    // [{ userId, assignedAt }] for this tour
+const allProfiles = ref([])  // profiles, for names + the assignable dropdown
+const pickUserId = ref('')
+const assignBusy = ref(false)
+const profileName = (uid) => {
+  const p = allProfiles.value.find((x) => x.user_id === uid)
+  return p?.display_name || p?.email || 'Unknown user'
+}
+const assignable = computed(() => allProfiles.value.filter(
+  (p) => p.role === 'editor' && !assignees.value.some((a) => a.userId === p.user_id)))
+async function loadAssignees() {
+  if (!store.isSuperAdmin || isNew) return
+  assignees.value = await db.listTourEditors(existing.recordId).catch(() => [])
+  allProfiles.value = (await db.listProfiles().catch(() => [])) || []
+}
+async function assign() {
+  if (!pickUserId.value) return
+  assignBusy.value = true
+  try { await db.assignEditor(existing.recordId, pickUserId.value); pickUserId.value = ''; await loadAssignees() }
+  catch (e) { alert('Assign failed: ' + e.message) } finally { assignBusy.value = false }
+}
+async function unassign(uid) {
+  assignBusy.value = true
+  try { await db.unassignEditor(existing.recordId, uid); await loadAssignees() }
+  catch (e) { alert('Remove failed: ' + e.message) } finally { assignBusy.value = false }
+}
+onMounted(loadAssignees)
 
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : {
   id: 'tour-' + Math.random().toString(36).slice(2, 8), recordId: undefined,

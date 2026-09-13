@@ -26,7 +26,8 @@
             <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
             <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
           </div>
-          <button class="btn btn-primary" @click="save()" :disabled="saving">{{ saving ? 'Saving…' : 'Save story' }}</button>
+          <button class="btn btn-primary" @click="save()" :disabled="saving || !canEdit">{{ saving ? 'Saving…' : 'Save story' }}</button>
+          <span v-if="!canEdit" class="muted" role="status" style="font-size:13px;">Read-only — this location belongs to someone else.</span>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto;" @click="back">← Back to location</button>
           <button v-if="nextStory" class="btn btn-ghost btn-sm" @click="goNext" :title="`Go to: ${nextStory.heading || 'next story'}`">Next story →</button>
@@ -72,6 +73,8 @@ const existing = store.params.storyId
   ? (location.value?.stories || []).find((s) => s.storyId === store.params.storyId)
   : null
 const isNew = !existing
+// Scoping (migration 036): a story is editable by the parent location's owner + SA.
+const canEdit = computed(() => store.canEditStory(location.value))
 
 const blank = {
   storyId: undefined, locationId: store.params.locationId, sortOrder: (location.value?.stories?.length || 0) + 1,
@@ -148,6 +151,7 @@ const saving = ref(false)
 const flash = ref('')
 let flashTimer
 async function save() {
+  if (!canEdit.value) return // read-only (parent location not owned); RLS would reject
   if (!form.heading) { alert('Heading is required.'); return }
   fields.value?.normalize()
   saving.value = true
