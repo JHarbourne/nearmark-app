@@ -190,6 +190,16 @@ tr.row-clickable:hover { background: var(--line); }
   .card > table.compact-list.tours td[data-label="Status"] { grid-area: status; justify-self: end; }
   .card > table.compact-list.tours td[data-label="Distance"],
   .card > table.compact-list.tours td[data-label="Duration"] { display: none; }
+
+  /* Tours & events combined list: ⠿ | title · status / details / actions */
+  .card > table.compact-list.home tr.row-clickable {
+    grid-template-columns: 18px 1fr auto;
+    grid-template-areas: "handle title status" "handle details details" "actions actions actions";
+  }
+  .card > table.compact-list.home td[data-label="Order"]   { grid-area: handle; }
+  .card > table.compact-list.home td[data-label="Title"]   { grid-area: title; font-weight: 600; }
+  .card > table.compact-list.home td[data-label="Details"] { grid-area: details; color: var(--muted); font-size: 13px; }
+  .card > table.compact-list.home td[data-label="Status"]  { grid-area: status; justify-self: end; }
 }
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .demo-banner { background: #fff7e6; border: 1px solid #f3d98a; color: #8a6400; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }

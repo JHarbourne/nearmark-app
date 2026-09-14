@@ -64,6 +64,25 @@ export const store = reactive({
       lng: pts.reduce((s, l) => s + l.lng, 0) / pts.length,
     }
   },
+  // Combined "Tours & events" list — tours and announcements share one sort_order
+  // space (lower = higher up), driving both this admin list and the public home order.
+  get homeItems() {
+    const rows = [
+      ...this.tours.map((t) => ({ type: 'tour', item: t })),
+      ...this.announcements.map((a) => ({ type: 'event', item: a })),
+    ]
+    return rows.sort((x, y) => ((x.item.sortOrder ?? 0) - (y.item.sortOrder ?? 0))
+      || (x.type === y.type ? 0 : x.type === 'event' ? -1 : 1)
+      || (x.item.title || '').localeCompare(y.item.title || ''))
+  },
+  // Persist the given combined order: each row's index becomes its sort_order,
+  // written to whichever table it belongs to. Updates local state so the list re-sorts.
+  async reorderHome(ordered) {
+    ordered.forEach((row, i) => { row.item.sortOrder = i })
+    await Promise.all(ordered.map((row, i) =>
+      row.type === 'tour' ? db.setTourOrder(row.item.recordId, i) : db.setAnnouncementOrder(row.item.recordId, i)))
+    this.logActivity('Reordered tours & events', '')
+  },
   async refreshNotifications() { if (this.liveBackend) this.notifications = await db.listNotifications().catch(() => []) },
   async markNotificationsRead() {
     await db.markNotificationsRead().catch(() => {})

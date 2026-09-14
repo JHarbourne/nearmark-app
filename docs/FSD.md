@@ -155,6 +155,7 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 036 | RBAC per-tour scoping — `tour_editors` assignment table, scoped SELECT, Super-Admin-only location-sharing trigger, auto-assign the tour creator |
 | 037 | RBAC — assigned editors may edit **any stop in their tour** (edit now matches visibility; delete stays owner + SA) |
 | 038 | **announcements** ("What's on") — standalone lightweight events table (start/end date-time, place, image, optional link + linked tour); SA-managed; disappears from the public list the moment it ends. Additive; portable with/without RBAC. |
+| 039 | announcement **address + map pin** (directions) and **full image metadata** (focal point, caption, credit + show toggle, credit link). Additive. |
 
 RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied there. The soft-delete/archive and duplicate-title phases are **not yet built** — their migrations will be numbered **>037** (the old 032–034 numbers the permissions spec first used are now the approval flow above).
 
@@ -289,12 +290,15 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   (edit-any-stop), applied per project — **dormant (full access, exactly as before) until applied**.
   Currently **live on Tollesbury; dormant on LGBT**. Soft-delete/archive, duplicate-title handling
   and email digests are still to come (migrations >037) — design in `docs/backoffice-permissions-spec.md`.
-- **Announcements ("What's on").** A Super-Admin-only section for lightweight village-event cards
-  (a fair, a festival) — title, start/end date-time, place, description, one image, an optional link,
-  and an optional linked walk. They surface as a badged "What's on" strip at the top of the public
-  Tours list and open a **simple event page** (`/?event=<slug>`), **not** a tour — the walks stay the
-  focus. An event disappears from the public list the moment it ends. Standalone `announcements` table
-  (migration 038); design in `docs/announcements-spec.md`.
+- **Announcements ("What's on"), merged into "Tours & events".** Tours and announcements share one
+  admin list (badged Tour / Event, drag/▲▼-reorder in a **shared order**; "+ New" chooses the type)
+  and **one ordered list on the public Tours screen**. An announcement is a lightweight event card
+  (a fair, a festival) with title, start/end date-time, venue + **address/map pin** (directions),
+  description, an image with **focal point + caption + credit**, an optional link, and an optional
+  **linked walk** — opening a **simple event page** (`/?event=<slug>`), **not** a tour. Super-Admin-
+  managed; disappears from the public list the moment it ends. Standalone `announcements` table
+  (migrations 038–039); design in `docs/announcements-spec.md`. Monetising these as **paid event
+  adverts** is a separate, planned feature — `docs/paid-event-adverts-spec.md`.
 - **Safety.** An **unsaved-changes guard** warns before leaving a dirty editor (in-app
   navigation and browser close/reload).
 

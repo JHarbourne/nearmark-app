@@ -525,6 +525,7 @@ export const db = {
   createAnnouncement: (a) => run(supabase.from('announcements').insert(announcementToRow(a)).select()),
   updateAnnouncement: (recordId, a) => run(supabase.from('announcements').update(announcementToRow(a)).eq('id', recordId).select()),
   deleteAnnouncement: (recordId) => run(supabase.from('announcements').delete().eq('id', recordId)),
+  setAnnouncementOrder: (recordId, order) => run(supabase.from('announcements').update({ sort_order: order }).eq('id', recordId)),
   createLocation: (l) => run(supabase.from('locations').insert(locationToRow(l)).select()),
   updateLocation: (recordId, l) => run(supabase.from('locations').update(locationToRow(l)).eq('id', recordId).select()),
   deleteLocation: (recordId) => run(supabase.from('locations').delete().eq('id', recordId)),

@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.16.0] — 2026-09-15
+
+### Changed
+- **Tours and announcements are now one list — "Tours & events".** In the admin they share a single menu item and a single drag/▲▼-reorderable list (each row badged Tour or Event), and **"+ New"** asks which type to create; the two editors stay separate. That shared order now drives the **public Tours screen**, where tours and current events appear interleaved in one list (the separate "What's on" strip is gone; events are badged "Event" cards). No new migration — it reuses each table's existing `sort_order`.
+
 ## [1.15.1] — 2026-09-14
 
 ### Changed

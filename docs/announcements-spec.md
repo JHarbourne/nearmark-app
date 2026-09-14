@@ -63,20 +63,25 @@ create policy ann_sa_write on public.announcements for all to authenticated
 On projects **without** RBAC applied, `is_super_admin()` won't exist — either gate writes on
 `authenticated` there, or (cleaner) ship announcements only where RBAC is on. Decide at build time.
 
-## Admin
-A new **"Announcements"** item in the sidebar (Super-Admin-only), with a small list + a **simple
-editor** (much lighter than the story editor): title, start/end **date-time** (`datetime-local`),
-place, description, one image (+ alt), optional link (url + label), optional linked tour (a picker of
-existing tours), draft/publish. Reuses the existing image upload/media-library controls and the
-markdown help. No takedown field — visibility is derived live from the end time.
+## Admin (merged with Tours — decided 2026-09-14)
+Tours and announcements share **one** sidebar item, **"Tours & events"** — a single list showing
+both, each row badged Tour / Event, drag/▲▼-reorderable in a **shared order** (`sort_order` written
+to whichever table the row belongs to; see `store.homeItems` / `store.reorderHome`). A single
+**"+ New"** button asks which type to create. The **editors stay separate**: the announcement editor
+mirrors the story/location treatment — title, start/end **date-time** (`datetime-local`), place,
+**address + map pin** (for directions), description, one image with **focal point + caption + credit
+(+ show toggle) + credit link**, optional link (url + label), optional linked tour, draft/publish.
+No takedown field — visibility is derived live from the end time.
 
 ## Public
-- **"What's on" strip** at the **top of the Tours list**: cards the **same size** as tour cards but
-  **badged "Event"** in a distinct colour, sorted by `event_start` (soonest first), showing only
-  published + current rows. The walks list sits underneath, unchanged.
-- **Event page** (`/?event=<slug>`): image, title, date(s), place, description, the optional link
-  button, and — if `tour_slug` is set — a **"Start the walk"** button into that tour. No map pin in
-  v1 (a place name is enough); add one later only if asked.
+- **One ordered list** on the Tours screen: tours and current events interleaved in the admin's
+  shared order. Event cards are a compact row **badged "Event"** (thumbnail + date + venue). Only
+  published, not-yet-ended (or evergreen) announcements appear.
+- **Event page** (`/?event=<slug>`): image (with focal point), title, date/time, venue + **address +
+  a Directions link** (device maps app), caption/credit, description, the optional link button, and —
+  if `tour_slug` is set — a **"Start the walk"** button into that tour.
+- **Paid adverts:** monetising these as paid event adverts is a separate, later feature — see
+  `docs/paid-event-adverts-spec.md`.
 
 ## Lifecycle
 A published announcement shows until `coalesce(event_end, event_start)` passes, then drops out of the

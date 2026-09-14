@@ -1,43 +1,54 @@
-<!-- A5 Tours list (BRD §11.5). -->
+<!-- A5 Tours & events — the app's home cards. Tours and announcements ("events")
+     share one drag/arrow-ordered list; the order drives the public Tours screen.
+     "+ New" chooses which type to create; each type keeps its own editor. -->
 <template>
   <div>
     <div class="pagehead">
-      <h1>Tours</h1>
-      <button class="btn btn-primary" @click="store.go('tourEditor', { id: null })">+ Add new tour</button>
+      <h1>Tours &amp; events</h1>
+      <div style="position:relative;">
+        <button class="btn btn-primary" @click="newOpen = !newOpen" :aria-expanded="String(newOpen)">+ New ▾</button>
+        <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- backdrop: click-outside closes; the menu buttons are the accessible path -->
+        <div v-if="newOpen" @click.self="newOpen = false" @keydown.esc="newOpen = false" style="position:absolute; inset:0 auto auto 0; z-index:1;">
+          <div style="position:absolute; top:6px; right:0; min-width:210px; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,0.18); overflow:hidden;">
+            <button class="menu-item" @click="newTour">🚶 Walking tour</button>
+            <button class="menu-item" @click="newEvent">📣 Announcement (event)</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle to reorder – this sets the order tours appear in the app.</p>
+    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle (or use ▲▼) to set the order these appear in the app. Events drop off automatically once they've passed.</p>
     <div class="card">
-      <table class="compact-list tours">
+      <table class="compact-list home">
         <thead>
-          <tr><th></th><th>Tour title</th><th>City</th><th>Stops</th><th>Distance</th><th>Duration</th><th>Status</th><th class="right">Actions</th></tr>
+          <tr><th></th><th>Title</th><th>Details</th><th>Status</th><th class="right">Actions</th></tr>
         </thead>
         <tbody>
-          <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
-          <tr v-for="(t, i) in rows" :key="t.id" class="row-clickable"
+          <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard path -->
+          <tr v-for="(row, i) in rows" :key="row.type + ':' + row.item.recordId" class="row-clickable"
             draggable="true"
-            @click="store.go('tourEditor', { id: t.id })"
+            @click="edit(row)"
             @dragstart="dragIdx = i" @dragover.prevent @drop="drop(i)" @dragend="dragIdx = null"
             :style="{ opacity: dragIdx === i ? 0.4 : 1 }">
             <td style="color:var(--muted); cursor:grab; width:24px; text-align:center;" title="Drag to reorder" data-label="Order">⠿</td>
-            <td style="font-weight:600;" data-label="Tour">{{ t.title }}</td>
-            <td data-label="City">{{ t.city }}</td>
-            <td data-label="Stops">{{ t.stopIds.length }}</td>
-            <td class="muted" data-label="Distance">{{ t.distanceLabel }}</td>
-            <td class="muted" data-label="Duration">{{ t.durationLabel }}</td>
-            <td data-label="Status"><span class="badge" :class="t.status">{{ t.status }}</span></td>
+            <td style="font-weight:600;" data-label="Title">
+              <span class="badge" :class="row.type === 'tour' ? 'kind-tour' : 'kind-event'" style="margin-right:8px; font-size:10px; letter-spacing:.3px;">{{ row.type === 'tour' ? 'Tour' : 'Event' }}</span>
+              {{ row.item.title }}
+            </td>
+            <td class="muted" data-label="Details">{{ details(row) }}</td>
+            <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span></td>
             <td class="right" style="white-space:nowrap;" data-label="Actions">
-              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="moveTour(i, -1)" :aria-label="`Move ${t.title} up`">▲</button>
-              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === rows.length - 1" @click.stop="moveTour(i, 1)" :aria-label="`Move ${t.title} down`">▼</button>
-              <button class="btn btn-ghost btn-sm" @click.stop="store.go('tourEditor', { id: t.id })">{{ store.canEditTour(t) ? 'Edit' : 'View' }}</button>
-              <button class="btn btn-ghost btn-sm" @click.stop="preview(t)" title="Open this tour in the app in a new tab">Preview</button>
-              <button class="btn btn-ghost btn-sm" @click.stop="duplicate(t)">Duplicate</button>
-              <button v-if="store.canDeleteTour(t)" class="btn btn-danger btn-sm" @click.stop="remove(t)" aria-label="Delete tour" title="Delete">
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" :aria-label="`Move ${row.item.title} up`">▲</button>
+              <button type="button" class="btn btn-ghost btn-sm" :disabled="i === rows.length - 1" @click.stop="move(i, 1)" :aria-label="`Move ${row.item.title} down`">▼</button>
+              <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
+              <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
+              <button v-if="row.type === 'tour'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row.item)">Duplicate</button>
+              <button v-if="canDelete(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`Delete ${row.item.title}`" title="Delete">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
               </button>
             </td>
           </tr>
-          <tr v-if="!rows.length"><td colspan="8" class="muted" style="text-align:center; padding:30px;">No tours yet.</td></tr>
+          <tr v-if="!rows.length"><td colspan="5" class="muted" style="text-align:center; padding:30px;">Nothing yet. Use “+ New”.</td></tr>
         </tbody>
       </table>
     </div>
@@ -48,47 +59,55 @@
 import { computed, ref } from 'vue'
 import { store } from '../store.js'
 import { config } from '../../config.js'
-import { routeLength, formatDistance } from '../../lib/geo.js'
+import { eventWhen } from '../../lib/eventtime.js'
 
-// Open the tour's detail screen in the public app (new tab). Same origin as the
-// admin, so it works even if VITE_PUBLIC_URL isn't set; drafts show when signed in.
-function preview(t) {
+const rows = computed(() => store.homeItems)
+
+// ── create ──
+const newOpen = ref(false)
+function newTour() { newOpen.value = false; store.go('tourEditor', { id: null }) }
+function newEvent() { newOpen.value = false; store.go('announcementEditor', { id: null }) }
+
+// ── per-type helpers ──
+function edit(row) { store.go(row.type === 'tour' ? 'tourEditor' : 'announcementEditor', { id: row.item.id }) }
+function canEdit(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.role !== 'editor' }
+function canDelete(row) { return row.type === 'tour' ? store.canDeleteTour(row.item) : store.role !== 'editor' }
+function details(row) {
+  if (row.type === 'tour') return `${row.item.stopIds.length} stop${row.item.stopIds.length === 1 ? '' : 's'}`
+  const when = row.item.eventStart ? eventWhen(row.item.eventStart, row.item.eventEnd) : 'Evergreen'
+  return row.item.place ? `${when} · ${row.item.place}` : when
+}
+function preview(row) {
   const base = config.publicUrl || window.location.origin
-  window.open(`${base}/?tour=${encodeURIComponent(t.id)}`, '_blank', 'noopener')
+  const q = row.type === 'tour' ? `tour=${encodeURIComponent(row.item.id)}` : `event=${encodeURIComponent(row.item.id)}`
+  window.open(`${base}/?${q}`, '_blank', 'noopener')
 }
-
-const dragIdx = ref(null)
-function drop(i) {
-  if (dragIdx.value == null || dragIdx.value === i) return
-  const arr = store.tours
-  const [moved] = arr.splice(dragIdx.value, 1)
-  arr.splice(i, 0, moved)
-  dragIdx.value = null
-  store.reorderTours()
-}
-// Keyboard/touch-accessible reorder (the ▲▼ buttons); mirrors the drag path.
-function moveTour(i, dir) {
-  const j = i + dir
-  const arr = store.tours
-  if (j < 0 || j >= arr.length) return
-  const [moved] = arr.splice(i, 1)
-  arr.splice(j, 0, moved)
-  store.reorderTours()
-}
-
-const byId = computed(() => Object.fromEntries(store.locations.map((l) => [l.id, l])))
-const rows = computed(() =>
-  store.tours.map((t) => {
-    const stops = t.stopIds.map((id) => byId.value[id]).filter(Boolean)
-    const mins = t.durationOverrideMins || stops.length * 12 + Math.round(routeLength(stops) / 80)
-    const h = Math.floor(mins / 60), m = mins % 60
-    return { ...t, distanceLabel: formatDistance(routeLength(stops), 'mi'), durationLabel: h ? `~${h}h ${m}m` : `~${m}m` }
-  })
-)
 async function duplicate(t) {
   await store.saveTour({ ...t, recordId: undefined, id: t.id + '-copy', title: t.title + ' (copy)', status: 'draft' })
 }
-async function remove(t) {
-  if (confirm(`Delete tour “${t.title}”?`)) await store.deleteTour(t)
+async function remove(row) {
+  if (!confirm(`Delete ${row.type === 'tour' ? 'tour' : 'announcement'} “${row.item.title}”?`)) return
+  if (row.type === 'tour') await store.deleteTour(row.item)
+  else await store.deleteAnnouncement(row.item)
 }
+
+// ── reorder (drag + keyboard), writing the shared order across both tables ──
+const dragIdx = ref(null)
+function reorder(from, to) {
+  const arr = [...rows.value]
+  if (to < 0 || to >= arr.length) return
+  const [m] = arr.splice(from, 1)
+  arr.splice(to, 0, m)
+  store.reorderHome(arr)
+}
+function move(i, dir) { reorder(i, i + dir) }
+function drop(i) { if (dragIdx.value != null && dragIdx.value !== i) reorder(dragIdx.value, i); dragIdx.value = null }
 </script>
+
+<style scoped>
+.menu-item { display:block; width:100%; text-align:left; padding:10px 14px; background:none; border:none; border-bottom:1px solid var(--line); font:inherit; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer; }
+.menu-item:last-child { border-bottom:none; }
+.menu-item:hover { background:var(--bg); }
+.badge.kind-tour { background:#e7ecff; color:#3346b8; }
+.badge.kind-event { background:#efe9fb; color:#5b3ea8; }
+</style>
