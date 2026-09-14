@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.14.9] — 2026-09-14
+
+### Changed
+- **"Calculate walking route" now uses a clean line icon** (a simple monochrome route glyph) instead of the colourful 🗺/↻ emoji, matching the rest of the admin's icon style.
+
 ## [1.14.8] — 2026-09-13
 
 ### Fixed

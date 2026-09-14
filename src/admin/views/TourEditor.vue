@@ -162,7 +162,7 @@
 
         <div style="margin-top:12px; padding-top:14px; border-top:1px solid var(--line);">
           <button class="btn btn-ghost btn-sm" :disabled="routing || form.stopIds.length < 2" @click="recalcRoute">
-            {{ routing ? 'Calculating…' : (form.routeGeometry ? '↻ Recalculate walking route' : '🗺 Calculate walking route') }}
+            <svg v-if="!routing" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><circle cx="6" cy="19" r="3" /><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /><circle cx="18" cy="5" r="3" /></svg>{{ routing ? 'Calculating…' : (form.routeGeometry ? 'Recalculate walking route' : 'Calculate walking route') }}
           </button>
           <p v-if="routeMsg" style="font-size:12.5px; margin:8px 0 0; font-weight:600;" :style="{ color: routeErr ? 'var(--red)' : 'var(--green)' }">{{ routeMsg }}</p>
           <p v-else-if="form.routeGeometry" class="muted" style="font-size:12px; margin:8px 0 0;">Route follows roads &amp; paths ({{ form.routeGeometry.length }} points). Save to keep it.</p>
