@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.16.1] — 2026-09-15
+
+### Changed
+- **Consistent row actions in "Tours & events".** Events now have a **Duplicate** action too (handy for a recurring event — duplicate last year's, then re-date it), so tour and event rows carry the same buttons.
+
 ## [1.16.0] — 2026-09-15
 
 ### Changed

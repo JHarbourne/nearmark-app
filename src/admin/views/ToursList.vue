@@ -42,7 +42,7 @@
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === rows.length - 1" @click.stop="move(i, 1)" :aria-label="`Move ${row.item.title} down`">▼</button>
               <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
               <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
-              <button v-if="row.type === 'tour'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row.item)">Duplicate</button>
+              <button v-if="row.type === 'tour' || store.role !== 'editor'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
               <button v-if="canDelete(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`Delete ${row.item.title}`" title="Delete">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
               </button>
@@ -82,8 +82,14 @@ function preview(row) {
   const q = row.type === 'tour' ? `tour=${encodeURIComponent(row.item.id)}` : `event=${encodeURIComponent(row.item.id)}`
   window.open(`${base}/?${q}`, '_blank', 'noopener')
 }
-async function duplicate(t) {
-  await store.saveTour({ ...t, recordId: undefined, id: t.id + '-copy', title: t.title + ' (copy)', status: 'draft' })
+async function duplicate(row) {
+  const it = row.item
+  if (row.type === 'tour') {
+    await store.saveTour({ ...it, recordId: undefined, id: it.id + '-copy', title: it.title + ' (copy)', status: 'draft' })
+  } else {
+    // fresh slug so it can't collide; drops to draft for the new occurrence to be dated
+    await store.saveAnnouncement({ ...it, recordId: undefined, id: 'ann-' + Math.random().toString(36).slice(2, 8), title: it.title + ' (copy)', status: 'draft' })
+  }
 }
 async function remove(row) {
   if (!confirm(`Delete ${row.type === 'tour' ? 'tour' : 'announcement'} “${row.item.title}”?`)) return
