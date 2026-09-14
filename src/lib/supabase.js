@@ -433,6 +433,69 @@ export async function fetchTours(publicView = false) {
   return sorted(data)
 }
 
+// ── announcements ("What's on") — lightweight event cards, migration 038 ──
+function rowToAnnouncement(r) {
+  return {
+    recordId: r.id,
+    id: r.slug,                    // stable slug; event-page deep link /?event=<slug>
+    title: r.title || '',
+    eventStart: r.event_start || null,  // 'YYYY-MM-DD' or null (evergreen notice)
+    eventEnd: r.event_end || null,
+    place: r.place || '',
+    description: r.description || '',
+    imageUrl: r.image_url || null,
+    imageAlt: r.image_alt || '',
+    linkUrl: r.link_url || '',
+    linkLabel: r.link_label || '',
+    tourSlug: r.tour_slug || '',   // optional: event that's also a walk → "Start the walk"
+    status: r.status || 'draft',
+    sortOrder: r.sort_order ?? 0,
+  }
+}
+function announcementToRow(a) {
+  return {
+    slug: a.id,
+    title: a.title,
+    event_start: a.eventStart || null,
+    event_end: a.eventEnd || null,
+    place: a.place || null,
+    description: a.description || null,
+    image_url: a.imageUrl || null,
+    image_alt: a.imageAlt || null,
+    link_url: a.linkUrl || null,
+    link_label: a.linkLabel || null,
+    tour_slug: a.tourSlug || null,
+    status: a.status || 'draft',
+    sort_order: a.sortOrder ?? 0,
+  }
+}
+// Soonest event first (evergreen notices, no date, sort last), then manual order.
+const sortAnnouncements = (rows) => rows.map(rowToAnnouncement).sort((a, b) =>
+  ((a.eventStart || '9999-12-31').localeCompare(b.eventStart || '9999-12-31')) || (a.sortOrder - b.sortOrder))
+
+// Fully defensive: announcements are non-critical, and the table may not exist on a
+// project that hasn't run migration 038 — any error just yields no announcements
+// rather than breaking the tours list / admin.
+export async function fetchAnnouncements(publicView = false) {
+  if (!supabaseConfigured) return []
+  try {
+    const { data, error } = await supabase.from('announcements').select('*')
+    if (error) return []
+    let list = sortAnnouncements(data || [])
+    if (publicView) {
+      // Published, and only until the event ends (evergreen if no dates). Mirrors the
+      // anon RLS, but also filters for a signed-in admin browsing the public app.
+      const now = Date.now()
+      list = list.filter((a) => {
+        if (a.status !== 'published') return false
+        const end = a.eventEnd || a.eventStart
+        return !end || Date.parse(end) >= now
+      })
+    }
+    return list
+  } catch { return [] }
+}
+
 // ── admin CRUD (requires an authenticated session; RLS enforces it) ──
 async function run(promise) {
   const { data, error } = await promise
@@ -442,6 +505,11 @@ async function run(promise) {
 export const db = {
   listLocations: () => fetchLocations(),
   listTours: () => fetchTours(),
+  // ── announcements ("What's on"), migration 038 ──
+  listAnnouncements: () => fetchAnnouncements(false),
+  createAnnouncement: (a) => run(supabase.from('announcements').insert(announcementToRow(a)).select()),
+  updateAnnouncement: (recordId, a) => run(supabase.from('announcements').update(announcementToRow(a)).eq('id', recordId).select()),
+  deleteAnnouncement: (recordId) => run(supabase.from('announcements').delete().eq('id', recordId)),
   createLocation: (l) => run(supabase.from('locations').insert(locationToRow(l)).select()),
   updateLocation: (recordId, l) => run(supabase.from('locations').update(locationToRow(l)).eq('id', recordId).select()),
   deleteLocation: (recordId) => run(supabase.from('locations').delete().eq('id', recordId)),

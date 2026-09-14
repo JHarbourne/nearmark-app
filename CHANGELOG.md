@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.15.0] — 2026-09-14
+
+### Added
+- **Announcements ("What's on").** A lightweight way to show village events (a fair, a festival) in the app without turning it into an events app. A Super-Admin-only **Announcements** section in the admin creates event cards — title, start/end date-time, place, description, one image, an optional link (tickets / Facebook event), and an optional **linked walk**. They appear as a badged **"What's on" strip at the top of the Tours list** and open a **simple event page** (`/?event=<slug>`), not a tour — the walks stay the focus. An announcement **disappears from the public list the moment it ends** (no takedown buffer, unlike tours); leave the dates blank for an evergreen notice. New standalone `announcements` table — **run `migration-038-announcements.sql`** per project to enable it (dormant/absent until then; the app degrades gracefully where the table isn't there). See `docs/announcements-spec.md`.
+
 ## [1.14.9] — 2026-09-14
 
 ### Changed

@@ -124,6 +124,8 @@ import MediaLibrary from './views/MediaLibrary.vue'
 import Analytics from './views/Analytics.vue'
 import UserManagement from './views/UserManagement.vue'
 import Approvals from './views/Approvals.vue'
+import AnnouncementsList from './views/AnnouncementsList.vue'
+import AnnouncementEditor from './views/AnnouncementEditor.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
 const platformName = config.platformName
@@ -135,12 +137,15 @@ const nav = computed(() => [
   { route: 'dashboard', label: 'Dashboard' },
   { route: 'locations', label: 'Locations' },
   { route: 'tours', label: 'Tours' },
+  // Announcements ("What's on") — Super-Admin-managed (shown too where RBAC is off,
+  // i.e. every signed-in admin has full access).
+  ...(store.role !== 'editor' ? [{ route: 'announcements', label: 'Announcements' }] : []),
   ...(store.approvals.length ? [{ route: 'approvals', label: 'Approvals' }] : []),
   { route: 'media', label: 'Media library' },
   { route: 'analytics', label: 'Analytics' },
   { route: 'users', label: 'User management' },
 ])
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals }
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals, announcements: AnnouncementsList, announcementEditor: AnnouncementEditor }
 const view = computed(() => views[store.route] || Dashboard)
 // Remount the view when the record it edits changes, so navigating record→record
 // within the same route (e.g. Story editor's "Next story") re-seeds the editor.

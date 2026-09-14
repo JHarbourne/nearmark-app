@@ -25,6 +25,7 @@ export const store = reactive({
 
   locations: [],
   tours: [],
+  announcements: [], // "What's on" event cards (migration 038); [] where the table isn't there
   approvals: [], // per-story owner-approval records (participatory tours); empty where the participants table isn't used
   loading: false,
   error: '',
@@ -243,6 +244,7 @@ export const store = reactive({
         this.myTourIds = this.role === 'editor' ? await db.myTourIds().catch(() => []) : []
         this.notifications = await db.listNotifications().catch(() => [])
         this.approvals = await db.listApprovals().catch(() => [])
+        this.announcements = await db.listAnnouncements().catch(() => [])
       }
     } catch (e) {
       this.error = e.message
@@ -337,6 +339,18 @@ export const store = reactive({
   async deleteTour(tour) {
     if (tour.recordId) await db.deleteTour(tour.recordId)
     this.logActivity('Deleted tour', tour.title)
+    await this.load()
+  },
+  // ── announcements ("What's on"), migration 038 ──
+  async saveAnnouncement(a) {
+    if (a.recordId) await db.updateAnnouncement(a.recordId, a)
+    else await db.createAnnouncement(a)
+    this.logActivity(a.recordId ? 'Updated announcement' : 'Created announcement', a.title)
+    await this.load()
+  },
+  async deleteAnnouncement(a) {
+    if (a.recordId) await db.deleteAnnouncement(a.recordId)
+    this.logActivity('Deleted announcement', a.title)
     await this.load()
   },
   // persist the current order of this.tours as sort_order (lower = higher up)

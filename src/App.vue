@@ -34,8 +34,18 @@
           v-else-if="screen==='tourList'"
           :city="cityName"
           :tours="tourCards"
+          :announcements="announcements"
           @open="openTour"
+          @open-announcement="openAnnouncement"
           @back="screen='cover'"
+        />
+
+        <AnnouncementScreen
+          v-else-if="screen==='announcement'"
+          :announcement="activeAnnouncement"
+          :tours="tourCards"
+          @back="screen='tourList'"
+          @open-tour="openAnnouncementTour"
         />
 
         <TourDetailScreen
@@ -142,6 +152,7 @@ import CityScreen from './components/CityScreen.vue'
 import CoverScreen from './components/CoverScreen.vue'
 import TourListScreen from './components/TourListScreen.vue'
 import TourDetailScreen from './components/TourDetailScreen.vue'
+import AnnouncementScreen from './components/AnnouncementScreen.vue'
 import MapView from './components/MapView.vue'
 import LocationPrompt from './components/LocationPrompt.vue'
 import StoryCard from './components/StoryCard.vue'
@@ -151,7 +162,7 @@ import SettingsSheet from './components/SettingsSheet.vue'
 import InstallGuide from './components/InstallGuide.vue'
 import AppNotices from './components/AppNotices.vue'
 
-import { fetchLocations, fetchTours } from './lib/supabase.js'
+import { fetchLocations, fetchTours, fetchAnnouncements } from './lib/supabase.js'
 import { precacheTourMedia, precacheBasemap, requestPersistentStorage } from './lib/precache.js'
 import { config } from './config.js'
 import { theme } from './theme.js'
@@ -167,6 +178,7 @@ const bars = theme.brandBars
 const loading = ref(true)
 const locations = ref([])
 const tours = ref([])
+const announcements = ref([])   // "What's on" event cards (empty where the table isn't there)
 const byId = computed(() => Object.fromEntries(locations.value.map((l) => [l.id, l])))
 
 // Single-city deployments set the active city via env (VITE_CITY_NAME + map
@@ -185,6 +197,7 @@ const mapMode = ref('guided')         // guided | discovery
 const isMap = computed(() => screen.value === 'map')
 
 const activeTour = ref(null)
+const activeAnnouncement = ref(null)   // the event page currently open (screen === 'announcement')
 const visited = ref([])
 const nextIdx = ref(0)
 const openId = ref(null)           // slug of the location whose story card is open
@@ -219,9 +232,10 @@ onMounted(async () => {
   requestPersistentStorage()
   precacheBasemap()
   try {
-    const [locs, trs] = await Promise.all([fetchLocations(true), fetchTours(true)])
+    const [locs, trs, anns] = await Promise.all([fetchLocations(true), fetchTours(true), fetchAnnouncements(true)])
     locations.value = locs
     tours.value = trs
+    announcements.value = anns
     activeTour.value = trs[0] || null
   } catch (e) {
     console.error('Data load failed:', e)
@@ -234,8 +248,10 @@ onMounted(async () => {
   const params = new URLSearchParams(window.location.search)
   const storyId = params.get('story')
   const tourId = params.get('tour')
+  const eventId = params.get('event')
   if (storyId && byId.value[storyId]) { screen.value = 'cover'; openId.value = storyId }
   else if (tourId) { const t = tours.value.find((x) => x.id === tourId); if (t) { activeTour.value = t; screen.value = 'tourDetail' } }
+  else if (eventId) { const ev = announcements.value.find((x) => x.id === eventId); if (ev) { activeAnnouncement.value = ev; screen.value = 'announcement' } }
 })
 
 // ── derived: tour stops in order ──
@@ -393,6 +409,13 @@ function selectCity(c) { activeCity.value = c; screen.value = 'cover' }
 
 function openTour(t) { activeTour.value = tours.value.find((x) => x.id === t.id) || t; screen.value = 'tourDetail' }
 
+// ── announcements ("What's on") ──
+function openAnnouncement(a) { activeAnnouncement.value = a; screen.value = 'announcement'; track('announcement_viewed', { id: a.id, title: a.title }) }
+function openAnnouncementTour(slug) {
+  const t = tours.value.find((x) => x.id === slug)
+  if (t) { activeTour.value = t; screen.value = 'tourDetail' }
+}
+
 // Both modes lean on GPS (Discovery requires it; Guided uses it to track the
 // route). If location hasn't been granted, ask at the moment it matters rather
 // than dead-ending – the splash "Not now" no longer leaves the user stuck.
@@ -460,6 +483,7 @@ function closeOneLayer() {
   if (storyListLoc.value) { storyListLoc.value = null; return true } // story picker
   if (isMap.value) { exitMap(); return true }                // map → tour detail / cover
   if (screen.value === 'completion') { goCover(); return true }
+  if (screen.value === 'announcement') { screen.value = 'tourList'; return true }
   if (screen.value === 'tourDetail') { screen.value = 'tourList'; return true }
   if (screen.value === 'tourList') { screen.value = 'cover'; return true }
   return false // at the cover / top level – let Back leave the app
