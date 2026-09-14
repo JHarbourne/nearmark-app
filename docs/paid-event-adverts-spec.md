@@ -1,13 +1,34 @@
 # Paid event adverts (monetising Announcements) — spec
 
 Status: **Spec only — not built.** A monetisation avenue for Nearmark: let local
-businesses/organisers pay to advertise an event as an **Announcement**. Builds on the
-announcements feature (`migration-038/039`, `docs/announcements-spec.md`).
+businesses/organisers pay to advertise — **a dated event, or an evergreen listing for a business**
+(a pub, café, shop, service) — as an **Announcement**. Builds on the announcements feature
+(`migration-038/039`, `docs/announcements-spec.md`).
 
 ## Why
 Announcements already put event cards on the app's home. Turning them into **paid adverts**
 gives Nearmark (and/or the deploying organisation) a revenue stream without changing the app's
 walking-guide focus — the same lightweight event card, but sold. Jonathan flagged this 2026-09-14.
+
+## Two kinds of paid slot (added 2026-09-15)
+A paid slot needn't be a dated event. There are two:
+1. **Dated event advert** — a fair, a festival: uses the start/end date-time and auto-hides the
+   moment it ends (the existing announcement lifecycle).
+2. **Evergreen business advert** — a pub, café, shop or service with **no event date**. The
+   announcements model already supports this (blank dates = evergreen, shows until unpublished), so
+   no schema change is needed to display one.
+
+**Billing expiry (`run_until`).** What differs for a *paid* slot is that it should come down when the
+**paid period** ends, not (only) when an event ends. Add a billing field — `run_until` (a date) —
+that auto-hides the advert when the paid period lapses, independent of any event date. For a dated
+event it can default to the event end; for an evergreen business advert it's the end of the paid
+subscription window (extended on renewal). This is the one real schema addition monetisation needs.
+
+**Presentation.** A business listing isn't an "Event", so it likely wants a **different badge**
+(e.g. "Sponsored" / "Local") and slightly different card content (no date; perhaps opening hours or a
+phone number instead of a start time). Worth deciding whether business adverts sit in the same home
+list as tours/events or in their own strip. Pricing also splits by type: **one-off** for an event,
+**recurring** (monthly/annual) for a business listing.
 
 ## The shift this represents
 Today announcements are an **internal tool** (the Super Admin posts village notices). Paid adverts
