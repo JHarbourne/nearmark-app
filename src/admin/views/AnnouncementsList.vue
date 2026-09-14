@@ -41,12 +41,9 @@
 <script setup>
 import { store } from '../store.js'
 import { config } from '../../config.js'
+import { eventWhen } from '../../lib/eventtime.js'
 
-const fmt = (d) => d ? new Date(d).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''
-function whenLabel(a) {
-  if (!a.eventStart) return 'Evergreen'
-  return a.eventEnd && a.eventEnd !== a.eventStart ? `${fmt(a.eventStart)} – ${fmt(a.eventEnd)}` : fmt(a.eventStart)
-}
+const whenLabel = (a) => a.eventStart ? eventWhen(a.eventStart, a.eventEnd) : 'Evergreen'
 function preview(a) {
   const base = config.publicUrl || window.location.origin
   window.open(`${base}/?event=${encodeURIComponent(a.id)}`, '_blank', 'noopener')

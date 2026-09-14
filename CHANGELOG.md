@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.15.1] — 2026-09-14
+
+### Changed
+- **Announcement images now match the story/location treatment** — focal-point picker, caption, photo credit (+ "Show" toggle) and credit link; and the upload/library icons sit inside the field instead of dropping onto the next line.
+- **Announcements gained an address + map pin.** The event page now shows the venue, address and a **Directions** link (opens the device maps app), consistent with a story card.
+- **Cleaner event date/time.** A same-day range shows the date once — "Sat 21 November, 10:00 – 17:00" — instead of repeating it at both ends.
+- Added a **Preview** button to the announcement editor, and removed the "What's on" heading from the Tours list (events show as badged "Event" cards). Needs `migration-039-announcement-details.sql`.
+
 ## [1.15.0] — 2026-09-14
 
 ### Added

@@ -1,6 +1,5 @@
 <!-- Event page for an Announcement ("What's on"). A simple, read-only page — NOT a
-     tour. Reached from the "What's on" strip on the Tour list, or /?event=<slug>.
-     See docs/announcements-spec.md. -->
+     tour. Reached from the Tour list, or /?event=<slug>. See docs/announcements-spec.md. -->
 <template>
   <div style="position: absolute; inset: 0; overflow-y: auto;">
     <button @click="$emit('back')" :style="backBtn" aria-label="Back">
@@ -18,11 +17,25 @@
       </div>
     </div>
 
-    <div style="padding: 20px 24px 48px;">
-      <p v-if="a.place" style="display:flex; align-items:center; gap:8px; margin:0 0 14px; font-weight:600; color:var(--ink-soft);">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        {{ a.place }}
+    <div style="padding: 18px 24px 48px;">
+      <!-- caption + credit under the photo (same as a story card) -->
+      <p v-if="a.imageCaption || showCredit" style="margin:0 0 14px; font-size:12.5px; color:var(--ink-muted);">
+        <span v-if="a.imageCaption" style="font-style:italic;">{{ a.imageCaption }}</span>
+        <span v-if="showCredit">{{ a.imageCaption ? ' · ' : '' }}Photo: <a v-if="a.imageCreditUrl" :href="a.imageCreditUrl" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">{{ a.imageCredit }}</a><template v-else>{{ a.imageCredit }}</template></span>
       </p>
+
+      <!-- where it is: venue, address, and a "Directions" link (device maps app) -->
+      <div v-if="a.place || a.address || hasCoords" style="margin:0 0 16px;">
+        <p v-if="a.place" style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600; color:var(--ink-soft);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ a.place }}
+        </p>
+        <p v-if="a.address" style="margin:3px 0 0 24px; font-size:13.5px; color:var(--ink-muted);">{{ a.address }}</p>
+        <a v-if="hasCoords" :href="directionsHref" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:4px; margin:6px 0 0 24px; font-size:13.5px; font-weight:700; color:var(--accent-warm); text-decoration:none;">
+          Directions
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
 
       <!-- eslint-disable-next-line vue/no-v-html -- HTML-escaped in renderBody; only safe tags emitted -->
       <div v-if="a.description" class="ann-body" v-html="descriptionHtml"></div>
@@ -42,6 +55,7 @@
 <script setup>
 import { computed } from 'vue'
 import { renderBody } from '../lib/richtext.js'
+import { eventWhen } from '../lib/eventtime.js'
 
 const props = defineProps({
   announcement: { type: Object, required: true },
@@ -52,13 +66,18 @@ defineEmits(['back', 'open-tour'])
 const a = computed(() => props.announcement)
 const descriptionHtml = computed(() => renderBody(props.announcement.description || ''))
 const linkedTour = computed(() => props.announcement.tourSlug ? props.tours.find((t) => t.id === props.announcement.tourSlug) || null : null)
+const whenLabel = computed(() => eventWhen(props.announcement.eventStart, props.announcement.eventEnd))
+const showCredit = computed(() => !!props.announcement.imageCredit && props.announcement.showImageCredit !== false)
 
-const fmt = (d) => d ? new Date(d).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
-const whenLabel = computed(() => {
-  const s = props.announcement.eventStart
-  if (!s) return ''
-  const e = props.announcement.eventEnd
-  return e && e !== s ? `${fmt(s)} – ${fmt(e)}` : fmt(s)
+// "Directions" — open the device maps app to the place (Apple Maps on iOS, else Google).
+const hasCoords = computed(() => props.announcement.lat != null && props.announcement.lng != null)
+const directionsHref = computed(() => {
+  if (!hasCoords.value) return ''
+  const dest = `${props.announcement.lat},${props.announcement.lng}`
+  const label = encodeURIComponent(props.announcement.title || 'Event')
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    ? `https://maps.apple.com/?daddr=${dest}&q=${label}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${dest}`
 })
 
 const backBtn = {
@@ -70,7 +89,7 @@ const backBtn = {
 const hero = computed(() => {
   const base = { position: 'relative', height: '230px', overflow: 'hidden' }
   return props.announcement.imageUrl
-    ? { ...base, backgroundImage: `url(${props.announcement.imageUrl})`, backgroundSize: 'cover', backgroundPosition: '50% 50%', backgroundRepeat: 'no-repeat' }
+    ? { ...base, backgroundImage: `url(${props.announcement.imageUrl})`, backgroundSize: 'cover', backgroundPosition: props.announcement.imagePosition || '50% 50%', backgroundRepeat: 'no-repeat' }
     : { ...base, background: 'var(--grad-brand)' }
 })
 const eventTag = {
