@@ -59,7 +59,7 @@
 import { computed, ref } from 'vue'
 import { store } from '../store.js'
 import { config } from '../../config.js'
-import { eventWhen } from '../../lib/eventtime.js'
+import { eventWhen, expiresLabel } from '../../lib/eventtime.js'
 
 const rows = computed(() => store.homeItems)
 
@@ -74,8 +74,9 @@ function canEdit(row) { return row.type === 'tour' ? store.canEditTour(row.item)
 function canDelete(row) { return row.type === 'tour' ? store.canDeleteTour(row.item) : store.role !== 'editor' }
 function details(row) {
   if (row.type === 'tour') return `${row.item.stopIds.length} stop${row.item.stopIds.length === 1 ? '' : 's'}`
-  const when = row.item.eventStart ? eventWhen(row.item.eventStart, row.item.eventEnd) : 'Evergreen'
-  return row.item.place ? `${when} · ${row.item.place}` : when
+  const a = row.item
+  const when = a.eventStart ? eventWhen(a.eventStart, a.eventEnd) : (a.eventEnd ? expiresLabel(a.eventEnd) : 'Evergreen')
+  return a.place ? `${when} · ${a.place}` : when
 }
 function preview(row) {
   const base = config.publicUrl || window.location.origin

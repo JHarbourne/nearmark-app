@@ -8,6 +8,11 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.16.2] — 2026-09-15
+
+### Changed
+- **Announcements can be dateless notices/adverts.** Leave **Starts** blank and the card shows with no date — a standing notice or a local-business advert rather than a timed event. The **Ends** field doubles as an **expiry**: it still comes down automatically then (or stays until you unpublish if both are blank). The admin list shows "Until …" for a dateless item with an expiry.
+
 ## [1.16.1] — 2026-09-15
 
 ### Changed
