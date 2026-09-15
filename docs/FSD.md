@@ -296,9 +296,12 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   (a fair, a festival) with title, start/end date-time, venue + **address/map pin** (directions),
   description, an image with **focal point + caption + credit**, an optional link, and an optional
   **linked walk** — opening a **simple event page** (`/?event=<slug>`), **not** a tour. Super-Admin-
-  managed; disappears from the public list the moment it ends. Standalone `announcements` table
-  (migrations 038–039); design in `docs/announcements-spec.md`. Monetising these as **paid event
-  adverts** is a separate, planned feature — `docs/paid-event-adverts-spec.md`.
+  managed. **Lifecycle:** a dated event uses start + end and disappears the moment it ends; leaving
+  **start blank** makes it a **dateless standing notice / advert** (a business, a service) shown with
+  no date, where the **end acts as an expiry** (auto-hides then); blank start *and* end = an evergreen
+  notice that shows until unpublished. Standalone `announcements` table (migrations 038–039); design
+  in `docs/announcements-spec.md`. Monetising these as **paid adverts** (dated events or evergreen
+  business listings) is a separate, planned feature — `docs/paid-event-adverts-spec.md`.
 - **Safety.** An **unsaved-changes guard** warns before leaving a dirty editor (in-app
   navigation and browser close/reload).
 

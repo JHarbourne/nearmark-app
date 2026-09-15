@@ -86,8 +86,12 @@ No takedown field — visibility is derived live from the end time.
 ## Lifecycle
 A published announcement shows until `coalesce(event_end, event_start)` passes, then drops out of the
 public list **immediately** (no buffer — that's the difference from a tour's takedown window). The
-admin still sees past ones to duplicate or delete. An announcement with no dates is an evergreen
-notice that shows until unpublished.
+admin still sees past ones to duplicate or delete. Three shapes, all from the same two fields:
+- **Dated event** — start + end: shows with its date/time, hides the moment it ends.
+- **Dateless notice / advert** — **no start, an end**: shows with **no public date** (a standing
+  notice, a business advert); the end acts as an **expiry** that auto-hides it. The admin list shows
+  "Until &lt;date&gt;". (`eventWhen` returns nothing without a start, so nothing dated is shown publicly.)
+- **Evergreen** — no dates at all: shows until unpublished.
 
 ## Out of scope (keep it lite)
 RSVPs · ticketing · recurring events · reminders/notifications · a calendar view · comments. These
