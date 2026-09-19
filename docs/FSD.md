@@ -156,8 +156,9 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 037 | RBAC — assigned editors may edit **any stop in their tour** (edit now matches visibility; delete stays owner + SA) |
 | 038 | **announcements** ("What's on") — standalone lightweight events table (start/end date-time, place, image, optional link + linked tour); SA-managed; disappears from the public list the moment it ends. Additive; portable with/without RBAC. |
 | 039 | announcement **address + map pin** (directions) and **full image metadata** (focal point, caption, credit + show toggle, credit link). Additive. |
+| 040 | RBAC Phase 3 — **soft-delete / archive**. `archived_at`/`archived_by` on locations & tours (hidden from the public + admin lists); `deletion_requests`; `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard delete is now Super-Admin-only (a purge). Reconciled to the current schema (leaves 031's notify triggers intact; wraps 025's visibility helper). |
 
-RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied there. The soft-delete/archive and duplicate-title phases are **not yet built** — their migrations will be numbered **>037** (the old 032–034 numbers the permissions spec first used are now the approval flow above).
+RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied there. **Phase 3 (040 – soft-delete/archive) is built + staging-verified (v1.17.0), dormant on both prod projects until run.** The duplicate-title (Phase 4) and email-digest (Phase 5) phases are still to come — design in `docs/backoffice-permissions-spec.md`.
 
 ---
 
@@ -287,9 +288,15 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   but the **database RLS is the real boundary**. A non-owner edit notifies the owner via an in-app
   **bell**. Assignment is managed from the tour editor (Super-Admin-only panel). Enforced by
   migrations 030 (roles/ownership) + 031 (notifications) + 036 (per-tour scoping) + 037
-  (edit-any-stop), applied per project — **dormant (full access, exactly as before) until applied**.
-  Currently **live on Tollesbury; dormant on LGBT**. Soft-delete/archive, duplicate-title handling
-  and email digests are still to come (migrations >037) — design in `docs/backoffice-permissions-spec.md`.
+  (edit-any-stop) + 040 (soft-delete/archive), applied per project — **dormant (full access, exactly
+  as before) until applied**. Currently **live on Tollesbury; dormant on LGBT**. Duplicate-title
+  handling and email digests are still to come — design in `docs/backoffice-permissions-spec.md`.
+- **Deletion is recoverable (soft-archive, Phase 3 / migration 040).** "Delete" no longer removes a
+  tour or location outright: the owner/Super Admin **archives** it (out of the admin lists and the
+  public app, restorable); an editor who doesn't own it raises a **deletion request** the owner
+  Approves/Declines from the bell. The **Archive** screen lists everything archived with **Restore**,
+  and — Super-Admin-only — a permanent **Purge** (rows older than 30 days are flagged). A single
+  **story** is a plain delete (it cascades with, and is archive-protected by, its parent location).
 - **Announcements ("What's on"), merged into "Tours & events".** Tours and announcements share one
   admin list (badged Tour / Event, drag/▲▼-reorder in a **shared order**; "+ New" chooses the type)
   and **one ordered list on the public Tours screen**. An announcement is a lightweight event card

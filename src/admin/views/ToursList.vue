@@ -43,7 +43,7 @@
               <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
               <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
               <button v-if="row.type === 'tour' || store.role !== 'editor'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
-              <button v-if="canDelete(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`Delete ${row.item.title}`" title="Delete">
+              <button v-if="canRemove(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`${removeLabel(row)} ${row.item.title}`" :title="removeLabel(row)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
               </button>
             </td>
@@ -71,7 +71,13 @@ function newEvent() { newOpen.value = false; store.go('announcementEditor', { id
 // ── per-type helpers ──
 function edit(row) { store.go(row.type === 'tour' ? 'tourEditor' : 'announcementEditor', { id: row.item.id }) }
 function canEdit(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.role !== 'editor' }
-function canDelete(row) { return row.type === 'tour' ? store.canDeleteTour(row.item) : store.role !== 'editor' }
+// A tour can be removed by anyone who can edit it: the owner/SA archive it (recoverable),
+// an assigned non-owner raises a request to the owner. Events stay SA/admin-only (they
+// aren't in the deletion workflow — a plain delete).
+function canRemove(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.role !== 'editor' }
+// Label the destructive button: "Request deletion" when it will raise a request
+// rather than archive directly (a non-owner editor on someone else's tour).
+function removeLabel(row) { return row.type === 'tour' && !store.canDeleteTour(row.item) ? 'Request deletion' : 'Delete' }
 function details(row) {
   if (row.type === 'tour') return `${row.item.stopIds.length} stop${row.item.stopIds.length === 1 ? '' : 's'}`
   const a = row.item
@@ -93,9 +99,19 @@ async function duplicate(row) {
   }
 }
 async function remove(row) {
-  if (!confirm(`Delete ${row.type === 'tour' ? 'tour' : 'announcement'} “${row.item.title}”?`)) return
-  if (row.type === 'tour') await store.deleteTour(row.item)
-  else await store.deleteAnnouncement(row.item)
+  if (row.type !== 'tour') {
+    // Events aren't archived — a plain delete (they're transient by nature).
+    if (!confirm(`Delete announcement “${row.item.title}”? This cannot be undone.`)) return
+    await store.deleteAnnouncement(row.item)
+    return
+  }
+  const willRequest = !store.canDeleteTour(row.item) // a non-owner assigned editor
+  const msg = willRequest
+    ? `Request deletion of tour “${row.item.title}”? The owner will be asked to approve.`
+    : `Archive tour “${row.item.title}”? It moves to the Archive and can be restored.`
+  if (!confirm(msg)) return
+  const result = await store.deleteTour(row.item)
+  if (result === 'requested') alert('Request sent to the owner for approval.')
 }
 
 // ── reorder (drag + keyboard), writing the shared order across both tables ──

@@ -8,6 +8,14 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.17.0] — 2026-09-19
+
+### Added
+- **Recoverable deletion (RBAC Phase 3 – soft-archive).** "Delete" no longer removes a tour or location outright. The owner (or a Super Admin) **archives** it – it drops out of the admin lists and the public app but can be **restored**. An editor who doesn't own an item raises a **deletion request** instead; the owner gets a bell notification with **Approve** / **Decline**. A new **Archive** screen lists everything archived (with Restore) and, for the Super Admin only, a permanent **Purge**; rows archived more than 30 days are flagged as safe to clear. Nothing archived is ever served to the public. Needs `migration-040-deletion-workflow.sql` in the project; where it isn't run, Delete keeps its old behaviour.
+
+### Changed
+- The delete button in the Locations and Tours & events lists now reads **"Request deletion"** for an editor acting on an item they don't own, and archives (rather than hard-deletes) for the owner/Super Admin.
+
 ## [1.16.2] — 2026-09-15
 
 ### Changed

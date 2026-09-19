@@ -1,6 +1,6 @@
 # Back-office permissions (RBAC + ownership) — spec
 
-Status: **Phases 1, 2 & per-tour scoping (1b) built + verified on staging (2026-09-13); deletion-workflow next.** Live on prod only when the migrations are run per project (see Phasing below).
+Status: **Phases 1, 2, per-tour scoping (1b/1c) & the deletion-workflow (Phase 3) built + verified on staging.** Phase 3 (soft-archive + request-to-delete + Archive/Restore/Purge) shipped 2026-09-19 as `migration-040-deletion-workflow.sql` + app v1.17.0. Live on a prod project only when its migrations are run (see Phasing below).
 Applies to the Nearmark core, so every deployment (Tollesbury, LGBT History, …) inherits it.
 Super Admin for all current projects: **jharbourne@mac.com**.
 
@@ -202,12 +202,16 @@ exists, show a non-blocking dialog:
 | **2** | `notifications` + de-duped edit-notify triggers (locations & stories) + admin **bell** UI | `migration-031-notifications.sql` | ✅ **BUILT + verified on staging** (app v1.9.1). Dormant on prod until run. |
 | **1b** | `tour_editors` assignment table + scoped SELECT + owner-only edit + SA-only-sharing trigger + assignment UI | `migration-036-tour-editor-scoping.sql` | ✅ **BUILT + verified on staging** (app v1.13.0). Live on Tollesbury; LGBT dormant. |
 | **1c** | Assigned editors may edit **any stop in their tour** (edit now matches visibility; delete stays owner + SA) | `migration-037-editors-edit-tour-stops.sql` | ✅ **BUILT + verified on staging** (app v1.14.0). Dormant on prod until run. |
-| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI | `migration-037-deletion-workflow.sql` (draft exists as **024** — renumber + extend to stories) | ⏭️ **NEXT — not yet built** |
+| **3** | `archived_at` + `deletion_requests` + `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard-delete SA-only; + Archive/Restore/Purge UI + bell Approve/Decline | `migration-040-deletion-workflow.sql` (renumbered from the parked draft 024) | ✅ **BUILT + verified on staging** (app v1.17.0, 2026-09-19). Dormant on prod until run. |
 | 4 | duplicate-title warning + `evergreen` unique index + override-first UX | `038` (to draft) | not built |
 | 5 | email notifications (Brevo) | Edge Function | not built |
 
-> Migration numbers 032–035 are now the participants / owner-approval flow (consent intake), so the
-> deletion-workflow lands at **037**, not the 032 the older draft named.
+> Migration numbers 032–035 are the participants / owner-approval flow (consent intake), 036/037 the
+> per-tour scoping, and 038/039 announcements — so the deletion-workflow landed at **040**, not the
+> 032 the parked draft (024) named. 040 was reconciled to the current schema: it does **not** re-create
+> 031's `notify_owner_on_edit` (which would drop the de-dupe helper + stories trigger); it only teaches
+> that trigger to ignore an archive/restore, and it wraps 025's `location_visible_to_anon` rather than
+> copying its body, so an archived location and its stories drop out of the public app in one place.
 
 **Progress (2026-09-13):** Phases 1, 2 and per-tour scoping (1b) are built and verified end-to-end on
 **nearmark-staging** — editor restrictions hold (verified via SQL role-impersonation: editors see only
@@ -222,9 +226,12 @@ and extending to stories, plus the Archive UI.
 Every migration is additive and must be run in **each** project (Tollesbury and LGBT),
 each followed by `notify pgrst, 'reload schema';`.
 
-## Open items to confirm before Phase 3+
-- Notification delivery: in-app bell only for v1, or email from the start?
-- Recovery window length for soft-archive (default 30 days) and who can purge.
-- Whether `editor`s may create tours at all, or only the Super Admin (currently: any editor).
-- Whether removing a **single story** should soft-archive (recoverable) like locations/tours, or a
-  plain delete is acceptable (it's sub-content, and its parent location stays archive-protected).
+## Open items — decided for Phase 3 (2026-09-19)
+- **Notification delivery:** in-app **bell only** for v1 (Approve/Decline live on the delete-request
+  notification). Email digests stay Phase 5 (Brevo).
+- **Recovery window / purge:** archive is recoverable indefinitely; the **Super Admin** purges (a real
+  delete) at any time; the Archive screen **flags rows older than 30 days** as safe to clear. No auto-purge.
+- **Single story:** a plain delete by the parent-location owner/SA — **not** soft-archived. A story
+  cascades with its location, so archiving/restoring/purging the location carries its stories.
+- Still open (not needed for Phase 3): whether `editor`s may create tours at all, or only the SA
+  (currently any editor); and Phase-3.5 field-level hiding of consent fields on SA-shared stops.
