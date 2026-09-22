@@ -8,6 +8,22 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+## [1.18.0] — 2026-09-23
+
+### Added
+- **Event bookings dashboard.** A new admin screen (where stall bookings are enabled) showing who has booked a stall for an event and who has paid: an **event pulldown**, a booked / paid / awaiting / £-collected summary, a per-row **Paid** tick the committee sets when the money lands in the bank, CSV export, and a per-row **delete** for a duplicate, test or withdrawn booking. Bookings arrive from the public booking form through a `SECURITY DEFINER` RPC that assigns a short bank reference (`XF26-<surname>-NN`, kept within the 18-character bank-reference limit); the screen reads the private `craft_fair_signups` table (admin-only by RLS).
+- **Bookings are tied to a real event.** An item in **Tours & events** can carry an optional **Stall-bookings reference** (`booking_key`) that matches what the booking form sends – so the event shows up in the bookings pulldown **even while it's still a draft**, past events stay visible for reconciliation, and a booking whose reference has no matching event still appears rather than vanishing.
+- **Post-event tidy for approvals.** After a participatory event, a Super Admin can **Tidy up**: delete the contact details of everyone who didn't ask to be kept, archive the rest, and move them off the live approvals list (still viewable under **View archived**). Story content is untouched, and deleting the contact details can't be undone.
+
+### Changed
+- **Admin pages fill the width.** The main content no longer stops at a fixed width, so the tables and dashboard use the whole space beside the sidebar.
+- **Show / hide the login password** with an eye toggle.
+- **Media library list / grid toggle** – switch between the detailed list and a thumbnail grid; the choice is remembered.
+- Upgraded the mapping library **maplibre-gl 5 → 6** (with the v6 import change) – no visible difference; the tour and admin maps render exactly as before.
+
+### Fixed
+- **Event page back button was trapped behind the iOS status bar.** On the event ("What's on") page the back button and the "What's on" tag sat under the iPhone status bar, where iOS swallows taps for "scroll to top" – so the button looked dead and stranded you on the page. Both now clear the status bar (safe-area inset), so Back works and the tag no longer crashes into the clock and Wi-Fi icons.
+
 ## [1.17.0] — 2026-09-19
 
 ### Added
