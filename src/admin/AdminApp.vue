@@ -148,7 +148,7 @@ const nav = computed(() => [
   ...(store.approvals.length ? [{ route: 'approvals', label: 'Approvals' }] : []),
   { route: 'media', label: 'Media library' },
   { route: 'analytics', label: 'Analytics' },
-  ...(store.craftFairEnabled ? [{ route: 'craftFair', label: 'Craft Fair bookings' }] : []),
+  ...(store.craftFairEnabled ? [{ route: 'craftFair', label: 'Event Bookings' }] : []),
   { route: 'users', label: 'User management' },
   // Archive appears where the deletion workflow is live (RBAC on), or wherever there's
   // something recoverable / a request to decide. A count nudges the owner to pending requests.
