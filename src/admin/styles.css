@@ -24,7 +24,9 @@ h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
 .navlink:hover { background: var(--bg); color: var(--ink); }
 .navlink.active { background: var(--violet-soft); color: var(--violet); }
 
-.main { flex: 1; padding: 28px 32px 64px; max-width: 1100px; }
+/* Fill the width beside the sidebar. The 1100px cap left a wide empty gutter on
+   the right on larger screens; tables and the dashboard read better using it. */
+.main { flex: 1; min-width: 0; padding: 28px 32px 64px; }
 .pagehead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
 .pagehead h1 { font-size: 26px; margin: 0; }
 

@@ -15,10 +15,15 @@
       Stall bookings for each event. Tick <strong>Paid</strong> when the money lands in the bank (match the reference on the statement).
     </p>
 
-    <div class="toolbar">
+    <p v-if="!events.length" class="card muted" style="padding:16px 18px; font-size:13.5px;">
+      No bookable events yet. In <strong>Tours &amp; events</strong>, open (or create) an event and set its
+      <strong>Stall bookings</strong> reference to match the website form – it will then appear here, even as a draft.
+    </p>
+
+    <div class="toolbar" v-if="events.length">
       <label for="event-select" style="margin:0; font-weight:600; font-size:13px;">Event</label>
-      <select id="event-select" v-model="selectedEvent" style="max-width:240px;">
-        <option v-for="e in events" :key="e.value" :value="e.value">{{ e.label }}</option>
+      <select id="event-select" v-model="selectedEvent" style="max-width:280px;">
+        <option v-for="e in events" :key="e.value" :value="e.value">{{ e.label }}{{ e.draft ? ' · draft' : '' }}{{ e.orphan ? ' · (no event page)' : '' }}</option>
       </select>
       <div class="seg-toggle" role="group" aria-label="Filter by payment status" v-if="rows.length">
         <button type="button" :class="{ on: filter === '' }" @click="filter = ''">All <span class="seg-n">{{ rows.length }}</span></button>
@@ -91,31 +96,46 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { store } from '../store.js'
 
-// Friendly names for each event's notice_version key. New events map here;
-// anything unmapped falls back to its raw key so it still appears in the pulldown.
-const EVENT_LABELS = { 'faire-2026-12': 'Xmas Craft Fair 2026' }
-const CURRENT_EVENT = 'faire-2026-12'
-function eventLabel(nv) { return EVENT_LABELS[nv] || nv || 'Other' }
-
 const filter = ref('')
-const selectedEvent = ref(CURRENT_EVENT)
+const selectedEvent = ref('')
 const refreshing = ref(false)
 const savingId = ref(null)
 
-// events pulldown: the current event always present, plus any others seen in the data
+// Events are the real "Tours & events" announcements that carry a Stall-bookings
+// reference (bookingKey). That reference matches craft_fair_signups.notice_version,
+// so a draft event still appears here the moment its reference is set. Any booking
+// whose reference has no matching event still shows, keyed by its raw reference, so
+// data is never hidden. Titles come from the event; unmatched keys fall back to raw.
+const eventsByKey = computed(() =>
+  Object.fromEntries(store.announcements.filter((a) => a.bookingKey).map((a) => [a.bookingKey, a])))
+function eventLabel(nv) { return eventsByKey.value[nv]?.title || nv || 'Other' }
+
 const events = computed(() => {
-  const keys = new Set([CURRENT_EVENT])
-  for (const r of store.craftFairSignups) if (r.notice_version) keys.add(r.notice_version)
-  return [...keys].sort().reverse().map((nv) => ({ value: nv, label: eventLabel(nv) }))
+  const seen = new Set()
+  const list = []
+  // events with a bookings reference (any status, incl. past) — newest first by start
+  for (const a of [...store.announcements].filter((a) => a.bookingKey)
+    .sort((x, y) => (y.eventStart || '').localeCompare(x.eventStart || '') || (x.title || '').localeCompare(y.title || ''))) {
+    if (seen.has(a.bookingKey)) continue
+    seen.add(a.bookingKey)
+    list.push({ value: a.bookingKey, label: a.title || a.bookingKey, draft: a.status !== 'published' })
+  }
+  // any booking whose reference has no matching event — don't lose the data
+  for (const r of store.craftFairSignups) {
+    if (r.notice_version && !seen.has(r.notice_version)) { seen.add(r.notice_version); list.push({ value: r.notice_version, label: r.notice_version, draft: false, orphan: true }) }
+  }
+  return list
 })
+// default the pulldown to the first event once the list is known
+watch(events, (list) => { if (list.length && !list.some((e) => e.value === selectedEvent.value)) selectedEvent.value = list[0].value }, { immediate: true })
 
 // rows for the selected event, newest first
 const rows = computed(() =>
   store.craftFairSignups
-    .filter((r) => (r.notice_version || CURRENT_EVENT) === selectedEvent.value)
+    .filter((r) => r.notice_version === selectedEvent.value)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
 )
 const paidCount = computed(() => rows.value.filter((r) => r.payment_status === 'paid').length)

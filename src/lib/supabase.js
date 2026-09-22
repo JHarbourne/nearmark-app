@@ -457,6 +457,7 @@ function rowToAnnouncement(r) {
     linkUrl: r.link_url || '',
     linkLabel: r.link_label || '',
     tourSlug: r.tour_slug || '',   // optional: event that's also a walk → "Start the walk"
+    bookingKey: r.booking_key || '', // optional: matches craft_fair_signups.notice_version → shows in Event Bookings
     status: r.status || 'draft',
     sortOrder: r.sort_order ?? 0,
   }
@@ -482,6 +483,7 @@ function announcementToRow(a) {
     link_url: a.linkUrl || null,
     link_label: a.linkLabel || null,
     tour_slug: a.tourSlug || null,
+    booking_key: a.bookingKey || null,
     status: a.status || 'draft',
     sort_order: a.sortOrder ?? 0,
   }
