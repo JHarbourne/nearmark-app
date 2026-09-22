@@ -141,7 +141,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl' // v6 dropped the ESM default export → namespace import
 import { Protocol, PMTiles } from 'pmtiles'
 import { layers, LIGHT } from '@protomaps/basemaps'
 import { badgeColors } from '../lib/tokens.js'
