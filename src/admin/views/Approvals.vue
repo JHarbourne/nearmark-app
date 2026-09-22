@@ -5,13 +5,20 @@
 <template>
   <div>
     <div class="pagehead">
-      <h1>Approvals</h1>
-      <button class="btn btn-ghost" @click="refresh" :disabled="refreshing">{{ refreshing ? 'Refreshing…' : 'Refresh' }}</button>
+      <h1>Approvals<span v-if="showArchived" class="muted" style="font-weight:400; font-size:16px;"> · archived</span></h1>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button v-if="store.isSuperAdmin && !showArchived && rows.length" class="btn btn-ghost" @click="tidy" :disabled="tidying">{{ tidying ? 'Tidying…' : 'Tidy up after the event' }}</button>
+        <button class="btn btn-ghost" @click="refresh" :disabled="refreshing">{{ refreshing ? 'Refreshing…' : 'Refresh' }}</button>
+      </div>
     </div>
 
-    <p class="muted" style="margin:-6px 0 16px; font-size:13.5px; max-width:60ch;">
+    <p class="muted" style="margin:-6px 0 6px; font-size:13.5px; max-width:60ch;">
       Owners and artists who approve their own listing (participatory tours) appear here.
       Approving is their green light to publish – you still publish each story and the tour yourself.
+      <span v-if="store.isSuperAdmin">After an event, <strong>Tidy up</strong> deletes the contact details of anyone who didn't ask to be kept, and archives the rest.</span>
+    </p>
+    <p style="margin:0 0 16px; font-size:12.5px;">
+      <button type="button" class="linklike muted" @click="toggleArchived">{{ showArchived ? '← Back to current approvals' : 'View archived (past events)' }}</button>
     </p>
 
     <!-- summary -->
@@ -63,7 +70,7 @@
         </tbody>
         <tbody v-if="!shown.length">
           <tr><td colspan="6" class="muted" style="text-align:center; padding:30px;">
-            {{ rows.length ? 'None match this filter.' : 'No approvals yet. Add an owner email/mobile to a story and send them their approval link.' }}
+            {{ rows.length ? 'None match this filter.' : (showArchived ? 'Nothing archived yet.' : 'No approvals yet. Add an owner email/mobile to a story and send them their approval link.') }}
           </td></tr>
         </tbody>
       </table>
@@ -77,10 +84,14 @@ import { store } from '../store.js'
 
 const filter = ref('')
 const refreshing = ref(false)
+const showArchived = ref(false)
+const tidying = ref(false)
 
+// current (live) approvals, or the archived (post-event) set when toggled
+const source = computed(() => (showArchived.value ? store.archivedApprovals : store.approvals))
 // Pending first, then by name; approvals come from the private participants table.
 const rows = computed(() =>
-  [...store.approvals].sort((a, b) => (a.approved === b.approved ? a.heading.localeCompare(b.heading) : a.approved ? 1 : -1)),
+  [...source.value].sort((a, b) => (a.approved === b.approved ? a.heading.localeCompare(b.heading) : a.approved ? 1 : -1)),
 )
 const approvedCount = computed(() => rows.value.filter((r) => r.approved).length)
 const pendingCount = computed(() => rows.value.length - approvedCount.value)
@@ -95,9 +106,37 @@ function open(r) {
   if (loc) store.go('locationEditor', { id: loc.id })
 }
 
+async function toggleArchived() {
+  showArchived.value = !showArchived.value
+  filter.value = ''
+  if (showArchived.value) { refreshing.value = true; try { await store.loadArchivedApprovals() } finally { refreshing.value = false } }
+}
+
+// Post-event tidy (super-admin): delete non-consented contacts, keep consented, archive both.
+async function tidy() {
+  const current = store.approvals
+  if (!current.length) return
+  const cleared = current.filter((r) => !r.keepDetails).length
+  const retained = current.length - cleared
+  const msg = 'Tidy up after the event?\n\n'
+    + `• Delete the contact details of ${cleared} ${cleared === 1 ? 'person who' : 'people who'} did NOT ask to be kept for next time.\n`
+    + `• Keep (archive) the ${retained} who did, ready to reuse.\n\n`
+    + 'Story content is untouched. Deleting contact details cannot be undone. Continue?'
+  if (!window.confirm(msg)) return
+  tidying.value = true
+  try {
+    const res = await store.tidyApprovals(current.map((r) => r.storyId))
+    window.alert(`Tidied: ${res.cleared} contact detail${res.cleared === 1 ? '' : 's'} deleted, ${res.retained} kept for next time.`)
+  } catch (e) {
+    window.alert('Tidy failed: ' + e.message)
+  } finally {
+    tidying.value = false
+  }
+}
+
 async function refresh() {
   refreshing.value = true
-  try { await store.loadApprovals() } finally { refreshing.value = false }
+  try { showArchived.value ? await store.loadArchivedApprovals() : await store.loadApprovals() } finally { refreshing.value = false }
 }
 onMounted(refresh)
 </script>
