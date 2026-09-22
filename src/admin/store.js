@@ -35,6 +35,7 @@ export const store = reactive({
   deletionRequests: [],  // pending requests I can decide (owner or SA); [] pre-migration-040
   announcements: [], // "What's on" event cards (migration 038); [] where the table isn't there
   approvals: [], // per-story owner-approval records (participatory tours); empty where the participants table isn't used
+  archivedApprovals: [], // post-event tidied approvals (loaded on demand for the archived view)
   craftFairSignups: [], // Christmas Craft Fair stall bookings (Tollesbury only); [] where the table isn't present
   craftFairEnabled: false, // true only where craft_fair_signups exists (Tollesbury) → shows the nav item
   loading: false,
@@ -296,6 +297,17 @@ export const store = reactive({
   async loadApprovals() {
     if (!this.liveBackend) { this.approvals = []; return }
     try { this.approvals = await db.listApprovals() } catch { /* keep what we have */ }
+  },
+  async loadArchivedApprovals() {
+    if (!this.liveBackend) { this.archivedApprovals = []; return }
+    try { this.archivedApprovals = await db.listArchivedApprovals() } catch { /* keep what we have */ }
+  },
+  // Post-event tidy: delete non-consented contacts, retain consented, archive both; then refresh.
+  async tidyApprovals(storyIds) {
+    const res = await db.tidyParticipants(storyIds)
+    await this.loadApprovals()
+    if (this.archivedApprovals.length) await this.loadArchivedApprovals()
+    return res
   },
   // Re-pull Craft Fair bookings (e.g. when that screen opens). Tollesbury only.
   async loadCraftFairSignups() {

@@ -519,6 +519,33 @@ async function run(promise) {
   if (error) throw new Error(error.message)
   return data
 }
+// Participants (owner/artist approvals) mapped for the admin, with an optional
+// PostgREST filter (e.g. current-only vs archived). Admin-only by RLS.
+async function queryParticipants(filterFn) {
+  let q = supabase.from('participants').select(
+    'story_id, status, approved_at, name, approval_note, address_changed, contact_email, contact_mobile, token, tidied_at, keep_details, stories!inner(heading, sort_order, location_id, locations!inner(title, slug))',
+  )
+  if (filterFn) q = filterFn(q)
+  const { data, error } = await q
+  if (error) throw new Error(error.message)
+  return (data || []).map((r) => ({
+    storyId: r.story_id,
+    heading: r.stories?.heading || 'Untitled',
+    locationRecordId: r.stories?.location_id || null,   // locations.id (uuid) – maps to a location's recordId
+    locationTitle: r.stories?.locations?.title || '',
+    slug: r.stories?.locations?.slug || '',
+    status: r.status || 'pending',
+    approved: r.status === 'approved' || !!r.approved_at,
+    approvedAt: r.approved_at || null,
+    approvedBy: r.name || '',
+    note: r.approval_note || '',
+    addressChanged: !!r.address_changed,
+    hasContact: !!(r.contact_email || r.contact_mobile),
+    keepDetails: !!r.keep_details,     // asked to be kept for next time
+    tidiedAt: r.tidied_at || null,     // set once tidied after an event
+  }))
+}
+
 export const db = {
   listLocations: () => fetchLocations(),
   listTours: () => fetchTours(),
@@ -556,26 +583,12 @@ export const db = {
     ).select()),
   // Every participant (owner) with its story + venue and approval state, for the
   // admin Approvals overview + the per-location badges. Admin-only by RLS.
-  listApprovals: async () => {
-    const { data, error } = await supabase.from('participants').select(
-      'story_id, status, approved_at, name, approval_note, address_changed, contact_email, contact_mobile, token, stories!inner(heading, sort_order, location_id, locations!inner(title, slug))',
-    )
-    if (error) throw new Error(error.message)
-    return (data || []).map((r) => ({
-      storyId: r.story_id,
-      heading: r.stories?.heading || 'Untitled',
-      locationRecordId: r.stories?.location_id || null,   // locations.id (uuid) – maps to a location's recordId
-      locationTitle: r.stories?.locations?.title || '',
-      slug: r.stories?.locations?.slug || '',
-      status: r.status || 'pending',
-      approved: r.status === 'approved' || !!r.approved_at,
-      approvedAt: r.approved_at || null,
-      approvedBy: r.name || '',
-      note: r.approval_note || '',
-      addressChanged: !!r.address_changed,
-      hasContact: !!(r.contact_email || r.contact_mobile),
-    }))
-  },
+  // Live overview = current (not tidied after an event); archived = post-event.
+  listApprovals: () => queryParticipants((q) => q.is('tidied_at', null)),
+  listArchivedApprovals: () => queryParticipants((q) => q.not('tidied_at', 'is', null)),
+  // Post-event tidy (super-admin only, enforced in the function): delete the contact
+  // details of anyone who didn't opt in to be kept, retain those who did, archive both.
+  tidyParticipants: (storyIds) => run(supabase.rpc('tidy_participants', { p_story_ids: storyIds })),
   // ── Christmas Craft Fair stall bookings (Tollesbury only; migration craft_fair_*) ──
   // Admin-only: RLS grants the authenticated role SELECT + UPDATE. Throws where the
   // table isn't present (other deployments), which the store uses to hide the screen.
