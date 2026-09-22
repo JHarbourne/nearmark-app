@@ -115,6 +115,17 @@ that replaces the stop's number on its badge); `route_geometry` (stored road-fol
 Optional metadata for files in the `media` storage bucket, keyed by `storage_url`:
 `type`, `filename`, `photographer`, `license`, `caption`.
 
+### `craft_fair_signups` (feature-scoped – stall bookings)
+Where stall bookings are enabled (Tollesbury). A booking holds the stallholder's
+`name`/`org`/`email`/`phone`, what they make + `description`, up to two photo paths,
+`website`, `image_rights` + `consent_contact` (booking is the lawful basis, so this is
+sent `true` rather than a form tick) + optional `consent_keep`, a **payment reference**
+(`XF26-<surname>-NN` from a sequence, capped at the 18-character UK bank-reference limit)
+and `payment_status` (awaiting/paid), and `notice_version` – which matches an
+announcement's `booking_key` to tie the booking to its event. Anon can't touch the table;
+bookings arrive only through the `book_craft_fair_stall()` `SECURITY DEFINER` RPC, and
+authenticated admins read/update/delete (feeds the **Event bookings** screen).
+
 ### Migration index
 `schema.sql` is the baseline; run every `migration-*.sql` in order after it.
 
@@ -159,6 +170,8 @@ Optional metadata for files in the `media` storage bucket, keyed by `storage_url
 | 040 | RBAC Phase 3 — **soft-delete / archive**. `archived_at`/`archived_by` on locations & tours (hidden from the public + admin lists); `deletion_requests`; `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard delete is now Super-Admin-only (a purge). Reconciled to the current schema (leaves 031's notify triggers intact; wraps 025's visibility helper). |
 
 RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied there. **Phase 3 (040 – soft-delete/archive) is built + staging-verified (v1.17.0), dormant on both prod projects until run.** The duplicate-title (Phase 4) and email-digest (Phase 5) phases are still to come — design in `docs/backoffice-permissions-spec.md`.
+
+**Applied directly (dashboard SQL, not yet numbered repo migrations – to backfill as 041+):** the **stall-bookings** feature on Tollesbury (`craft_fair_signups` + `book_craft_fair_stall()` RPC + payment fields + delete RLS); announcements' **`booking_key`** (links an event to its bookings – added on Tollesbury, LGBT and staging so the shared write path is safe everywhere); and the participants **post-event tidy** (`keep_details` / `tidied_at` + the `tidy_participants()` RPC, Tollesbury).
 
 ---
 
@@ -235,9 +248,9 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
 
 ## 5. Admin backoffice (`/admin`)
 
-- **Auth.** Supabase email/password, session-persisted; optional **TOTP two-factor**.
-  Password reset via emailed recovery link, which prompts for the 2FA code first when the
-  account has MFA enabled.
+- **Auth.** Supabase email/password (with a **show/hide** toggle on the password),
+  session-persisted; optional **TOTP two-factor**. Password reset via emailed recovery link,
+  which prompts for the 2FA code first when the account has MFA enabled.
 - **Dashboard.** Live counts (locations, tours, published, drafts), session activity feed,
   quick links.
 - **Locations list.** Grouped by tour, searchable/filterable; hero **thumbnail** column
@@ -272,8 +285,8 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   the number, to match signs or a paper map, independent of walking order; in a tour that uses
   labels, a stop left blank shows a plain pin with no badge); **Calculate walking
   route** button + route preview; collapsible event window.
-- **Media library.** Lists everything in the bucket (folders + root); edit metadata; upload,
-  replace, delete.
+- **Media library.** Lists everything in the bucket (folders + root), with a **list / grid
+  view toggle** (thumbnail tiles; the choice is remembered); edit metadata; upload, replace, delete.
 - **User management.** Invite/list/remove admins + manage own 2FA (needs the `admin-users`
   Edge Function). When RBAC is applied (below), also shows each admin's **role** and lets a Super
   Admin change it (reads the `profiles` table, so the role UI works even without the Edge Function).
@@ -307,8 +320,25 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   **start blank** makes it a **dateless standing notice / advert** (a business, a service) shown with
   no date, where the **end acts as an expiry** (auto-hides then); blank start *and* end = an evergreen
   notice that shows until unpublished. Standalone `announcements` table (migrations 038–039); design
-  in `docs/announcements-spec.md`. Monetising these as **paid adverts** (dated events or evergreen
+  in `docs/announcements-spec.md`. An event can also carry an optional **Stall-bookings reference**
+  (`booking_key`) that links it to its stall bookings in the **Event bookings** screen (below).
+  Monetising these as **paid adverts** (dated events or evergreen
   business listings) is a separate, planned feature — `docs/paid-event-adverts-spec.md`.
+- **Event bookings (feature-scoped – stall bookings).** Where enabled, a screen showing who has
+  booked a stall for an event and who has paid. An **event pulldown** built from the "Tours & events"
+  items that carry a **Stall-bookings reference** (`booking_key`) – so a **draft** event still appears,
+  past events stay for reconciliation, and a booking with no matching event still shows by its raw
+  reference. Per row: a **Paid** tick the committee sets when the money lands in the bank (matched by
+  the payment reference), and a **delete** for a duplicate / test / withdrawn booking. Plus a
+  booked / paid / awaiting / £-collected summary and **CSV export**. Reads the private
+  `craft_fair_signups` table (admin-only by RLS); bookings arrive from the public booking form via the
+  `book_craft_fair_stall()` RPC.
+- **Approvals (participatory tours).** A screen listing every owner/artist story on a participatory
+  tour with its approval state (Pending / Approved, who and when, any note), so an organiser can chase
+  the outstanding ones and open each to publish. **After the event, a Super Admin can Tidy up:** delete
+  the contact details of anyone who didn't ask to be kept (`keep_details`), archive the rest, and move
+  them off the live list into **View archived** (`tidied_at`). Story content is untouched; the contact
+  deletion can't be undone. Matches the privacy promise made to participants.
 - **Safety.** An **unsaved-changes guard** warns before leaving a dirty editor (in-app
   navigation and browser close/reload).
 
