@@ -321,6 +321,12 @@ export const store = reactive({
     const row = this.craftFairSignups.find((r) => r.id === id)
     if (row) row.payment_status = status
   },
+  // Remove a booking (duplicate / test / withdrawn): delete in the DB, then drop it locally.
+  async deleteCraftFairSignup(id) {
+    await db.deleteCraftFairSignup(id)
+    this.craftFairSignups = this.craftFairSignups.filter((r) => r.id !== id)
+    this.logActivity('Deleted a booking', '')
+  },
   logActivity(action, title) {
     this.activity.unshift({ action, title, who: this.user?.email || 'admin', at: new Date() })
     this.activity = this.activity.slice(0, 20)
