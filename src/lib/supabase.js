@@ -601,6 +601,8 @@ export const db = {
   },
   setCraftFairPaymentStatus: (id, status) =>
     run(supabase.from('craft_fair_signups').update({ payment_status: status }).eq('id', id).select()),
+  deleteCraftFairSignup: (id) =>
+    run(supabase.from('craft_fair_signups').delete().eq('id', id)),
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),

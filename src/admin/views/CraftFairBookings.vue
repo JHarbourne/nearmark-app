@@ -49,7 +49,7 @@
       <table>
         <thead>
           <tr style="white-space:nowrap;">
-            <th>Paid</th><th>Stallholder</th><th>What they create</th><th>Contact</th><th>Reference</th><th>Page</th><th>Booked</th>
+            <th>Paid</th><th>Stallholder</th><th>What they create</th><th>Contact</th><th>Reference</th><th>Page</th><th>Booked</th><th class="right">Remove</th>
           </tr>
         </thead>
         <tbody>
@@ -83,10 +83,17 @@
               <span v-if="photoCount(r)" class="muted" style="display:block;">📷 {{ photoCount(r) }}</span>
             </td>
             <td class="muted" data-label="Booked" style="white-space:nowrap; font-size:12px;">{{ new Date(r.created_at).toLocaleDateString() }}</td>
+            <td class="right" data-label="Remove" style="white-space:nowrap;">
+              <button class="btn btn-danger btn-sm" @click="removeBooking(r)" :disabled="deletingId === r.id"
+                      :aria-label="`Delete booking for ${r.name}`" :title="`Delete booking for ${r.name}`">
+                <svg v-if="deletingId !== r.id" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
+                <span v-else>…</span>
+              </button>
+            </td>
           </tr>
         </tbody>
         <tbody v-if="!shown.length">
-          <tr><td colspan="7" class="muted" style="text-align:center; padding:30px;">
+          <tr><td colspan="8" class="muted" style="text-align:center; padding:30px;">
             {{ rows.length ? 'None match this filter.' : 'No bookings yet for this event.' }}
           </td></tr>
         </tbody>
@@ -103,6 +110,7 @@ const filter = ref('')
 const selectedEvent = ref('')
 const refreshing = ref(false)
 const savingId = ref(null)
+const deletingId = ref(null)
 
 // Events are the real "Tours & events" announcements that carry a Stall-bookings
 // reference (bookingKey). That reference matches craft_fair_signups.notice_version,
@@ -156,6 +164,16 @@ async function setPaid(r, paid) {
   try { await store.setCraftFairPaid(r.id, paid) }
   catch (e) { alert('Could not update payment status: ' + e.message) }
   finally { savingId.value = null }
+}
+
+// Remove a booking (duplicate, test, or withdrawn). Destructive → confirm first.
+async function removeBooking(r) {
+  const ref = r.payment_ref ? ` (${r.payment_ref})` : ''
+  if (!confirm(`Delete ${r.name}'s booking${ref}?\n\nThis removes it from the list for good and cannot be undone.`)) return
+  deletingId.value = r.id
+  try { await store.deleteCraftFairSignup(r.id) }
+  catch (e) { alert('Could not delete the booking: ' + e.message) }
+  finally { deletingId.value = null }
 }
 
 function exportCsv() {
