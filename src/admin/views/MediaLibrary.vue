@@ -24,12 +24,18 @@
         <button type="button" :class="{ on: sortBy === 'newest' }" @click="sortBy = 'newest'">Newest</button>
         <button type="button" :class="{ on: sortBy === 'name' }" @click="sortBy = 'name'">A–Z</button>
       </div>
+      <div class="seg-toggle" role="group" aria-label="Layout">
+        <button type="button" :class="{ on: view === 'list' }" @click="setView('list')">List</button>
+        <button type="button" :class="{ on: view === 'grid' }" @click="setView('grid')">Grid</button>
+      </div>
       <span class="muted" style="font-size:13px;">{{ filtered.length }} of {{ store.media.length }}</span>
     </div>
 
     <p v-if="loading" class="muted">Loading media…</p>
     <p v-else-if="!store.media.length" class="muted">No files uploaded yet. Use “Upload asset”, or add images in a Location/Tour editor.</p>
 
+    <!-- list view: full rows with editable metadata -->
+    <template v-if="view === 'list'">
     <div v-for="(m, i) in filtered" :key="m.url" class="card" style="display:flex; gap:16px; padding:14px; margin-bottom:12px;">
       <div :style="thumb(m)"><span v-if="m.type !== 'image'" style="text-transform:uppercase;">{{ m.type }}</span></div>
       <div style="flex:1; min-width:0;">
@@ -66,6 +72,22 @@
         </div>
       </div>
     </div>
+    </template>
+
+    <!-- grid view: compact thumbnails; switch to List to edit metadata -->
+    <div v-else class="media-grid">
+      <div v-for="m in filtered" :key="m.url" class="card media-tile">
+        <div :style="tileThumb(m)"><span v-if="m.type !== 'image'" style="text-transform:uppercase; color:#6b46e5; font-weight:700; font-size:12px;">{{ m.type }}</span></div>
+        <div class="media-tile-meta">
+          <div class="media-tile-name" :title="m.filename">{{ m.filename || '(unnamed)' }}</div>
+          <div class="muted" style="font-size:11px;">{{ m.type }} · {{ sizeLabel(m) }}</div>
+          <div style="display:flex; gap:6px; margin-top:7px; flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" @click="copy(m)">{{ copied === m.url ? 'Copied ✓' : 'Copy URL' }}</button>
+            <a :href="m.url" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Open</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -75,6 +97,8 @@ import { store } from '../store.js'
 
 const typeFilter = ref('')
 const sortBy = ref('newest') // 'newest' (date added) | 'name' (alphabetical)
+const view = ref((() => { try { return localStorage.getItem('mediaView') || 'list' } catch { return 'list' } })()) // 'list' | 'grid', remembered per browser
+function setView(v) { view.value = v; try { localStorage.setItem('mediaView', v) } catch { /* private mode */ } }
 const q = ref('')
 const loading = ref(true)
 const uploadingFile = ref(false)
@@ -196,9 +220,23 @@ function thumb(m) {
     display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b46e5', fontWeight: 700, fontSize: '11px',
   }
 }
+// full-width tile image for the grid view
+function tileThumb(m) {
+  const bust = busted.value[m.path] ? `?t=${busted.value[m.path]}` : ''
+  return {
+    width: '100%', aspectRatio: '4 / 3',
+    background: m.type === 'image' ? `center/cover no-repeat url(${m.url}${bust})` : 'linear-gradient(135deg,#efeafd,#e7e3ef)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  }
+}
 </script>
 
 <style scoped>
 /* count next to each type filter, e.g. "Images 8" */
 .seg-n { opacity: 0.55; font-weight: 400; font-size: 0.85em; margin-left: 3px; }
+/* grid view: compact thumbnail tiles (edit metadata in list view) */
+.media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.media-tile { padding: 0; overflow: hidden; }
+.media-tile-meta { padding: 9px 11px 11px; }
+.media-tile-name { font-weight: 600; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
