@@ -80,8 +80,12 @@ const directionsHref = computed(() => {
     : `https://www.google.com/maps/dir/?api=1&destination=${dest}`
 })
 
+// Offset the back button + "What's on" tag by the iOS safe-area inset. Without it,
+// on a notched/Dynamic-Island iPhone they sat under the status bar (clock/wifi),
+// and – worse – iOS treats taps in the status-bar strip as "scroll to top" and
+// eats them, so the back button looked dead and trapped you on the page.
 const backBtn = {
-  position: 'absolute', top: '18px', left: '18px', zIndex: 5,
+  position: 'absolute', top: 'calc(14px + env(safe-area-inset-top))', left: '18px', zIndex: 5,
   width: '38px', height: '38px', borderRadius: '50%', background: 'var(--overlay-panel)',
   border: '1px solid var(--line)', cursor: 'pointer', display: 'flex',
   alignItems: 'center', justifyContent: 'center',
@@ -93,7 +97,7 @@ const hero = computed(() => {
     : { ...base, background: 'var(--grad-brand)' }
 })
 const eventTag = {
-  position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 700,
+  position: 'absolute', top: 'calc(12px + env(safe-area-inset-top))', right: '16px', fontSize: '11px', fontWeight: 700,
   letterSpacing: '0.6px', textTransform: 'uppercase', color: '#fff',
   background: 'var(--accent, #9B6DFF)', padding: '4px 10px', borderRadius: '20px',
 }
