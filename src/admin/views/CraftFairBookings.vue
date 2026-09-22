@@ -1,10 +1,10 @@
-<!-- Christmas Craft Fair stall bookings: who has booked and who has paid, so the
-     committee (coordinator / treasurer) can see it at a glance and tick payments off.
-     Reads store.craftFairSignups (craft_fair_signups; admin-only by RLS, Tollesbury only). -->
+<!-- Event bookings: who has booked a stall and who has paid, per event, so the
+     committee can see it at a glance and tick payments off as the money lands.
+     Reads store.craftFairSignups (craft_fair_signups; admin-only by RLS). -->
 <template>
   <div>
     <div class="pagehead">
-      <h1>Craft Fair bookings</h1>
+      <h1>Event Bookings</h1>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-ghost" @click="exportCsv" :disabled="!rows.length">Export CSV</button>
         <button class="btn btn-ghost" @click="refresh" :disabled="refreshing">{{ refreshing ? 'Refreshing…' : 'Refresh' }}</button>
@@ -12,9 +12,20 @@
     </div>
 
     <p class="muted" style="margin:-6px 0 16px; font-size:13.5px; max-width:66ch;">
-      Tollesbury Christmas Craft Fair · Saturday 12 December 2026. Bookings come in from
-      tollesbury.art/XmasFair26 (£10 a stall). Match the reference on the bank statement, then mark it paid.
+      Stall bookings for each event. Tick <strong>Paid</strong> when the money lands in the bank (match the reference on the statement).
     </p>
+
+    <div class="toolbar">
+      <label for="event-select" style="margin:0; font-weight:600; font-size:13px;">Event</label>
+      <select id="event-select" v-model="selectedEvent" style="max-width:240px;">
+        <option v-for="e in events" :key="e.value" :value="e.value">{{ e.label }}</option>
+      </select>
+      <div class="seg-toggle" role="group" aria-label="Filter by payment status" v-if="rows.length">
+        <button type="button" :class="{ on: filter === '' }" @click="filter = ''">All <span class="seg-n">{{ rows.length }}</span></button>
+        <button type="button" :class="{ on: filter === 'awaiting' }" @click="filter = 'awaiting'">Awaiting <span class="seg-n">{{ awaitingCount }}</span></button>
+        <button type="button" :class="{ on: filter === 'paid' }" @click="filter = 'paid'">Paid <span class="seg-n">{{ paidCount }}</span></button>
+      </div>
+    </div>
 
     <!-- summary -->
     <div v-if="rows.length" class="card" style="padding:16px 18px; margin-bottom:16px;">
@@ -29,29 +40,25 @@
       </div>
     </div>
 
-    <div class="toolbar" v-if="rows.length">
-      <select v-model="filter" aria-label="Filter by payment status" style="max-width:210px;">
-        <option value="">All ({{ rows.length }})</option>
-        <option value="awaiting">Awaiting payment ({{ awaitingCount }})</option>
-        <option value="paid">Paid ({{ paidCount }})</option>
-      </select>
-    </div>
-
     <div class="card">
       <table>
         <thead>
           <tr style="white-space:nowrap;">
-            <th>Status</th><th>Stallholder</th><th>What they create</th><th>Contact</th><th>Reference</th><th>Page</th><th>Booked</th><th class="right">Action</th>
+            <th>Paid</th><th>Stallholder</th><th>What they create</th><th>Contact</th><th>Reference</th><th>Page</th><th>Booked</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="r in shown" :key="r.id">
-            <td data-label="Status">
-              <span class="badge" :style="r.payment_status === 'paid'
-                ? { background:'var(--green,#1f9d57)', color:'#fff' }
-                : { background:'var(--amber-soft,#fff6df)', color:'var(--amber-ink,#8a6d00)', border:'1px solid var(--amber,#E0A800)' }">
-                {{ r.payment_status === 'paid' ? '✅ Paid' : '⏳ Awaiting' }}
-              </span>
+            <td data-label="Paid">
+              <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
+                <input type="checkbox" :checked="r.payment_status === 'paid'" :disabled="savingId === r.id"
+                       @change="setPaid(r, $event.target.checked)" :aria-label="`Payment received in the bank for ${r.name}`" />
+                <span class="badge" :style="r.payment_status === 'paid'
+                  ? { background:'var(--green,#1f9d57)', color:'#fff' }
+                  : { background:'var(--amber-soft,#fff6df)', color:'var(--amber-ink,#8a6d00)', border:'1px solid var(--amber,#E0A800)' }">
+                  {{ savingId === r.id ? '…' : (r.payment_status === 'paid' ? 'Paid' : 'Awaiting') }}
+                </span>
+              </label>
             </td>
             <td style="font-weight:600;" data-label="Stallholder">
               {{ r.name }}
@@ -71,17 +78,11 @@
               <span v-if="photoCount(r)" class="muted" style="display:block;">📷 {{ photoCount(r) }}</span>
             </td>
             <td class="muted" data-label="Booked" style="white-space:nowrap; font-size:12px;">{{ new Date(r.created_at).toLocaleDateString() }}</td>
-            <td class="right" data-label="Action" style="white-space:nowrap;">
-              <button class="btn btn-sm" :class="r.payment_status === 'paid' ? 'btn-ghost' : 'btn-primary'"
-                      :disabled="savingId === r.id" @click="togglePaid(r)">
-                {{ savingId === r.id ? '…' : (r.payment_status === 'paid' ? 'Mark awaiting' : 'Mark paid') }}
-              </button>
-            </td>
           </tr>
         </tbody>
         <tbody v-if="!shown.length">
-          <tr><td colspan="8" class="muted" style="text-align:center; padding:30px;">
-            {{ rows.length ? 'None match this filter.' : 'No bookings yet. They come in from tollesbury.art/XmasFair26.' }}
+          <tr><td colspan="7" class="muted" style="text-align:center; padding:30px;">
+            {{ rows.length ? 'None match this filter.' : 'No bookings yet for this event.' }}
           </td></tr>
         </tbody>
       </table>
@@ -93,13 +94,29 @@
 import { ref, computed, onMounted } from 'vue'
 import { store } from '../store.js'
 
+// Friendly names for each event's notice_version key. New events map here;
+// anything unmapped falls back to its raw key so it still appears in the pulldown.
+const EVENT_LABELS = { 'faire-2026-12': 'Xmas Craft Fair 2026' }
+const CURRENT_EVENT = 'faire-2026-12'
+function eventLabel(nv) { return EVENT_LABELS[nv] || nv || 'Other' }
+
 const filter = ref('')
+const selectedEvent = ref(CURRENT_EVENT)
 const refreshing = ref(false)
 const savingId = ref(null)
 
-// newest first
+// events pulldown: the current event always present, plus any others seen in the data
+const events = computed(() => {
+  const keys = new Set([CURRENT_EVENT])
+  for (const r of store.craftFairSignups) if (r.notice_version) keys.add(r.notice_version)
+  return [...keys].sort().reverse().map((nv) => ({ value: nv, label: eventLabel(nv) }))
+})
+
+// rows for the selected event, newest first
 const rows = computed(() =>
-  [...store.craftFairSignups].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+  store.craftFairSignups
+    .filter((r) => (r.notice_version || CURRENT_EVENT) === selectedEvent.value)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
 )
 const paidCount = computed(() => rows.value.filter((r) => r.payment_status === 'paid').length)
 const awaitingCount = computed(() => rows.value.length - paidCount.value)
@@ -113,14 +130,14 @@ const shown = computed(() => rows.value.filter((r) =>
 function photoCount(r) { return (r.photo1_path ? 1 : 0) + (r.photo2_path ? 1 : 0) }
 function truncate(s, n) { return s && s.length > n ? s.slice(0, n) + '…' : s }
 
-async function togglePaid(r) {
+// Carol ticks this when the bank alert shows the money in; writes payment_status.
+async function setPaid(r, paid) {
   savingId.value = r.id
-  try { await store.setCraftFairPaid(r.id, r.payment_status !== 'paid') }
+  try { await store.setCraftFairPaid(r.id, paid) }
   catch (e) { alert('Could not update payment status: ' + e.message) }
   finally { savingId.value = null }
 }
 
-// Client-side CSV for the treasurer (all bookings, current filter ignored).
 function exportCsv() {
   const cols = ['created_at', 'name', 'org', 'email', 'phone', 'craft', 'description', 'website', 'wants_free_page', 'photo1_path', 'photo2_path', 'payment_ref', 'payment_status']
   const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'
@@ -128,7 +145,7 @@ function exportCsv() {
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'craft-fair-bookings.csv'
+  a.download = `${eventLabel(selectedEvent.value).replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-bookings.csv`
   a.click()
   URL.revokeObjectURL(a.href)
 }
@@ -139,3 +156,7 @@ async function refresh() {
 }
 onMounted(refresh)
 </script>
+
+<style scoped>
+.seg-n { opacity: 0.55; font-weight: 400; font-size: 0.85em; margin-left: 3px; }
+</style>
