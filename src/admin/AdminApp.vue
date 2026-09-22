@@ -81,17 +81,24 @@
           </span>
         </div>
         <div style="overflow-y:auto;">
-          <p v-if="!store.notifications.length" class="muted" style="padding:18px 14px; font-size:13px; margin:0;">Nothing yet. You'll be told here when someone edits one of your locations.</p>
-          <button v-for="n in store.notifications" :key="n.id" class="notif-item" @click="openNotif(n)"
-            style="display:block; width:100%; text-align:left; padding:11px 14px; border:none; border-bottom:1px solid var(--line); background:none; color:inherit; cursor:pointer;">
-            <span style="display:flex; gap:8px; align-items:flex-start;">
-              <span :style="{ flexShrink:0, width:'8px', height:'8px', borderRadius:'50%', marginTop:'5px', background: n.readAt ? 'transparent' : 'var(--violet,#6b46e5)' }"></span>
-              <span style="flex:1; min-width:0;">
-                <span style="display:block; font-size:13px; line-height:1.45;">{{ n.message }}</span>
-                <span class="muted" style="display:block; font-size:11.5px; margin-top:2px;">{{ relTime(n.createdAt) }}</span>
+          <p v-if="!store.notifications.length" class="muted" style="padding:18px 14px; font-size:13px; margin:0;">Nothing yet. You'll be told here when someone edits one of your locations, or asks to delete one.</p>
+          <div v-for="n in store.notifications" :key="n.id" style="border-bottom:1px solid var(--line);">
+            <button class="notif-item" @click="openNotif(n)"
+              style="display:block; width:100%; text-align:left; padding:11px 14px; border:none; background:none; color:inherit; cursor:pointer;">
+              <span style="display:flex; gap:8px; align-items:flex-start;">
+                <span :style="{ flexShrink:0, width:'8px', height:'8px', borderRadius:'50%', marginTop:'5px', background: n.readAt ? 'transparent' : 'var(--violet,#6b46e5)' }"></span>
+                <span style="flex:1; min-width:0;">
+                  <span style="display:block; font-size:13px; line-height:1.45;">{{ n.message }}</span>
+                  <span class="muted" style="display:block; font-size:11.5px; margin-top:2px;">{{ relTime(n.createdAt) }}</span>
+                </span>
               </span>
+            </button>
+            <!-- a pending deletion request I can decide right here -->
+            <span v-if="pendingRequestFor(n)" style="display:flex; gap:6px; padding:0 14px 11px 30px;">
+              <button class="btn btn-primary btn-sm" @click="decideFromBell(n, true)">Approve</button>
+              <button class="btn btn-ghost btn-sm" @click="decideFromBell(n, false)">Decline</button>
             </span>
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -125,6 +132,8 @@ import Analytics from './views/Analytics.vue'
 import UserManagement from './views/UserManagement.vue'
 import Approvals from './views/Approvals.vue'
 import AnnouncementEditor from './views/AnnouncementEditor.vue'
+import Archive from './views/Archive.vue'
+import CraftFairBookings from './views/CraftFairBookings.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
 const platformName = config.platformName
@@ -139,9 +148,14 @@ const nav = computed(() => [
   ...(store.approvals.length ? [{ route: 'approvals', label: 'Approvals' }] : []),
   { route: 'media', label: 'Media library' },
   { route: 'analytics', label: 'Analytics' },
+  ...(store.craftFairEnabled ? [{ route: 'craftFair', label: 'Craft Fair bookings' }] : []),
   { route: 'users', label: 'User management' },
+  // Archive appears where the deletion workflow is live (RBAC on), or wherever there's
+  // something recoverable / a request to decide. A count nudges the owner to pending requests.
+  ...(store.role || store.archivedTours.length || store.archivedLocations.length || store.deletionRequests.length
+    ? [{ route: 'archive', label: store.deletionRequests.length ? `Archive (${store.deletionRequests.length})` : 'Archive' }] : []),
 ])
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals, announcementEditor: AnnouncementEditor }
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals, announcementEditor: AnnouncementEditor, archive: Archive, craftFair: CraftFairBookings }
 const view = computed(() => views[store.route] || Dashboard)
 // Remount the view when the record it edits changes, so navigating record→record
 // within the same route (e.g. Story editor's "Next story") re-seeds the editor.
@@ -155,11 +169,28 @@ function navigate(route) { store.go(route); menuOpen.value = false }
 const bellOpen = ref(false)
 function openBell() { bellOpen.value = true; store.refreshNotifications() }
 function openNotif(n) {
+  // A delete-related notification opens the Archive (requests + restore live there);
+  // an edit opens the location it names.
+  if (['delete_request', 'delete_approved', 'delete_declined'].includes(n.type)) {
+    bellOpen.value = false; store.go('archive'); return
+  }
   bellOpen.value = false
   if (n.entityType === 'location') {
     const loc = store.locations.find((l) => l.recordId === n.entityId)
     store.go(loc ? 'locationEditor' : 'locations', loc ? { id: loc.id } : {})
   }
+}
+// The pending request behind a 'delete_request' notification (if still open), so the
+// owner can Approve/Decline without leaving the bell.
+function pendingRequestFor(n) {
+  if (n.type !== 'delete_request') return null
+  return store.deletionRequests.find((r) => r.entityType === n.entityType && r.entityId === n.entityId) || null
+}
+async function decideFromBell(n, approve) {
+  const r = pendingRequestFor(n)
+  if (!r) return
+  try { await store.resolveDeletion(r.id, approve); await store.refreshNotifications() }
+  catch (e) { alert('Could not update the request: ' + (e?.message || e)) }
 }
 function relTime(d) {
   const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000)

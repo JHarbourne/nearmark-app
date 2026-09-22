@@ -20,11 +20,11 @@
 
         <div class="field-row">
           <div>
-            <label for="ann-start">Starts <span class="hint">date &amp; time</span></label>
+            <label for="ann-start">Starts <span class="hint">optional · blank = a standing notice</span></label>
             <input id="ann-start" type="datetime-local" v-model="startLocal" />
           </div>
           <div>
-            <label for="ann-end">Ends <span class="hint">date &amp; time · it disappears then</span></label>
+            <label for="ann-end">Ends / expires <span class="hint">date &amp; time · when it disappears</span></label>
             <input id="ann-end" type="datetime-local" v-model="endLocal" />
           </div>
         </div>
@@ -98,7 +98,7 @@
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button v-if="!isNew && canManage" class="btn btn-danger btn-sm" style="margin-left:auto;" @click="remove">Delete</button>
         </div>
-        <p class="hint" style="margin-top:10px;">It disappears from the app's list the moment it ends. Leave the dates blank for an evergreen notice that stays until you unpublish it.</p>
+        <p class="hint" style="margin-top:10px;">A dated <strong>event</strong> uses both times. For a <strong>standing notice or advert</strong> (a business, a service), leave <strong>Starts</strong> blank — it shows with no date and comes down at the <strong>expiry</strong> you set under Ends (or stays until you unpublish, if you leave both blank).</p>
       </div>
 
       <!-- right: address + map (for directions, like a location) -->

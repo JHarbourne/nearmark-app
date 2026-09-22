@@ -72,7 +72,7 @@
                 <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">{{ store.canEditLocation(l) ? 'Edit' : 'View' }}</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>
-                <button v-if="store.canDeleteLocation(l)" class="btn btn-danger btn-sm" @click.stop="remove(l)" aria-label="Delete location" title="Delete">
+                <button v-if="store.canEditLocation(l)" class="btn btn-danger btn-sm" @click.stop="remove(l)" :aria-label="`${removeLabel(l)} location`" :title="removeLabel(l)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
                 </button>
               </td>
@@ -186,7 +186,17 @@ async function duplicate(l) {
     alert('Duplicate failed: ' + (e?.message || e))
   }
 }
+// Owner/SA archive (recoverable); a non-owner assigned editor raises a request.
+function removeLabel(l) { return store.canDeleteLocation(l) ? 'Delete' : 'Request deletion' }
 async function remove(l) {
-  if (confirm(`Delete “${l.title}”? This cannot be undone.`)) await store.deleteLocation(l)
+  const willRequest = !store.canDeleteLocation(l)
+  const msg = willRequest
+    ? `Request deletion of “${l.title}”? The owner will be asked to approve.`
+    : `Archive “${l.title}”? It moves to the Archive and can be restored.`
+  if (!confirm(msg)) return
+  const result = await store.deleteLocation(l)
+  showFlash(result === 'requested'
+    ? 'Request sent to the owner for approval.'
+    : `“${l.title}” moved to the Archive (recoverable).`)
 }
 </script>

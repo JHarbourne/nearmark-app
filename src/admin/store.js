@@ -8,6 +8,11 @@ import { supabaseConfigured, db, auth, uploadMedia, replaceMediaFile, removeMedi
 import { compressImage } from '../lib/image.js'
 import { config } from '../config.js'
 
+// A project that hasn't run migration 040 has no request_delete/restore RPCs;
+// PostgREST reports that as a "schema cache" / "Could not find the function" error.
+// We fall back to the pre-040 hard delete in that one case, and rethrow anything else.
+const isMissingRpc = (e) => /Could not find the function|schema cache|does not exist/i.test(e?.message || '')
+
 export const store = reactive({
   liveBackend: supabaseConfigured,
   authed: false,
@@ -25,8 +30,13 @@ export const store = reactive({
 
   locations: [],
   tours: [],
+  archivedLocations: [], // soft-archived (migration 040), kept out of the working lists
+  archivedTours: [],
+  deletionRequests: [],  // pending requests I can decide (owner or SA); [] pre-migration-040
   announcements: [], // "What's on" event cards (migration 038); [] where the table isn't there
   approvals: [], // per-story owner-approval records (participatory tours); empty where the participants table isn't used
+  craftFairSignups: [], // Christmas Craft Fair stall bookings (Tollesbury only); [] where the table isn't present
+  craftFairEnabled: false, // true only where craft_fair_signups exists (Tollesbury) → shows the nav item
   loading: false,
   error: '',
   activity: [],
@@ -256,14 +266,24 @@ export const store = reactive({
     this.error = ''
     try {
       const [locs, trs] = await Promise.all([db.listLocations(), db.listTours()])
-      this.locations = locs
-      this.tours = trs
+      // Split off soft-archived rows (migration 040) so they never appear in the
+      // working lists, map/stop pickers or the public home order. archivedAt is
+      // always null on a project without the migration → everything stays live.
+      this.locations = locs.filter((l) => !l.archivedAt)
+      this.archivedLocations = locs.filter((l) => l.archivedAt)
+      this.tours = trs.filter((t) => !t.archivedAt)
+      this.archivedTours = trs.filter((t) => t.archivedAt)
       if (this.liveBackend) {
         this.role = await db.myRole().catch(() => null)
         this.myTourIds = this.role === 'editor' ? await db.myTourIds().catch(() => []) : []
         this.notifications = await db.listNotifications().catch(() => [])
+        this.deletionRequests = await db.listDeletionRequests().catch(() => [])
         this.approvals = await db.listApprovals().catch(() => [])
         this.announcements = await db.listAnnouncements().catch(() => [])
+        // Craft Fair bookings: success (even []) means the table exists → show the screen;
+        // an error means this deployment has no such table → keep it hidden.
+        try { this.craftFairSignups = await db.listCraftFairSignups(); this.craftFairEnabled = true }
+        catch { this.craftFairSignups = []; this.craftFairEnabled = false }
       }
     } catch (e) {
       this.error = e.message
@@ -276,6 +296,18 @@ export const store = reactive({
   async loadApprovals() {
     if (!this.liveBackend) { this.approvals = []; return }
     try { this.approvals = await db.listApprovals() } catch { /* keep what we have */ }
+  },
+  // Re-pull Craft Fair bookings (e.g. when that screen opens). Tollesbury only.
+  async loadCraftFairSignups() {
+    if (!this.liveBackend) { this.craftFairSignups = []; return }
+    try { this.craftFairSignups = await db.listCraftFairSignups(); this.craftFairEnabled = true } catch { /* keep what we have */ }
+  },
+  // Mark a booking paid / awaiting: update the DB, then the local row so the UI reflects it.
+  async setCraftFairPaid(id, paid) {
+    const status = paid ? 'paid' : 'awaiting'
+    await db.setCraftFairPaymentStatus(id, status)
+    const row = this.craftFairSignups.find((r) => r.id === id)
+    if (row) row.payment_status = status
   },
   logActivity(action, title) {
     this.activity.unshift({ action, title, who: this.user?.email || 'admin', at: new Date() })
@@ -302,9 +334,52 @@ export const store = reactive({
     this.logActivity(loc.recordId ? 'Updated location' : 'Created location', loc.title)
     await this.load()
   },
+  // "Delete" is now a soft-archive (migration 040): owner/SA → archived (recoverable);
+  // a non-owner assigned editor → a request the owner approves. Returns 'archived' |
+  // 'requested' so the caller can toast the right thing. Falls back to the old hard
+  // delete on a project without the deletion-workflow migration.
   async deleteLocation(loc) {
-    if (loc.recordId) await db.deleteLocation(loc.recordId)
-    this.logActivity('Deleted location', loc.title)
+    if (!loc.recordId) return 'archived'
+    const result = await this._removeEntity('location', loc.recordId)
+    this.logActivity(result === 'requested' ? 'Requested location deletion' : 'Archived location', loc.title)
+    await this.load()
+    return result
+  },
+  async _removeEntity(type, recordId) {
+    try { return await db.requestDelete(type, recordId) }
+    catch (e) {
+      if (!isMissingRpc(e)) throw e
+      // pre-migration-040 project: keep the original behaviour (a real delete)
+      if (type === 'location') await db.deleteLocation(recordId)
+      else await db.deleteTour(recordId)
+      return 'archived'
+    }
+  },
+  // Owner or SA brings an archived row back to life.
+  async restoreLocation(loc) {
+    await db.restoreEntity('location', loc.recordId)
+    this.logActivity('Restored location', loc.title)
+    await this.load()
+  },
+  async restoreTour(tour) {
+    await db.restoreEntity('tour', tour.recordId)
+    this.logActivity('Restored tour', tour.title)
+    await this.load()
+  },
+  // Super Admin only: a permanent, unrecoverable delete of an archived row.
+  async purgeLocation(loc) {
+    await db.deleteLocation(loc.recordId)
+    this.logActivity('Purged location', loc.title)
+    await this.load()
+  },
+  async purgeTour(tour) {
+    await db.deleteTour(tour.recordId)
+    this.logActivity('Purged tour', tour.title)
+    await this.load()
+  },
+  // Owner/SA approves or declines a pending deletion request (from the bell or Archive).
+  async resolveDeletion(requestId, approve) {
+    await db.resolveDeletion(requestId, approve)
     await this.load()
   },
   // ── stories (content) ──
@@ -356,9 +431,11 @@ export const store = reactive({
     await this.load()
   },
   async deleteTour(tour) {
-    if (tour.recordId) await db.deleteTour(tour.recordId)
-    this.logActivity('Deleted tour', tour.title)
+    if (!tour.recordId) return 'archived'
+    const result = await this._removeEntity('tour', tour.recordId)
+    this.logActivity(result === 'requested' ? 'Requested tour deletion' : 'Archived tour', tour.title)
     await this.load()
+    return result
   },
   // ── announcements ("What's on"), migration 038 ──
   async saveAnnouncement(a) {

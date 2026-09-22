@@ -21,6 +21,7 @@ function rowToLocation(r) {
   return {
     recordId: r.id,           // uuid (used for updates/deletes + story FK)
     createdBy: r.created_by || null, // owner (RBAC, migration 030); absent pre-migration
+    archivedAt: r.archived_at || null, // soft-archive (migration 040); null = live
     id: r.slug,               // stable slug used across the app
     title: r.title || '',
     city: r.city || 'London',
@@ -184,6 +185,7 @@ function rowToTour(r) {
   return {
     recordId: r.id,
     createdBy: r.created_by || null, // owner (RBAC, migration 030); absent pre-migration
+    archivedAt: r.archived_at || null, // soft-archive (migration 040); null = live
     id: r.slug,
     title: r.title || '',
     city: r.city || 'London',
@@ -574,6 +576,16 @@ export const db = {
       hasContact: !!(r.contact_email || r.contact_mobile),
     }))
   },
+  // ── Christmas Craft Fair stall bookings (Tollesbury only; migration craft_fair_*) ──
+  // Admin-only: RLS grants the authenticated role SELECT + UPDATE. Throws where the
+  // table isn't present (other deployments), which the store uses to hide the screen.
+  listCraftFairSignups: async () => {
+    const { data, error } = await supabase.from('craft_fair_signups').select('*').order('created_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    return data || []
+  },
+  setCraftFairPaymentStatus: (id, status) =>
+    run(supabase.from('craft_fair_signups').update({ payment_status: status }).eq('id', id).select()),
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),
@@ -643,13 +655,42 @@ export const db = {
     const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(30)
     if (error) return []
     return (data || []).map((r) => ({
-      id: r.id, type: r.type, entityType: r.entity_type, entityId: r.entity_id,
+      id: r.id, type: r.type, entityType: r.entity_type, entityId: r.entity_id, entityTitle: r.entity_title || '',
       message: r.message, createdAt: new Date(r.created_at), readAt: r.read_at ? new Date(r.read_at) : null,
     }))
   },
   markNotificationsRead: async () => {
     if (!supabase) return
     await supabase.from('notifications').update({ read_at: new Date().toISOString() }).is('read_at', null)
+  },
+  // ── deletion workflow (migration 040). All defensive: a project without the
+  //    migration has no request_delete RPC, so the callers fall back gracefully. ──
+  // Owner/SA → soft-archives (returns 'archived'); a non-owner → raises a request
+  // to the owner (returns 'requested'). Throws only on a real error.
+  requestDelete: async (type, recordId, reason = null) => {
+    const { data, error } = await supabase.rpc('request_delete', { p_type: type, p_id: recordId, p_reason: reason })
+    if (error) throw new Error(error.message)
+    return data // 'archived' | 'requested'
+  },
+  resolveDeletion: async (requestId, approve) => {
+    const { error } = await supabase.rpc('resolve_deletion', { p_request_id: requestId, p_approve: approve })
+    if (error) throw new Error(error.message)
+  },
+  restoreEntity: async (type, recordId) => {
+    const { error } = await supabase.rpc('restore_entity', { p_type: type, p_id: recordId })
+    if (error) throw new Error(error.message)
+  },
+  // Pending requests the signed-in user may act on (owner or SA, per delreq_select RLS).
+  listDeletionRequests: async () => {
+    if (!supabase) return []
+    const { data, error } = await supabase.from('deletion_requests').select('*')
+      .eq('status', 'pending').order('created_at', { ascending: false })
+    if (error) return []
+    return (data || []).map((r) => ({
+      id: r.id, entityType: r.entity_type, entityId: r.entity_id, entityTitle: r.entity_title || '',
+      requestedByName: r.requested_by_name || 'Someone', owner: r.owner, reason: r.reason || '',
+      createdAt: new Date(r.created_at),
+    }))
   },
 }
 

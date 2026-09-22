@@ -21,3 +21,10 @@ export function eventWhenShort(startIso) {
   const d = new Date(startIso)
   return `${d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString(undefined, TIME)}`
 }
+
+// A dateless notice/advert (no start) that still has an expiry — shown in the admin
+// so you can see when it will drop off. Not shown publicly (the expiry just hides it).
+export function expiresLabel(endIso) {
+  if (!endIso) return ''
+  return `Until ${new Date(endIso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`
+}
