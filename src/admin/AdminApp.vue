@@ -133,6 +133,7 @@ import UserManagement from './views/UserManagement.vue'
 import Approvals from './views/Approvals.vue'
 import AnnouncementEditor from './views/AnnouncementEditor.vue'
 import Archive from './views/Archive.vue'
+import CraftFairBookings from './views/CraftFairBookings.vue'
 
 const bars = config.brandBars // themed per deployment (matches the login + public app)
 const platformName = config.platformName
@@ -147,13 +148,14 @@ const nav = computed(() => [
   ...(store.approvals.length ? [{ route: 'approvals', label: 'Approvals' }] : []),
   { route: 'media', label: 'Media library' },
   { route: 'analytics', label: 'Analytics' },
+  ...(store.craftFairEnabled ? [{ route: 'craftFair', label: 'Craft Fair bookings' }] : []),
   { route: 'users', label: 'User management' },
   // Archive appears where the deletion workflow is live (RBAC on), or wherever there's
   // something recoverable / a request to decide. A count nudges the owner to pending requests.
   ...(store.role || store.archivedTours.length || store.archivedLocations.length || store.deletionRequests.length
     ? [{ route: 'archive', label: store.deletionRequests.length ? `Archive (${store.deletionRequests.length})` : 'Archive' }] : []),
 ])
-const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals, announcementEditor: AnnouncementEditor, archive: Archive }
+const views = { dashboard: Dashboard, locations: LocationsList, locationEditor: LocationEditor, story: StoryEditor, tours: ToursList, tourEditor: TourEditor, media: MediaLibrary, analytics: Analytics, users: UserManagement, approvals: Approvals, announcementEditor: AnnouncementEditor, archive: Archive, craftFair: CraftFairBookings }
 const view = computed(() => views[store.route] || Dashboard)
 // Remount the view when the record it edits changes, so navigating record→record
 // within the same route (e.g. Story editor's "Next story") re-seeds the editor.

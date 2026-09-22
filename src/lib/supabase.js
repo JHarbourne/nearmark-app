@@ -576,6 +576,16 @@ export const db = {
       hasContact: !!(r.contact_email || r.contact_mobile),
     }))
   },
+  // ── Christmas Craft Fair stall bookings (Tollesbury only; migration craft_fair_*) ──
+  // Admin-only: RLS grants the authenticated role SELECT + UPDATE. Throws where the
+  // table isn't present (other deployments), which the store uses to hide the screen.
+  listCraftFairSignups: async () => {
+    const { data, error } = await supabase.from('craft_fair_signups').select('*').order('created_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    return data || []
+  },
+  setCraftFairPaymentStatus: (id, status) =>
+    run(supabase.from('craft_fair_signups').update({ payment_status: status }).eq('id', id).select()),
   createTour: (t) => run(supabase.from('tours').insert(tourToRow(t)).select()),
   updateTour: (recordId, t) => run(supabase.from('tours').update(tourToRow(t)).eq('id', recordId).select()),
   deleteTour: (recordId) => run(supabase.from('tours').delete().eq('id', recordId)),

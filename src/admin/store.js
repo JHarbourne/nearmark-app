@@ -35,6 +35,8 @@ export const store = reactive({
   deletionRequests: [],  // pending requests I can decide (owner or SA); [] pre-migration-040
   announcements: [], // "What's on" event cards (migration 038); [] where the table isn't there
   approvals: [], // per-story owner-approval records (participatory tours); empty where the participants table isn't used
+  craftFairSignups: [], // Christmas Craft Fair stall bookings (Tollesbury only); [] where the table isn't present
+  craftFairEnabled: false, // true only where craft_fair_signups exists (Tollesbury) → shows the nav item
   loading: false,
   error: '',
   activity: [],
@@ -278,6 +280,10 @@ export const store = reactive({
         this.deletionRequests = await db.listDeletionRequests().catch(() => [])
         this.approvals = await db.listApprovals().catch(() => [])
         this.announcements = await db.listAnnouncements().catch(() => [])
+        // Craft Fair bookings: success (even []) means the table exists → show the screen;
+        // an error means this deployment has no such table → keep it hidden.
+        try { this.craftFairSignups = await db.listCraftFairSignups(); this.craftFairEnabled = true }
+        catch { this.craftFairSignups = []; this.craftFairEnabled = false }
       }
     } catch (e) {
       this.error = e.message
@@ -290,6 +296,18 @@ export const store = reactive({
   async loadApprovals() {
     if (!this.liveBackend) { this.approvals = []; return }
     try { this.approvals = await db.listApprovals() } catch { /* keep what we have */ }
+  },
+  // Re-pull Craft Fair bookings (e.g. when that screen opens). Tollesbury only.
+  async loadCraftFairSignups() {
+    if (!this.liveBackend) { this.craftFairSignups = []; return }
+    try { this.craftFairSignups = await db.listCraftFairSignups(); this.craftFairEnabled = true } catch { /* keep what we have */ }
+  },
+  // Mark a booking paid / awaiting: update the DB, then the local row so the UI reflects it.
+  async setCraftFairPaid(id, paid) {
+    const status = paid ? 'paid' : 'awaiting'
+    await db.setCraftFairPaymentStatus(id, status)
+    const row = this.craftFairSignups.find((r) => r.id === id)
+    if (row) row.payment_status = status
   },
   logActivity(action, title) {
     this.activity.unshift({ action, title, who: this.user?.email || 'admin', at: new Date() })
