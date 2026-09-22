@@ -88,6 +88,10 @@
           <option v-for="t in store.tours" :key="t.id" :value="t.id">{{ t.title }}</option>
         </select>
 
+        <label for="ann-booking">Stall bookings <span class="hint">optional · web reference for this event's stall bookings, e.g. faire-2026-12</span></label>
+        <input id="ann-booking" type="text" v-model.trim="form.bookingKey" placeholder="e.g. faire-2026-12" />
+        <p class="hint" style="margin-top:4px;">Set this to match the reference the website booking form sends, and this event appears in <strong>Event Bookings</strong> – even while it is still a draft. Leave blank if it takes no stall bookings.</p>
+
         <div style="display:flex; gap:12px; margin-top:22px; align-items:center; flex-wrap:wrap;">
           <div class="seg-toggle" role="group" aria-label="Visibility">
             <button type="button" :class="{ on: form.status === 'published' }" @click="form.status = 'published'">Published</button>
@@ -139,10 +143,10 @@ const blank = {
   title: '', eventStart: '', eventEnd: '', place: '', address: '', lat: null, lng: null,
   description: '', imageUrl: '', imageAlt: '', imageCaption: '', imageCredit: '', imageCreditUrl: '',
   showImageCredit: true, imagePosition: '50% 50%', linkUrl: '', linkLabel: '', tourSlug: '',
-  status: 'draft', sortOrder: 0,
+  bookingKey: '', status: 'draft', sortOrder: 0,
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
-for (const k of ['eventStart', 'eventEnd', 'place', 'address', 'description', 'imageUrl', 'imageAlt', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'linkUrl', 'linkLabel', 'tourSlug']) {
+for (const k of ['eventStart', 'eventEnd', 'place', 'address', 'description', 'imageUrl', 'imageAlt', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'linkUrl', 'linkLabel', 'tourSlug', 'bookingKey']) {
   if (form[k] == null) form[k] = ''
 }
 if (!form.imagePosition) form.imagePosition = '50% 50%'
