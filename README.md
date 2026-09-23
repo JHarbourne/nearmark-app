@@ -81,13 +81,21 @@ In the Supabase dashboard, open the **SQL Editor**, then paste-and-run, in order
 
 1. `schema.sql` – tables, security policies, the `media` storage bucket
 2. `seed.sql` – *(optional)* example rows; skip it if you'll add your own content
-3. **Every `migration-*.sql` file in numerical order** – `migration-002-…` through
-   `migration-017-…`. Each one is small, additive and idempotent (`add column if not
-   exists`), so run them all to bring the schema up to date; re-running is harmless.
+3. **Every `migration-*.sql` file in numerical order** – `migration-002-…` through the
+   highest-numbered one. Each is small, additive and idempotent (`add column if not
+   exists`), so run them all to bring the schema up to date; re-running is harmless. The
+   last one, `migration-041-data-api-grants.sql`, grants the Data API roles access to the
+   tables (required: since 2026-10-30 Supabase no longer does this automatically).
 
 > Running a client on the shared core? Any time you `git pull` new features, check for new
 > `migration-*.sql` files and run them in each Supabase project – a missing column shows up
 > as a "Save failed" in the admin.
+
+> **Adding a new table in a migration?** Grant it, or the Data API can't reach it (since
+> 2026-10-30). `schema.sql` sets `alter default privileges` so tables created after it
+> inherit the grants automatically; if a project predates that, add explicit grants in the
+> migration (`grant select on public.your_table to anon;` + full CRUD to `authenticated,
+> service_role`) — see `migration-041-data-api-grants.sql` for the pattern.
 
 Then create your first admin user: **Authentication → Users → Add user → Create new
 user**, set an email + password, and tick **Auto Confirm User**. Keep **"Allow new users

@@ -2,6 +2,19 @@
 -- Run this in the Supabase SQL Editor (or via the migration script) on a fresh project.
 -- Safe to re-run: uses IF NOT EXISTS / CREATE OR REPLACE where possible.
 
+-- ── Data API grants ─────────────────────────────────────────────────────────
+-- From 2026-10-30 Supabase no longer auto-grants Data API access to new public
+-- tables. Setting ALTER DEFAULT PRIVILEGES BEFORE the tables below means every
+-- table created afterwards (here and in later migrations) inherits the grants,
+-- so a fresh project stays reachable via PostgREST / supabase-js. RLS still
+-- governs which rows each role sees. anon is read-only (writes go via SECURITY
+-- DEFINER functions); authenticated + service_role get full CRUD. See
+-- migration-041, which also grants tables that already exist (for rebuilds).
+grant usage on schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant select                         on tables    to anon;
+alter default privileges in schema public grant select, insert, update, delete on tables    to authenticated, service_role;
+alter default privileges in schema public grant usage, select                  on sequences to anon, authenticated, service_role;
+
 -- ── locations ──────────────────────────────────────────────────────────────
 create table if not exists public.locations (
   id                 uuid primary key default gen_random_uuid(),

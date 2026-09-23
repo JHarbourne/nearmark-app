@@ -8,6 +8,15 @@ The [README](README.md) is documentation; this file is the release history.
 
 ## [Unreleased]
 
+### Changed
+- **Explicit Data API grants** (`migration-041-data-api-grants.sql`). From 2026-10-30
+  Supabase stops auto-granting Data API access to new `public` tables, so the schema now
+  sets the grants itself (`schema.sql` uses `alter default privileges` for future tables;
+  the migration grants existing ones). Without this, a fresh project, preview branch,
+  `db reset`, or any new table would be unreachable via PostgREST/supabase-js. RLS is
+  unchanged — grants only let the API reach the tables; rows are still governed by policy.
+  Applied to the Tollesbury, LGBT and staging projects. No app-code change.
+
 ## [1.18.0] — 2026-09-23
 
 ### Added
