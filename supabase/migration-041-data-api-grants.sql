@@ -30,6 +30,14 @@ grant select                         on all tables    in schema public to anon;
 grant select, insert, update, delete on all tables    in schema public to authenticated, service_role;
 grant usage, select                  on all sequences in schema public to anon, authenticated, service_role;
 
+-- anon is read-only in this app (its RLS policies are all `for select`; anon writes
+-- go through SECURITY DEFINER functions, which don't need anon table grants). Strip
+-- any write privileges the OLD Supabase auto-grant left on existing tables so anon
+-- is SELECT-only everywhere — matching the default-privileges rule below. On a fresh
+-- build anon never had these, so this is a harmless no-op there.
+revoke insert, update, delete, truncate, references, trigger
+  on all tables in schema public from anon;
+
 -- 3) Restore the auto-grant for tables created LATER by future migrations, so a
 --    new feature's table is reachable without remembering to grant it by hand.
 alter default privileges in schema public grant select                         on tables    to anon;

@@ -15,7 +15,9 @@ The [README](README.md) is documentation; this file is the release history.
   the migration grants existing ones). Without this, a fresh project, preview branch,
   `db reset`, or any new table would be unreachable via PostgREST/supabase-js. RLS is
   unchanged — grants only let the API reach the tables; rows are still governed by policy.
-  Applied to the Tollesbury, LGBT and staging projects. No app-code change.
+  The migration also revokes the legacy write privileges the old auto-grant left on
+  `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
+  and staging projects. No app-code change.
 
 ## [1.18.0] — 2026-09-23
 
