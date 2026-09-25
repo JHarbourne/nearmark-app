@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.2] — 2026-09-25
+
+### Fixed
+- **The map was blank (grey) in production.** The maplibre-gl 5 → 6 upgrade moved the map renderer into a separate worker file, whose path maplibre builds at runtime from its own script location – which Vite can't emit when maplibre is bundled, so `/assets/maplibre-gl-worker.mjs` 404'd and no tiles ever rendered. (It only worked in dev, where the file is served straight from `node_modules`.) The worker is now built by Vite and handed to maplibre explicitly (`setWorkerUrl`), and it's included in the offline precache too. Maps render again in Discovery, guided tours and the admin place-picker.
+
 ## [1.18.1] — 2026-09-25
 
 ### Added

@@ -209,6 +209,12 @@ export default defineConfig(({ mode }) => {
         devOptions: { enabled: false }, // don't run the SW in dev (keeps HMR clean)
       }),
     ],
+    // maplibre-gl v6 runs its renderer in an ES-module worker (new Worker(url,
+    // {type:'module'})). We build that worker ourselves via a ?worker&url import
+    // (see src/lib/maplibre.js) because maplibre derives the worker path from its
+    // own script URL, which Vite can't emit when maplibre is bundled into a chunk.
+    // Building the worker as 'es' keeps it a module worker maplibre can load.
+    worker: { format: 'es' },
     build: {
       rollupOptions: {
         input: {

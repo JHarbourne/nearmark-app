@@ -18,7 +18,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import * as maplibregl from 'maplibre-gl' // v6 dropped the ESM default export → namespace import
+import maplibregl from '../../lib/maplibre.js' // maplibre-gl + the v6 worker-URL fix (see that file)
 import { badgeColors } from '../../lib/tokens.js'
 
 const props = defineProps({
