@@ -271,7 +271,10 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   governs visibility). A location with **two or more** stories instead shows a **Stories list**
   (drag or ▲▼ reorder, edit, delete, "+ Add story"), each edited on its own screen; **"+ Add another
   story"** promotes a single-story location into the list. **Previous / Next** buttons page through
-  the locations without returning to the list. (City is only shown on multi-city deployments.)
+  the locations without returning to the list: opened from a **tour** in the Locations list they
+  follow that **tour's stop order** (the sequence a visitor walks) and name the tour; a location can
+  be in several tours, so they follow whichever one it was opened from; opened outside a tour they
+  fall back to the whole list, alphabetical by title. (City is only shown on multi-city deployments.)
 - **Story editor.** The content form for one story, fields in the end-user card's
   top-to-bottom order (hero photo → period/date → photo credit + link/caption/alt → heading →
   significance → text → before/after slider → second photo → audio/video → links → related);

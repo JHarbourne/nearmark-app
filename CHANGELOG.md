@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.4] — 2026-09-25
+
+### Changed
+- **Location editor Previous / Next now follows the tour.** Open a location from a tour in the Locations list and the ← Previous / Next → arrows step through **that tour's stops in walking order** – the same sequence a visitor follows – and show the tour's name, instead of stepping alphabetically through every location on the site. A location can be in more than one tour; the arrows follow whichever tour you opened it from. Opened outside a tour (the "Not in a tour" group, the ungrouped view, or a notification/link) they keep the alphabetical fallback.
+
 ## [1.18.3] — 2026-09-25
 
 ### Changed

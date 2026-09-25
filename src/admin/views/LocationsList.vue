@@ -45,7 +45,7 @@
           </tr>
           <template v-if="!collapsed[g.key]">
             <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard / assistive-tech path -->
-            <tr v-for="l in g.locations" :key="g.key + '|' + l.id" class="row-clickable" @click="store.go('locationEditor', { id: l.id })">
+            <tr v-for="l in g.locations" :key="g.key + '|' + l.id" class="row-clickable" @click="store.go('locationEditor', { id: l.id, from: g.key })">
               <td style="width:56px;" data-label="Photo">
                 <img v-if="l.heroImageUrl" :src="l.heroImageUrl" alt="" loading="lazy" style="width:48px; height:34px; object-fit:cover; border-radius:5px; display:block; background:var(--bg);" />
                 <span v-else title="No photo yet" style="display:block; width:48px; height:34px; border-radius:5px; background:var(--bg); border:1px dashed var(--line);"></span>
@@ -69,7 +69,7 @@
                 <span v-else class="muted">—</span>
               </td>
               <td class="right" style="white-space:nowrap;" data-label="Actions">
-                <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id })">{{ store.canEditLocation(l) ? 'Edit' : 'View' }}</button>
+                <button class="btn btn-ghost btn-sm" @click.stop="store.go('locationEditor', { id: l.id, from: g.key })">{{ store.canEditLocation(l) ? 'Edit' : 'View' }}</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(l)" title="Open this story in the app in a new tab">Preview</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="duplicate(l)">Duplicate</button>
                 <button v-if="store.canEditLocation(l)" class="btn btn-danger btn-sm" @click.stop="remove(l)" :aria-label="`${removeLabel(l)} location`" :title="removeLabel(l)">

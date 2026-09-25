@@ -6,8 +6,9 @@
     <div class="pagehead">
       <h1>{{ isNew ? 'New location' : 'Edit location' }}</h1>
       <div style="display:flex; gap:8px; align-items:center;">
-        <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous: ${prevLoc.title}`">← Previous</button>
-        <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next: ${nextLoc.title}`">Next →</button>
+        <span v-if="seqLabel" class="muted" style="font-size:12px; white-space:nowrap;" title="The arrows step through this tour in its stop order">Tour: {{ seqLabel }}</span>
+        <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous${seqLabel ? ' in ' + seqLabel : ''}: ${prevLoc.title}`">← Previous</button>
+        <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next${seqLabel ? ' in ' + seqLabel : ''}: ${nextLoc.title}`">Next →</button>
         <button class="btn btn-ghost" @click="back">← Back to list</button>
       </div>
     </div>
@@ -129,9 +130,10 @@
         <button class="btn btn-primary" @click="save()" :disabled="saving || !canEdit">{{ saving ? 'Saving…' : 'Save' }}</button>
         <span v-if="!canEdit" class="muted" role="status" style="font-size:13px;">Read-only — this location belongs to someone else; only its owner or a Super Admin can edit it.</span>
         <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
-        <div style="display:flex; gap:8px; margin-left:auto;">
-          <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous: ${prevLoc.title}`">← Previous</button>
-          <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next: ${nextLoc.title}`">Next →</button>
+        <div style="display:flex; gap:8px; margin-left:auto; align-items:center;">
+          <span v-if="seqLabel" class="muted" style="font-size:12px; white-space:nowrap;" title="The arrows step through this tour in its stop order">Tour: {{ seqLabel }}</span>
+          <button v-if="prevLoc" class="btn btn-ghost btn-sm" @click="goToLoc(prevLoc)" :title="`Previous${seqLabel ? ' in ' + seqLabel : ''}: ${prevLoc.title}`">← Previous</button>
+          <button v-if="nextLoc" class="btn btn-ghost btn-sm" @click="goToLoc(nextLoc)" :title="`Next${seqLabel ? ' in ' + seqLabel : ''}: ${nextLoc.title}`">Next →</button>
           <button class="btn btn-ghost btn-sm" @click="back">← Back to list</button>
         </div>
       </div>
@@ -202,13 +204,38 @@ const isNew = !existing
 // just stops the UI offering a Save the DB would reject.
 const canEdit = computed(() => isNew || store.canEditLocation(existing))
 
-// Page through locations without going back to the list. Follows the store's
-// location order (same as the flat list). store.go runs the unsaved-changes guard,
-// and the view is keyed by id so it re-initialises on each move.
-const curIdx = computed(() => existing ? store.locations.findIndex((l) => l.id === existing.id) : -1)
-const prevLoc = computed(() => curIdx.value > 0 ? store.locations[curIdx.value - 1] : null)
-const nextLoc = computed(() => (curIdx.value >= 0 && curIdx.value < store.locations.length - 1) ? store.locations[curIdx.value + 1] : null)
-function goToLoc(l) { if (l) store.go('locationEditor', { id: l.id }) }
+// Page through locations without going back to the list. When you arrive from a tour
+// group in the Locations list (store.params.from = that tour's id), the arrows follow
+// THAT tour's stop order – the sequence a visitor walks, and the one the list shows –
+// so "Next" is the next stop on the walk. A location can sit in several tours; the arrows
+// follow whichever one you came in through. With no tour context (the ungrouped view, the
+// "Not in a tour" group, a deep link) they fall back to the whole list, alphabetical by
+// title. store.go runs the unsaved-changes guard; the view is keyed by id so it re-inits.
+const fromKey = store.params.from || null
+const fromTour = computed(() => (fromKey && fromKey !== 'all' && fromKey !== '__none')
+  ? store.tours.find((t) => t.id === fromKey) : null)
+// The ordered sequence the arrows walk.
+const sequence = computed(() => {
+  if (fromTour.value) {
+    const byId = Object.fromEntries(store.locations.map((l) => [l.id, l]))
+    const seq = fromTour.value.stopIds.map((id) => byId[id]).filter(Boolean)
+    // Only use it if the current location really is in that tour; otherwise the
+    // context is stale, so fall through to the global list rather than hide the arrows.
+    if (!existing || seq.some((l) => l.id === existing.id)) return seq
+  }
+  if (fromKey === '__none') {
+    const inAnyTour = new Set(store.tours.flatMap((t) => t.stopIds))
+    return store.locations.filter((l) => !inAnyTour.has(l.id))
+  }
+  return store.locations // fallback: the whole list, alphabetical by title
+})
+// Shown on the arrows so the order is always legible (esp. on mobile, where there's no tooltip).
+const seqLabel = computed(() => (fromTour.value && sequence.value.some((l) => l.id === existing?.id)) ? fromTour.value.title : '')
+const curIdx = computed(() => existing ? sequence.value.findIndex((l) => l.id === existing.id) : -1)
+const prevLoc = computed(() => curIdx.value > 0 ? sequence.value[curIdx.value - 1] : null)
+const nextLoc = computed(() => (curIdx.value >= 0 && curIdx.value < sequence.value.length - 1) ? sequence.value[curIdx.value + 1] : null)
+// Carry the tour context forward so continued Next/Prev stays in the same tour.
+function goToLoc(l) { if (l) store.go('locationEditor', { id: l.id, from: fromKey || undefined }) }
 
 const blank = {
   id: 'loc-' + Math.random().toString(36).slice(2, 8),
