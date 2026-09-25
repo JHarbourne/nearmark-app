@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.1] — 2026-09-25
+
+### Added
+- **Preview an unpublished tour, event or story.** The admin **Preview** buttons now open the app in preview mode (`&preview=1`) so a **draft** resolves without publishing it – you can review your own work, or show a contributor the finished tour, before it goes live. It's safe by construction: the request carries no filter of its own, so the database's Row Level Security decides – an anonymous person opening the same link still sees only published content, while a signed-in admin/editor also sees the drafts they're allowed to. (A contributor with a scoped editor login assigned to the tour can therefore preview it on their own device.)
+
 ## [1.18.0] — 2026-09-23
 
 ### Added

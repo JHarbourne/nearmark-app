@@ -96,7 +96,8 @@ import { config } from '../../config.js'
 // works even if VITE_PUBLIC_URL isn't set; drafts show when you're signed in.
 function preview(l) {
   const base = config.publicUrl || window.location.origin
-  window.open(`${base}/?story=${encodeURIComponent(l.id)}`, '_blank', 'noopener')
+  // preview=1 → the app loads unfiltered so a draft story/location resolves (RLS still gates it to a signed-in admin)
+  window.open(`${base}/?story=${encodeURIComponent(l.id)}&preview=1`, '_blank', 'noopener')
 }
 
 const q = ref('')

@@ -231,8 +231,17 @@ onMounted(async () => {
   // ask the browser to keep the cache from being evicted.
   requestPersistentStorage()
   precacheBasemap()
+  // Preview mode (?preview=1, set by the admin "Preview" buttons): load the FULL,
+  // unfiltered set so a draft/unpublished tour, event or story resolves. This is safe
+  // by construction – the query carries no client-side filter, so Row Level Security
+  // decides: an anonymous visitor still sees only published rows, while a signed-in
+  // admin/editor (the public app shares the admin's session on the same origin) also
+  // sees the drafts they're allowed to. So a preview link shows a draft only to someone
+  // already entitled to see it – no login, no draft.
+  const previewMode = new URLSearchParams(window.location.search).get('preview') === '1'
   try {
-    const [locs, trs, anns] = await Promise.all([fetchLocations(true), fetchTours(true), fetchAnnouncements(true)])
+    const pv = !previewMode
+    const [locs, trs, anns] = await Promise.all([fetchLocations(pv), fetchTours(pv), fetchAnnouncements(pv)])
     locations.value = locs
     tours.value = trs
     announcements.value = anns
@@ -242,9 +251,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-  // Deep links – power the admin "Preview" buttons and make URLs shareable; drafts
-  // resolve too when an admin is signed in in the same browser (shared session →
-  // RLS):  /?story=<slug> opens that story · /?tour=<slug> opens that tour detail.
+  // Deep links – power the admin "Preview" buttons and make URLs shareable:
+  //   /?story=<slug> opens that story · /?tour=<slug> opens that tour detail.
+  // The admin appends &preview=1 (handled above) so a draft resolves for a signed-in
+  // admin/editor; without it, only published rows load.
   const params = new URLSearchParams(window.location.search)
   const storyId = params.get('story')
   const tourId = params.get('tour')

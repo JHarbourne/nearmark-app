@@ -255,7 +255,8 @@ async function remove() {
 }
 function preview() {
   const base = config.publicUrl || window.location.origin
-  window.open(`${base}/?event=${encodeURIComponent(form.id)}`, '_blank', 'noopener')
+  // preview=1 → the app loads unfiltered so a draft event resolves (RLS still gates it to a signed-in admin)
+  window.open(`${base}/?event=${encodeURIComponent(form.id)}&preview=1`, '_blank', 'noopener')
 }
 function back() { store.go('announcements') }
 </script>

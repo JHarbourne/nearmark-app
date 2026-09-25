@@ -87,7 +87,8 @@ function details(row) {
 function preview(row) {
   const base = config.publicUrl || window.location.origin
   const q = row.type === 'tour' ? `tour=${encodeURIComponent(row.item.id)}` : `event=${encodeURIComponent(row.item.id)}`
-  window.open(`${base}/?${q}`, '_blank', 'noopener')
+  // preview=1 → the app loads unfiltered so a DRAFT resolves (RLS still gates it to a signed-in admin)
+  window.open(`${base}/?${q}&preview=1`, '_blank', 'noopener')
 }
 async function duplicate(row) {
   const it = row.item

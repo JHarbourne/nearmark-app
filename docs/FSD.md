@@ -227,9 +227,14 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   screen", share, an analytics opt-out, and **"Report a fault"** — a general feedback path (not
   tied to one stop) that opens the reader's mail app pre-filled with the app version + device,
   addressed to `VITE_FAULT_EMAIL` (defaults to the platform support inbox).
-- **Deep links.** `?story=<slug>` opens a story; `?tour=<slug>` opens a tour detail —
-  shareable, and used by the admin Preview buttons. Drafts resolve when an admin is signed
-  in in the same browser (shared session).
+- **Deep links.** `?story=<slug>` opens a story; `?tour=<slug>` opens a tour detail;
+  `?event=<slug>` an event — shareable. The admin **Preview** buttons add `&preview=1`, which
+  loads the app **unfiltered** so a **draft** (unpublished) tour, event or story resolves. This
+  is safe by construction: the query carries no client filter, so Row Level Security decides —
+  an anonymous visitor with the same link still sees only published rows, while a signed-in
+  admin/editor (the public app shares the admin session on the same origin) also sees the drafts
+  they're entitled to. So a contributor can be shown a draft either over the owner's shoulder or,
+  once they have a scoped editor login assigned to the tour, on their own device.
 - **SEO / crawlable pages.** The app itself is client-rendered, so search engines see almost
   nothing. Vercel serverless functions (`api/place.js`, `api/tour.js`) render real, indexable
   HTML per stop (`/place/<slug>`) and tour (`/tour/<slug>`) — `<title>`, meta description,
