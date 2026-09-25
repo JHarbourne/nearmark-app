@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.3] — 2026-09-25
+
+### Changed
+- **Markup guide on the tour description.** The tour editor's Description field now shows the same Markdown hint that sits under a story's text (bold, italic, bullets, line breaks) – the tour description already renders that formatting, so the help now matches.
+
 ## [1.18.2] — 2026-09-25
 
 ### Fixed

@@ -70,6 +70,7 @@
 
         <label for="tour-description">Description</label>
         <textarea id="tour-description" v-model="form.description" rows="3"></textarea>
+        <p class="hint" style="margin:5px 0 0;">Optional Markdown: <code>**bold**</code>, <code>*italic*</code>, and <code>- </code> at the start of a line for bullet points. Blank lines and new lines both start a new paragraph. For a line break <em>within</em> a paragraph (verse, quotes), end the line with a backslash <code>\</code> or type <code>&lt;br&gt;</code>.</p>
 
         <label class="participatory-toggle">
           <input type="checkbox" v-model="form.participatory" class="big-check" />
