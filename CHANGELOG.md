@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.5] — 2026-10-11
+
+### Fixed
+- **User management: action buttons overflowed the card.** On a wide screen the editors table's "Make Super Admin" / "Remove" buttons spilled past the card's right edge (the card was too narrow for a four-column table with two action buttons). The card is now wide enough for the table, the buttons wrap instead of overflowing if space is ever tight, and the form fields above keep a readable width.
+
 ## [1.18.4] — 2026-09-25
 
 ### Changed

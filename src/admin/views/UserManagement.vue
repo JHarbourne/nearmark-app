@@ -7,15 +7,18 @@
   <div>
     <div class="pagehead"><h1>User management</h1></div>
 
-    <div class="card" style="padding:22px; max-width:640px;">
+    <!-- Wider than the form cards below: the editors table (email + role + date +
+         two action buttons) needs the room, or the buttons overflow the card. The
+         form elements inside are capped so the top of the card doesn't look stretched. -->
+    <div class="card" style="padding:22px; max-width:860px;">
       <p style="margin:0 0 14px;">You're signed in as <strong>{{ store.user?.email }}</strong>.</p>
       <h2 style="margin:0 0 6px; font-size:16px;">Editors</h2>
-      <p class="muted" style="font-size:13px; line-height:1.6; margin:0 0 16px;">
+      <p class="muted" style="font-size:13px; line-height:1.6; margin:0 0 16px; max-width:60ch;">
         Invite editors by email – they set their own password via the link. Self-signup
         stays disabled, so only invited people can reach the backoffice.
       </p>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:0 0 14px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:0 0 14px; max-width:560px;">
         <div style="flex:1; min-width:200px;">
           <label for="invite-email">Invite by email</label>
           <input id="invite-email" type="email" v-model="inviteEmail" placeholder="editor@example.org" autocomplete="off" @keyup.enter="invite" />
@@ -37,7 +40,7 @@
             <td v-if="rbacActive" data-label="Role"><span class="badge" :class="u.role === 'super_admin' ? 'published' : 'draft'" style="white-space:nowrap;">{{ u.role === 'super_admin' ? 'Super Admin' : 'Editor' }}</span></td>
             <td class="muted" data-label="Last sign-in">{{ u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleDateString() : '–' }}</td>
             <td class="right" data-label="Access">
-              <div v-if="u.email !== store.user?.email" style="display:flex; gap:8px; justify-content:flex-end; align-items:center; flex-wrap:nowrap;">
+              <div v-if="u.email !== store.user?.email" style="display:flex; gap:8px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
                 <button v-if="rbacActive && store.isSuperAdmin" class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="toggleRole(u)" :disabled="roleBusy">{{ u.role === 'super_admin' ? 'Make editor' : 'Make Super Admin' }}</button>
                 <button v-if="!u.fromProfiles" class="btn btn-danger btn-sm" @click="remove(u)">Remove</button>
               </div>
