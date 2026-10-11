@@ -24,7 +24,7 @@
     "pmtiles-protocol": "^1.1.2",
     "posthog-js": "^1.393.5",
     "qrcode.vue": "^3.10.0",
-    "vue": "^3.4.21"
+    "vue": "^3.5.43"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
