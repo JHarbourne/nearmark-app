@@ -1,38 +1,59 @@
 # Branded auth emails
 
-Branded HTML for the Supabase Auth **"Invite user"** email – the first thing a new editor
-sees. One file per deployment (each app has its own Supabase project, so the template is set
-per project).
+When you add an editor in Supabase, they get an invitation email. Out of the box it's the
+plain, unbranded Supabase default — "Supabase Auth" as the sender, no mention of the app.
+These templates replace the body with a branded one so editors recognise what they've been
+invited to.
 
-| App | File | Supabase project |
-|---|---|---|
-| Tollesbury | `invite-tollesbury.html` | `wijnnlzxjerymjrlvblv` |
-| LGBT History Project | `invite-lgbt.html` | `rewowvjmeoggigrwhdvl` |
+| App | Supabase project | Template file |
+|-----|------------------|---------------|
+| Tollesbury App | `wijnnlzxjerymjrlvblv` | [`invite-tollesbury.html`](invite-tollesbury.html) |
+| LGBT History Project | `rewowvjmeoggigrwhdvl` | [`invite-lgbt.html`](invite-lgbt.html) |
 
 ## How to apply (per project)
 
-1. Supabase dashboard → the project → **Authentication → Email Templates → "Invite user"**.
-2. **Subject:** `You're invited to the <App> editor backoffice` (the suggestion is at the top of each file).
-3. **Message body:** paste the whole HTML file (minus the leading `<!-- … -->` comment if you like).
-4. Save. Send yourself a test invite from the admin (User management → invite your own spare address) to check it.
+1. Supabase Dashboard → the project → **Authentication → Emails → Templates**.
+2. Select **"Invite user"**.
+3. **Subject** — set to:
+   - Tollesbury: `You're invited to help edit the Tollesbury App`
+   - LGBT: `You're invited to help edit the LGBT History Project`
+4. **Message body** — switch to source/HTML and paste the whole contents of the matching
+   `.html` file. Save.
+5. Add an editor as usual (Authentication → Users → **Invite**). They'll receive the branded
+   email. `{{ .ConfirmationURL }}` and `{{ .Email }}` are filled in by Supabase.
 
-## Notes
+The same look works for the other templates if you want them too — **Confirm signup**,
+**Magic Link**, **Reset password**. Reuse the card and swap the heading/body wording; the
+link variable differs per template (`{{ .ConfirmationURL }}` for invite/confirm/recovery,
+`{{ .Token }}`/`{{ .ConfirmationURL }}` for magic link — Supabase shows the available
+variables above each editor).
 
-- **Keep `{{ .ConfirmationURL }}`** exactly as-is – Supabase fills it in with the one-time
-  set-password link. The template uses it twice (the button and the copy-paste fallback).
-- The copy points new editors at **https://nearmark.co.uk/guide** (Getting Started), matching the
-  in-app welcome card.
-- **Accent colour** is a single hex, used three times (top bar, button, links). Swap it to retheme –
-  Tollesbury `#B23B3B` (red), LGBT `#6B46E5` (violet).
-- Typography is written with HTML entities (`&ndash;`, `&rsquo;`) so it renders correctly in every
-  mail client regardless of charset. Spaced en dashes, not em dashes (house style).
+## Custom SMTP — configured (Brevo)
 
-## Sender address (optional, for full branding)
+Both projects send auth emails through **Brevo** (custom SMTP), so the From name is the app —
+not "Supabase Auth" — and Supabase's built-in-mailer rate limit no longer applies.
 
-The template controls the email's *content*. The **from** address is still Supabase's default
-(`noreply@mail.app.supabase.io`) with a low rate limit. To send from your own address (and lift the
-limit), set **custom SMTP** under Authentication → settings, using **Brevo** SMTP credentials.
-⚠️ When you do, turn **Authorised IPs off** for the Brevo key – Supabase's sending IPs rotate, so an
-IP allow-list makes sends fail with "unrecognised IP". (See the `brevo-authorised-ips` note.)
+**Supabase → each project → Authentication → Emails → SMTP settings:**
+- Host `smtp-relay.brevo.com` · Port `587` · Username `af78db001@smtp-brevo.com`
+- Password = a Brevo **SMTP key** (Brevo → *SMTP & API → SMTP*). The key is **account-level** —
+  one key works for every project. Brevo shows it once; generating a new one does **not** revoke
+  existing keys, so it's safe to regenerate if you lose it.
 
-Related: the in-app Getting Started card (migration 042) and the guide at nearmark.co.uk/guide.
+| Project | Sender email | Sender name |
+|---|---|---|
+| Tollesbury (`wijnnlzxjerymjrlvblv`) | `hello@tollesbury.app` | Tollesbury App |
+| LGBT (`rewowvjmeoggigrwhdvl`) | `noreply@lgbthistoryuk.org` | LGBT History Project |
+
+Both sender **domains are authenticated in Brevo** (DKIM CNAMEs + `brevo-code` TXT). Notes:
+- `tollesbury.app` DNS is at **GoDaddy** (site is on Vercel, but DNS is GoDaddy).
+- `lgbthistoryuk.org` has an SPF record; `tollesbury.app` should add one so a brand-new domain
+  doesn't get junked on its first sends (DKIM alone passes DMARC, but filters like to see SPF):
+
+      TXT  @  v=spf1 include:spf.brevo.com ~all
+
+- No mailbox exists at `tollesbury.app`, so set a working **reply-to** (e.g. an `lgbthistoryuk.org`
+  address) if replies matter.
+
+> Note: SMTP + domain authentication are dashboard/DNS settings, not code — nothing here is
+> deployed by a build. These template files live in the repo only so the branded HTML is
+> versioned and easy to re-paste.
