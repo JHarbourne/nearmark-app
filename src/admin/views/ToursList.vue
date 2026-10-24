@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle (or use ▲▼) to set the order these appear in the app. Events drop off automatically once they've passed.</p>
+    <p class="muted" style="font-size:13px; margin:-6px 0 14px;">Drag the ⠿ handle (or use ▲▼) to set the order these appear in the app. Finished events and tours drop off the app automatically and gather under <strong>Past</strong>, below.</p>
     <div class="card">
       <table class="compact-list home">
         <thead>
@@ -48,7 +48,41 @@
               </button>
             </td>
           </tr>
-          <tr v-if="!rows.length"><td colspan="5" class="muted" style="text-align:center; padding:30px;">Nothing yet. Use “+ New”.</td></tr>
+          <tr v-if="!rows.length && !pastRows.length"><td colspan="5" class="muted" style="text-align:center; padding:30px;">Nothing yet. Use “+ New”.</td></tr>
+          <tr v-else-if="!rows.length"><td colspan="5" class="muted" style="text-align:center; padding:22px;">Nothing live right now — see Past, below.</td></tr>
+        </tbody>
+
+        <!-- Past: finished events + tours past their take-down date. Collapsed by default,
+             not reorderable (ordering a finished item is pointless), same actions otherwise. -->
+        <tbody v-if="pastRows.length">
+          <tr class="group-head">
+            <td colspan="5">
+              <button type="button" @click="togglePast" :aria-expanded="String(pastOpen)"
+                style="width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:10px 14px; font-size:14px; font-weight:700; color:inherit; display:flex; align-items:center; gap:8px;">
+                <span style="color:var(--muted);">{{ pastOpen ? '▾' : '▸' }}</span> Past <span class="muted" style="font-weight:600;">({{ pastRows.length }})</span>
+              </button>
+            </td>
+          </tr>
+          <template v-if="pastOpen">
+            <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -- whole-row click is a pointer shortcut; the Edit button is the keyboard path -->
+            <tr v-for="row in pastRows" :key="'past:' + row.type + ':' + row.item.recordId" class="row-clickable" @click="edit(row)">
+              <td data-label="Order"></td>
+              <td style="font-weight:600;" data-label="Title">
+                <span class="badge" :class="row.type === 'tour' ? 'kind-tour' : 'kind-event'" style="margin-right:8px; font-size:10px; letter-spacing:.3px;">{{ row.type === 'tour' ? 'Tour' : 'Event' }}</span>
+                {{ row.item.title }}
+              </td>
+              <td class="muted" data-label="Details">{{ details(row) }}</td>
+              <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span></td>
+              <td class="right" style="white-space:nowrap;" data-label="Actions">
+                <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
+                <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
+                <button v-if="row.type === 'tour' || store.role !== 'editor'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
+                <button v-if="canRemove(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`${removeLabel(row)} ${row.item.title}`" :title="removeLabel(row)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -61,7 +95,24 @@ import { store } from '../store.js'
 import { config } from '../../config.js'
 import { eventWhen, expiresLabel } from '../../lib/eventtime.js'
 
-const rows = computed(() => store.homeItems)
+// An item is "past" once it's dropped off the public app: an event whose end (or
+// start, if no end) has gone by, or a tour that's passed its take-down date. Dateless
+// notices and tours with no take-down never expire, so they stay in the live list.
+function pastWhen(row) {
+  return row.type === 'event' ? (row.item.eventEnd || row.item.eventStart) : row.item.takedownAt
+}
+function isPast(row) {
+  const w = pastWhen(row)
+  return !!w && Date.parse(w) < Date.now()
+}
+// Live list (drag-reorderable) vs the collapsed Past section (most-recent first).
+const rows = computed(() => store.homeItems.filter((r) => !isPast(r)))
+const pastRows = computed(() => store.homeItems.filter(isPast)
+  .sort((a, b) => (Date.parse(pastWhen(b)) || 0) - (Date.parse(pastWhen(a)) || 0)))
+
+// Past section collapsed by default; remember the choice per browser.
+const pastOpen = ref((() => { try { return localStorage.getItem('nm-past-open') === '1' } catch { return false } })())
+function togglePast() { pastOpen.value = !pastOpen.value; try { localStorage.setItem('nm-past-open', pastOpen.value ? '1' : '0') } catch { /* private mode */ } }
 
 // ── create ──
 const newOpen = ref(false)

@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.7] — 2026-10-24
+
+### Added
+- **"Past" section in Tours & events.** Finished events (past their end) and tours (past their take-down date) now drop out of the live list into a collapsed **Past** section at the bottom, so the working list only shows what's current. Past items keep Edit, Preview, Duplicate and Delete — handy for re-running next year — but aren't reorderable. Dateless notices and tours with no take-down date never expire, so they stay in the live list. The collapsed/open choice is remembered.
+
 ## [1.18.6] — 2026-10-24
 
 ### Fixed

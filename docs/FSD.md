@@ -319,8 +319,10 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   and — Super-Admin-only — a permanent **Purge** (rows older than 30 days are flagged). A single
   **story** is a plain delete (it cascades with, and is archive-protected by, its parent location).
 - **Announcements ("What's on"), merged into "Tours & events".** Tours and announcements share one
-  admin list (badged Tour / Event, drag/▲▼-reorder in a **shared order**; "+ New" chooses the type)
-  and **one ordered list on the public Tours screen**. An announcement is a lightweight event card
+  admin list (badged Tour / Event, drag/▲▼-reorder in a **shared order**; "+ New" chooses the type;
+  finished events and tours — past their end / take-down date — collapse into a non-reorderable
+  **Past** section at the bottom, still Edit/Preview/Duplicate/Delete-able) and **one ordered list on
+  the public Tours screen**. An announcement is a lightweight event card
   (a fair, a festival) with title, start/end date-time, venue + **address/map pin** (directions),
   description, an image with **focal point + caption + credit**, an optional link, and an optional
   **linked walk** — opening a **simple event page** (`/?event=<slug>`), **not** a tour. Super-Admin-
