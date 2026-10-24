@@ -37,6 +37,7 @@ let map = null
 let mapReady = false
 let marker = null
 let routeMarkers = []
+let ro = null  // ResizeObserver on the container (see onMounted)
 
 const rasterStyle = {
   version: 8,
@@ -93,8 +94,19 @@ onMounted(() => {
   map = new maplibregl.Map({ container: el.value, style: rasterStyle, center: [c.lng, c.lat], zoom: 16, attributionControl: false })
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right')
+  // MapLibre only auto-tracks WINDOW resizes, not its CONTAINER's. In the editor the
+  // two-column grid (and the image that loads into the left column) can settle *after*
+  // the map inits, or the map mounts before layout is final — leaving the map sized to
+  // the wrong (often zero/partial) box and rendering blank until a manual zoom forces an
+  // internal resize. Watching the container and resizing to match fixes that. The
+  // observer also fires once on observe(), correcting the initial size.
+  if (typeof ResizeObserver !== 'undefined') {
+    ro = new ResizeObserver(() => { if (map) map.resize() })
+    ro.observe(el.value)
+  }
   map.on('load', () => {
     mapReady = true
+    map.resize()
     if (props.routeOnly) {
       map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } })
       map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#2E7CF6', 'line-width': 4, 'line-opacity': 0.85 } })
@@ -105,7 +117,7 @@ onMounted(() => {
     }
   })
 })
-onUnmounted(() => { if (map) map.remove() })
+onUnmounted(() => { if (ro) ro.disconnect(); if (map) map.remove() })
 
 watch(() => [props.routePoints, props.routeGeometry], () => { if (props.routeOnly) drawRoute() }, { deep: true })
 

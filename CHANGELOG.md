@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.6] — 2026-10-24
+
+### Fixed
+- **Admin map rendered blank until you zoomed.** On the event and location editors the pin map often came up blank or half-drawn, and only filled in once you zoomed in or out. MapLibre only watches the browser window for size changes, not its own container – so when the editor's two-column layout settled after the map loaded (e.g. the image loading into the left column nudged the grid), the map kept its wrong initial size and didn't paint. It now watches its container and resizes to match, so the map draws correctly on arrival.
+
 ## [1.18.5] — 2026-10-11
 
 ### Fixed
