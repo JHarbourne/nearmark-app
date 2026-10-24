@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.8] — 2026-10-24
+
+### Added
+- **Getting Started card for new editors.** The first time a newly-invited editor opens the admin, the Dashboard shows a one-time welcome card pointing them to the Getting Started guide, with Open-the-guide and Dismiss. It appears once and never nags: everyone who already had a login was marked as welcomed when the feature went in, so only people invited from here on see it. (Migration 042 adds a `welcomed_at` flag + a `mark_welcomed()` function so an editor can stamp their own.)
+
 ## [1.18.7] — 2026-10-24
 
 ### Added

@@ -635,6 +635,21 @@ export const db = {
     if (error) return null
     return data?.role || null
   },
+  // First-login "welcome" flag (migration 042). Returns null = not yet welcomed (show
+  // the Getting Started card), a timestamp = already welcomed, or 'na' when we can't
+  // tell (no profiles/column, demo) — in which case we never show the card.
+  myWelcomedAt: async () => {
+    if (!supabase) return 'na'
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return 'na'
+    const { data, error } = await supabase.from('profiles').select('welcomed_at').eq('user_id', uid).maybeSingle()
+    if (error) return 'na'
+    return data ? (data.welcomed_at || null) : 'na'
+  },
+  markWelcomed: async () => {
+    if (!supabase) return
+    await supabase.rpc('mark_welcomed')
+  },
   listProfiles: async () => {
     if (!supabase) return null
     const { data, error } = await supabase.from('profiles').select('user_id, email, display_name, role').order('created_at')

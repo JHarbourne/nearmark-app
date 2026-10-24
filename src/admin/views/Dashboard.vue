@@ -5,6 +5,20 @@
   <div class="dashboard">
     <div class="pagehead" style="flex-shrink:0;"><h1>Dashboard</h1></div>
 
+    <!-- One-time Getting Started card for a newly-invited editor (migration 042). Shown
+         until they open the guide or dismiss it; existing admins were backfilled, so
+         they never see it. -->
+    <div v-if="store.showWelcome" class="card" style="flex-shrink:0; padding:18px 20px; margin-bottom:16px; border-left:3px solid var(--violet,#6b46e5); display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:240px;">
+        <h2 style="margin:0 0 6px; font-size:16px;">👋 Welcome to {{ appName }}</h2>
+        <p class="muted" style="margin:0; font-size:13.5px; line-height:1.6;">New here? The <strong>Getting Started</strong> guide walks you through adding a location, writing its story and building a tour — a few minutes and you'll know your way around.</p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <a :href="guideUrl" target="_blank" rel="noopener" class="btn btn-primary btn-sm" @click="store.dismissWelcome()">Open the guide ↗</a>
+        <button type="button" class="btn btn-ghost btn-sm" @click="store.dismissWelcome()">Dismiss</button>
+      </div>
+    </div>
+
     <!-- stat cards double as shortcuts to the matching list -->
     <div class="statgrid" style="flex-shrink:0;">
       <button type="button" class="card stat statlink" @click="store.go('locations')" aria-label="View all locations"><div class="n">{{ store.locations.length }}</div><div class="l">Total locations</div></button>
@@ -62,6 +76,8 @@ import { store } from '../store.js'
 import { config } from '../../config.js'
 const version = __APP_VERSION__
 const releasesUrl = config.releasesUrl
+const guideUrl = config.guideUrl
+const appName = config.appName
 const published = computed(() => store.locations.filter((l) => l.status === 'published').length)
 const drafts = computed(() => store.locations.filter((l) => l.status !== 'published').length)
 // bar chart: scale each editor's bar against the busiest editor

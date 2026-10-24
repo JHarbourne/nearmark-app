@@ -45,6 +45,7 @@ export const store = reactive({
   role: null, // RBAC role of the signed-in user ('super_admin'|'editor'); null = no RBAC on this project (pre-migration) → full access, as before
   myTourIds: [], // tour record-ids this editor is assigned to (migration 036); [] for SA / pre-migration
   notifications: [], // in-app notification feed (migration 031); empty where the table isn't there
+  welcomedAt: 'na',  // first-login flag (migration 042): null = show Getting Started card; timestamp/'na' = don't
 
   // ── RBAC gates: mirror the migration-030/036 RLS so the UI never offers an action the
   // DB will reject. role === null → no RBAC here → everything allowed (unchanged).
@@ -54,6 +55,8 @@ export const store = reactive({
   get isEditor() { return this.role === 'editor' },
   get isSuperAdmin() { return this.role === 'super_admin' },
   get unreadCount() { return this.notifications.filter((n) => !n.readAt).length },
+  // Show the one-time Getting Started card only to a new editor who hasn't seen it.
+  get showWelcome() { return this.welcomedAt === null },
   // owner + SA + any assigned editor whose tour this location is a stop in (migration 037)
   canEditLocation(loc) {
     if (this.role !== 'editor') return true
@@ -98,6 +101,12 @@ export const store = reactive({
   async markNotificationsRead() {
     await db.markNotificationsRead().catch(() => {})
     this.notifications = this.notifications.map((n) => (n.readAt ? n : { ...n, readAt: new Date() }))
+  },
+  // Dismiss the Getting Started card (once): hide it now, stamp the profile so it
+  // never returns. Best-effort — the local hide stands even if the write fails.
+  async dismissWelcome() {
+    this.welcomedAt = new Date().toISOString()
+    await db.markWelcomed().catch(() => {})
   },
 
   // ── session ──
@@ -278,6 +287,7 @@ export const store = reactive({
         this.role = await db.myRole().catch(() => null)
         this.myTourIds = this.role === 'editor' ? await db.myTourIds().catch(() => []) : []
         this.notifications = await db.listNotifications().catch(() => [])
+        this.welcomedAt = await db.myWelcomedAt().catch(() => 'na')
         this.deletionRequests = await db.listDeletionRequests().catch(() => [])
         this.approvals = await db.listApprovals().catch(() => [])
         this.announcements = await db.listAnnouncements().catch(() => [])
