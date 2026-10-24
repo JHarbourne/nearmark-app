@@ -279,7 +279,10 @@ RBAC (030/031/036/037) is **live on Tollesbury; dormant on LGBT** until applied 
   top-to-bottom order (hero photo → period/date → photo credit + link/caption/alt → heading →
   significance → text → before/after slider → second photo → audio/video → links → related);
   compact **upload** + **media-library picker**
-  icons, in-place replace, focal point, alt/caption/credits + credit toggle; audio with its
+  icons, in-place replace, focal point, alt/caption/credits + a credit **'Show' toggle** that
+  controls only whether the credit is *displayed* — the value is always stored, so the
+  photographer/source is kept on record (documenting provenance, so there's no later doubt the
+  image is cleared to use) even when the credit is hidden; audio with its
   **duration** beside the URL and a **transcript** field + missing-transcript accessibility
   warning; video with an optional **caption** beside the URL; accent picker; live story-card
   preview. The form itself is a shared **`StoryFields`** component, reused both on this standalone
