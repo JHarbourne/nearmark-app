@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.10] — 2026-10-25
+
+### Fixed
+- **Event page: title and date moved off the image.** They were overlaid on the hero photo, where a long title on a busy or portrait image was cramped and unreadable (and the back button collided with it). The title and date now sit in the main content below the image, dark on the page background; the hero just shows the photo (and shrinks to a slim brand strip when an event has no image).
+
 ## [1.18.9] — 2026-10-25
 
 ### Added

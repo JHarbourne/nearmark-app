@@ -9,15 +9,16 @@
     <!-- hero -->
     <div :style="hero">
       <div v-if="!a.imageUrl" style="position:absolute; inset:0; opacity:0.22; background-image: radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1.4px); background-size: 13px 13px;"></div>
-      <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 48%, rgba(0,0,0,0) 76%);"></div>
+      <!-- subtle top scrim so the back button + tag stay legible on a light or busy image -->
+      <div style="position:absolute; left:0; right:0; top:0; height:92px; background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0));"></div>
       <span :style="eventTag">What's on</span>
-      <div style="position:absolute; left:24px; right:24px; bottom:18px;">
-        <div v-if="whenLabel" style="font-size:12px; font-weight:700; letter-spacing:1.2px; color:rgba(255,255,255,0.92); text-transform:uppercase;">{{ whenLabel }}</div>
-        <h1 style="font-family:var(--font-heading); font-weight:700; font-size:30px; line-height:1.04; margin:6px 0 0; color:#fff;">{{ a.title }}</h1>
-      </div>
     </div>
 
     <div style="padding: 18px 24px 48px;">
+      <!-- title + date live here (not crammed over the image) -->
+      <div v-if="whenLabel" style="font-size:12.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent-warm); margin:0 0 6px;">{{ whenLabel }}</div>
+      <h1 style="font-family:var(--font-heading); font-weight:700; font-size:26px; line-height:1.12; margin:0 0 16px; color:var(--ink);">{{ a.title }}</h1>
+
       <!-- caption + credit under the photo (same as a story card) -->
       <p v-if="a.imageCaption || showCredit" style="margin:0 0 14px; font-size:12.5px; color:var(--ink-muted);">
         <span v-if="a.imageCaption" style="font-style:italic;">{{ a.imageCaption }}</span>
@@ -91,10 +92,11 @@ const backBtn = {
   alignItems: 'center', justifyContent: 'center',
 }
 const hero = computed(() => {
-  const base = { position: 'relative', height: '230px', overflow: 'hidden' }
+  const base = { position: 'relative', overflow: 'hidden' }
+  // Full hero for a photo; a slim brand strip when there's no image (title sits below now).
   return props.announcement.imageUrl
-    ? { ...base, backgroundImage: `url(${props.announcement.imageUrl})`, backgroundSize: 'cover', backgroundPosition: props.announcement.imagePosition || '50% 50%', backgroundRepeat: 'no-repeat' }
-    : { ...base, background: 'var(--grad-brand)' }
+    ? { ...base, height: '230px', backgroundImage: `url(${props.announcement.imageUrl})`, backgroundSize: 'cover', backgroundPosition: props.announcement.imagePosition || '50% 50%', backgroundRepeat: 'no-repeat' }
+    : { ...base, height: '92px', background: 'var(--grad-brand)' }
 })
 const eventTag = {
   position: 'absolute', top: 'calc(12px + env(safe-area-inset-top))', right: '16px', fontSize: '11px', fontWeight: 700,
