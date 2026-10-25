@@ -175,6 +175,12 @@ function openNotif(n) {
     bellOpen.value = false; store.go('archive'); return
   }
   bellOpen.value = false
+  if (n.entityType === 'event') {
+    // event_pending / event_approved / event_declined → open that event
+    const ev = store.announcements.find((a) => a.recordId === n.entityId)
+    store.go(ev ? 'announcementEditor' : 'tours', ev ? { id: ev.id } : {})
+    return
+  }
   if (n.entityType === 'location') {
     const loc = store.locations.find((l) => l.recordId === n.entityId)
     store.go(loc ? 'locationEditor' : 'locations', loc ? { id: loc.id } : {})

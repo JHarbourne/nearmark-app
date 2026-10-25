@@ -440,6 +440,8 @@ function rowToAnnouncement(r) {
   return {
     recordId: r.id,
     id: r.slug,                    // stable slug; event-page deep link /?event=<slug>
+    createdBy: r.created_by || null,   // owner (editor who made it, or SA); migration 038
+    approvedAt: r.approved_at || null, // null = awaiting Super-Admin approval (migration 043)
     title: r.title || '',
     eventStart: r.event_start || null,  // ISO timestamp or null (evergreen notice)
     eventEnd: r.event_end || null,
@@ -557,6 +559,11 @@ export const db = {
   updateAnnouncement: (recordId, a) => run(supabase.from('announcements').update(announcementToRow(a)).eq('id', recordId).select()),
   deleteAnnouncement: (recordId) => run(supabase.from('announcements').delete().eq('id', recordId)),
   setAnnouncementOrder: (recordId, order) => run(supabase.from('announcements').update({ sort_order: order }).eq('id', recordId)),
+  // Super Admin approves (live) or declines (back to pending) an editor's event (migration 043).
+  approveAnnouncement: async (recordId, approve) => {
+    const { error } = await supabase.rpc('approve_announcement', { p_id: recordId, p_approve: approve })
+    if (error) throw new Error(error.message)
+  },
   createLocation: (l) => run(supabase.from('locations').insert(locationToRow(l)).select()),
   updateLocation: (recordId, l) => run(supabase.from('locations').update(locationToRow(l)).eq('id', recordId).select()),
   deleteLocation: (recordId) => run(supabase.from('locations').delete().eq('id', recordId)),

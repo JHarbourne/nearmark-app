@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.9] — 2026-10-25
+
+### Added
+- **Editors can create events, with Super-Admin approval.** "What's on" events were Super-Admin-only; now an **editor can create and edit their own** event, but it stays invisible to the public until a **Super Admin approves** it. An event goes live only when it's **published *and* approved**; an editor can never self-approve, and any edit by an editor sends an approved event back to pending (so changes can't slip live). The Super Admin is notified in the bell when one's waiting and approves it from the event (or the Tours & events list, where pending events show a **"⏳ Pending"** badge); the editor is notified when it's approved or sent back. A Super Admin's own events are auto-approved exactly as before. (Migration 043.)
+
 ## [1.18.8] — 2026-10-24
 
 ### Added

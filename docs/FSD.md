@@ -170,6 +170,7 @@ authenticated admins read/update/delete (feeds the **Event bookings** screen).
 | 040 | RBAC Phase 3 — **soft-delete / archive**. `archived_at`/`archived_by` on locations & tours (hidden from the public + admin lists); `deletion_requests`; `request_delete()`/`resolve_deletion()`/`restore_entity()`; hard delete is now Super-Admin-only (a purge). Reconciled to the current schema (leaves 031's notify triggers intact; wraps 025's visibility helper). |
 | 041 | **Explicit Data API grants** — the schema now grants Data API access itself (Supabase stops auto-granting from 2026-10-30); `anon` made SELECT-only on existing tables. No app change. |
 | 042 | **`welcomed_at`** flag on `profiles` + `mark_welcomed()` — drives the one-time **Getting Started** card for a newly-invited editor (existing profiles backfilled, so only new invitees see it). |
+| 043 | **Editor-contributed events, Super-Admin-approved** — `approved_at`/`approved_by` on announcements; write RLS widened so an editor manages their own; `ann_approval_guard` (editors can't self-approve, SA's own auto-approve, editor edits revert to pending); `approve_announcement()`; anon sees an event only when **published AND approved**; SA/author notifications. |
 
 RBAC + Phase 3 archive (**030/031/036/037/040**) are **live on BOTH prod projects — Tollesbury AND LGBT — plus staging** (LGBT brought to parity 2026-10-24; SA there is `jonathan@lgbthistoryuk.org`). The duplicate-title (Phase 4) and email-digest (Phase 5) phases are still to come — design in `docs/backoffice-permissions-spec.md`.
 
@@ -330,8 +331,11 @@ RBAC + Phase 3 archive (**030/031/036/037/040**) are **live on BOTH prod project
   the public Tours screen**. An announcement is a lightweight event card
   (a fair, a festival) with title, start/end date-time, venue + **address/map pin** (directions),
   description, an image with **focal point + caption + credit**, an optional link, and an optional
-  **linked walk** — opening a **simple event page** (`/?event=<slug>`), **not** a tour. Super-Admin-
-  managed. **Lifecycle:** a dated event uses start + end and disappears the moment it ends; leaving
+  **linked walk** — opening a **simple event page** (`/?event=<slug>`), **not** a tour. **Editors may
+  create/edit their own events, but a Super Admin approves them** before they go public (an event is
+  live only when published *and* approved; editors can't self-approve; an editor edit reverts it to
+  pending; SA's own events auto-approve — migration 043, pending events show a "⏳ Pending" badge).
+  **Lifecycle:** a dated event uses start + end and disappears the moment it ends; leaving
   **start blank** makes it a **dateless standing notice / advert** (a business, a service) shown with
   no date, where the **end acts as an expiry** (auto-hides then); blank start *and* end = an evergreen
   notice that shows until unpublished. Standalone `announcements` table (migrations 038–039); design

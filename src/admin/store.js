@@ -67,6 +67,11 @@ export const store = reactive({
   canEditStory(loc) { return this.canEditLocation(loc) },                                         // follows the parent location
   canEditTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id || this.myTourIds.includes(tour?.recordId) }, // owner + assigned + SA
   canDeleteTour(tour) { return this.role !== 'editor' || tour?.createdBy === this.user?.id },     // owner + SA only (not assigned)
+  // Events (announcements): an editor may create and edit their OWN; a Super Admin edits any.
+  // An editor's event stays pending until a Super Admin approves it (migration 043).
+  canEditAnnouncement(a) { return this.role !== 'editor' || !a?.recordId || a?.createdBy === this.user?.id },
+  // Events awaiting Super-Admin approval (published or not, not yet approved) — drives the badge/count.
+  get pendingEvents() { return this.announcements.filter((a) => a.recordId && !a.approvedAt) },
   // Where a NEW location/tour map should open: the centre of the locations this
   // deployment already covers (so it lands on Tollesbury, London, … automatically),
   // falling back to the configured default only when there's no content yet.
@@ -475,6 +480,12 @@ export const store = reactive({
   async deleteAnnouncement(a) {
     if (a.recordId) await db.deleteAnnouncement(a.recordId)
     this.logActivity('Deleted announcement', a.title)
+    await this.load()
+  },
+  // Super Admin approves an editor's event (makes it eligible to go live) or declines it.
+  async approveAnnouncement(a, approve) {
+    await db.approveAnnouncement(a.recordId, approve)
+    this.logActivity(approve ? 'Approved event' : 'Declined event', a.title)
     await this.load()
   },
   // persist the current order of this.tours as sort_order (lower = higher up)

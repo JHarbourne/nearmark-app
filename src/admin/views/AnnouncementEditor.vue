@@ -12,6 +12,19 @@
       </div>
     </div>
 
+    <!-- Approval banner (migration 043): an editor's event is pending until a Super Admin approves it. -->
+    <div v-if="isPending" class="card" style="padding:12px 16px; margin-bottom:16px; border-left:3px solid var(--amber,#E0A800); display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <span style="flex:1; min-width:220px; font-size:13.5px; line-height:1.5;">
+        <strong>Awaiting approval.</strong>
+        <template v-if="store.isSuperAdmin"> Submitted by an editor – it won't appear in the app until you approve it.</template>
+        <template v-else> A Super Admin needs to approve this before it appears in the app. You can keep editing until then.</template>
+      </span>
+      <span v-if="store.isSuperAdmin" style="display:flex; gap:8px;">
+        <button class="btn btn-primary btn-sm" @click="decide(true)">Approve</button>
+        <button class="btn btn-ghost btn-sm" @click="decide(false)">Decline</button>
+      </span>
+    </div>
+
     <div class="editor-cols" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start;">
       <!-- left: content -->
       <div class="card" style="padding:22px;">
@@ -98,7 +111,7 @@
             <button type="button" :class="{ on: form.status !== 'published' }" @click="form.status = 'draft'">Draft</button>
           </div>
           <button class="btn btn-primary" @click="save()" :disabled="saving || !canManage">{{ saving ? 'Saving…' : 'Save' }}</button>
-          <span v-if="!canManage" class="muted" role="status" style="font-size:13px;">Only a Super Admin can manage announcements.</span>
+          <span v-if="!canManage" class="muted" role="status" style="font-size:13px;">This event belongs to another editor – view only.</span>
           <span v-if="flash" role="status" style="font-size:13px; font-weight:600; color:var(--green);">{{ flash }}</span>
           <button v-if="!isNew && canManage" class="btn btn-danger btn-sm" style="margin-left:auto;" @click="remove">Delete</button>
         </div>
@@ -134,7 +147,15 @@ import MediaPicker from '../components/MediaPicker.vue'
 
 const existing = store.params.id ? store.announcements.find((a) => a.id === store.params.id) : null
 const isNew = !existing
-const canManage = computed(() => store.role !== 'editor') // SA, or no RBAC on this project
+// Editors may create (isNew) and edit their OWN events; a Super Admin edits any (migration 043).
+const canManage = computed(() => isNew || store.canEditAnnouncement(existing))
+// Live record (reflects save/approve), so the "awaiting approval" banner updates in place.
+const current = computed(() => store.announcements.find((a) => a.id === form.id) || existing)
+const isPending = computed(() => !!(current.value?.recordId && !current.value?.approvedAt))
+async function decide(approve) {
+  try { await store.approveAnnouncement(current.value, approve) }
+  catch (e) { alert('Could not update: ' + (e?.message || e)) }
+}
 const hue = '#9B6DFF'
 const mapCenter = computed(() => store.defaultMapCenter)
 
@@ -244,7 +265,9 @@ async function save() {
     baseline.value = JSON.stringify(form)
     const saved = store.announcements.find((a) => a.id === form.id)
     if (saved) form.recordId = saved.recordId
-    flash.value = form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓'
+    flash.value = store.role === 'editor'
+      ? 'Saved · sent to a Super Admin for approval'
+      : (form.status === 'published' ? 'Saved · Published ✓' : 'Saved · Draft ✓')
     clearTimeout(flashTimer); flashTimer = setTimeout(() => (flash.value = ''), 2500)
   } catch (e) { alert('Save failed: ' + e.message) } finally { saving.value = false }
 }

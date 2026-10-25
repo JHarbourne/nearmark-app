@@ -36,13 +36,14 @@
               {{ row.item.title }}
             </td>
             <td class="muted" data-label="Details">{{ details(row) }}</td>
-            <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span></td>
+            <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span><span v-if="isPendingEvent(row)" class="badge" style="margin-left:6px; white-space:nowrap; background:var(--amber-soft,#fff6df); color:var(--amber-ink,#8a6d00);" title="Awaiting Super-Admin approval – not shown in the app yet">⏳ Pending</span></td>
             <td class="right" style="white-space:nowrap;" data-label="Actions">
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === 0" @click.stop="move(i, -1)" :aria-label="`Move ${row.item.title} up`">▲</button>
               <button type="button" class="btn btn-ghost btn-sm" :disabled="i === rows.length - 1" @click.stop="move(i, 1)" :aria-label="`Move ${row.item.title} down`">▼</button>
               <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
               <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
-              <button v-if="row.type === 'tour' || store.role !== 'editor'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
+              <button v-if="row.type === 'tour' || store.canEditAnnouncement(row.item)" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
+              <button v-if="isPendingEvent(row) && store.isSuperAdmin" class="btn btn-primary btn-sm" @click.stop="approve(row)" title="Approve this event so it can go live">Approve</button>
               <button v-if="canRemove(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`${removeLabel(row)} ${row.item.title}`" :title="removeLabel(row)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
               </button>
@@ -72,11 +73,12 @@
                 {{ row.item.title }}
               </td>
               <td class="muted" data-label="Details">{{ details(row) }}</td>
-              <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span></td>
+              <td data-label="Status"><span class="badge" :class="row.item.status" style="white-space:nowrap;">{{ row.item.status }}</span><span v-if="isPendingEvent(row)" class="badge" style="margin-left:6px; white-space:nowrap; background:var(--amber-soft,#fff6df); color:var(--amber-ink,#8a6d00);" title="Awaiting Super-Admin approval – not shown in the app yet">⏳ Pending</span></td>
               <td class="right" style="white-space:nowrap;" data-label="Actions">
                 <button class="btn btn-ghost btn-sm" @click.stop="edit(row)">{{ canEdit(row) ? 'Edit' : 'View' }}</button>
                 <button class="btn btn-ghost btn-sm" @click.stop="preview(row)" title="Open in the app in a new tab">Preview</button>
-                <button v-if="row.type === 'tour' || store.role !== 'editor'" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
+                <button v-if="row.type === 'tour' || store.canEditAnnouncement(row.item)" class="btn btn-ghost btn-sm" @click.stop="duplicate(row)">Duplicate</button>
+              <button v-if="isPendingEvent(row) && store.isSuperAdmin" class="btn btn-primary btn-sm" @click.stop="approve(row)" title="Approve this event so it can go live">Approve</button>
                 <button v-if="canRemove(row)" class="btn btn-danger btn-sm" @click.stop="remove(row)" :aria-label="`${removeLabel(row)} ${row.item.title}`" :title="removeLabel(row)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /></svg>
                 </button>
@@ -121,11 +123,14 @@ function newEvent() { newOpen.value = false; store.go('announcementEditor', { id
 
 // ── per-type helpers ──
 function edit(row) { store.go(row.type === 'tour' ? 'tourEditor' : 'announcementEditor', { id: row.item.id }) }
-function canEdit(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.role !== 'editor' }
+function canEdit(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.canEditAnnouncement(row.item) }
+// An editor's event is pending until a Super Admin approves it (migration 043).
+function isPendingEvent(row) { return row.type === 'event' && !!row.item.recordId && !row.item.approvedAt }
+async function approve(row) { try { await store.approveAnnouncement(row.item, true) } catch (e) { alert('Could not approve: ' + (e?.message || e)) } }
 // A tour can be removed by anyone who can edit it: the owner/SA archive it (recoverable),
 // an assigned non-owner raises a request to the owner. Events stay SA/admin-only (they
 // aren't in the deletion workflow — a plain delete).
-function canRemove(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.role !== 'editor' }
+function canRemove(row) { return row.type === 'tour' ? store.canEditTour(row.item) : store.canEditAnnouncement(row.item) }
 // Label the destructive button: "Request deletion" when it will raise a request
 // rather than archive directly (a non-owner editor on someone else's tour).
 function removeLabel(row) { return row.type === 'tour' && !store.canDeleteTour(row.item) ? 'Request deletion' : 'Delete' }

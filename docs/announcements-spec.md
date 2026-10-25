@@ -27,6 +27,16 @@ walks (Open Gardens, the Arts Trail). An **Announcement** is a card on the Tours
   deferred event-schedule/opening-times redesign.
 - **Super-Admin-managed** for v1 (the site owner posts village notices). Independent of the per-tour
   editor scoping — announcements aren't tours.
+- **Editor-contributed, Super-Admin-approved (migration 043, 2026-10-25).** An **editor** can now
+  create and edit **their own** events, but an editor's event stays invisible to the public until a
+  Super Admin **approves** it. Rules: public sees an event only when it is **published AND approved**
+  (and not ended); `approved_at` on the row is the gate (null = pending). A `before insert/update`
+  trigger (`ann_approval_guard`) forces a non-SA write to pending — an editor can **never** self-approve
+  — while a Super Admin's own new event auto-approves (their flow is unchanged); **any** editor edit of
+  an approved event reverts it to pending, so changes can't slip live. `approve_announcement(id, bool)`
+  (SA-only) flips it; the write RLS (`ann_write`) is widened to `can_manage_announcements() OR
+  created_by = auth.uid()`. Notifications: the Super Admins are told when an event is submitted
+  (`event_pending`), the author when it's approved/declined (`event_approved`/`event_declined`).
 
 ## Data model
 ```sql
