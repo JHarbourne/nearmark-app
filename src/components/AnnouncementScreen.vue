@@ -41,6 +41,15 @@
       <!-- eslint-disable-next-line vue/no-v-html -- HTML-escaped in renderBody; only safe tags emitted -->
       <div v-if="a.description" class="ann-body" v-html="descriptionHtml"></div>
 
+      <!-- optional second image (natural aspect), with its own caption/credit -->
+      <figure v-if="a.image2Url" style="margin:18px 0 0;">
+        <img :src="a.image2Url" :alt="a.image2Alt || ''" style="width:100%; border-radius:12px; display:block;" />
+        <figcaption v-if="a.image2Caption || showCredit2" style="margin:8px 2px 0; font-size:12.5px; color:var(--ink-muted);">
+          <span v-if="a.image2Caption" style="font-style:italic;">{{ a.image2Caption }}</span>
+          <span v-if="showCredit2">{{ a.image2Caption ? ' · ' : '' }}Photo: <a v-if="a.image2CreditUrl" :href="a.image2CreditUrl" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">{{ a.image2Credit }}</a><template v-else>{{ a.image2Credit }}</template></span>
+        </figcaption>
+      </figure>
+
       <a v-if="a.linkUrl" :href="a.linkUrl" target="_blank" rel="noopener" :style="linkBtn">
         {{ a.linkLabel || 'Find out more' }}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:6px;"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
@@ -69,6 +78,7 @@ const descriptionHtml = computed(() => renderBody(props.announcement.description
 const linkedTour = computed(() => props.announcement.tourSlug ? props.tours.find((t) => t.id === props.announcement.tourSlug) || null : null)
 const whenLabel = computed(() => eventWhen(props.announcement.eventStart, props.announcement.eventEnd))
 const showCredit = computed(() => !!props.announcement.imageCredit && props.announcement.showImageCredit !== false)
+const showCredit2 = computed(() => !!props.announcement.image2Credit && props.announcement.showImage2Credit !== false)
 
 // "Directions" — open the device maps app to the place (Apple Maps on iOS, else Google).
 const hasCoords = computed(() => props.announcement.lat != null && props.announcement.lng != null)

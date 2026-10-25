@@ -171,6 +171,7 @@ authenticated admins read/update/delete (feeds the **Event bookings** screen).
 | 041 | **Explicit Data API grants** — the schema now grants Data API access itself (Supabase stops auto-granting from 2026-10-30); `anon` made SELECT-only on existing tables. No app change. |
 | 042 | **`welcomed_at`** flag on `profiles` + `mark_welcomed()` — drives the one-time **Getting Started** card for a newly-invited editor (existing profiles backfilled, so only new invitees see it). |
 | 043 | **Editor-contributed events, Super-Admin-approved** — `approved_at`/`approved_by` on announcements; write RLS widened so an editor manages their own; `ann_approval_guard` (editors can't self-approve, SA's own auto-approve, editor edits revert to pending); `approve_announcement()`; anon sees an event only when **published AND approved**; SA/author notifications. |
+| 044 | **Second image on events** — `image2_*` columns on announcements (url/alt/caption/credit/credit_url/show); a plain photo shown in the event-page content under the description. |
 
 RBAC + Phase 3 archive (**030/031/036/037/040**) are **live on BOTH prod projects — Tollesbury AND LGBT — plus staging** (LGBT brought to parity 2026-10-24; SA there is `jonathan@lgbthistoryuk.org`). The duplicate-title (Phase 4) and email-digest (Phase 5) phases are still to come — design in `docs/backoffice-permissions-spec.md`.
 

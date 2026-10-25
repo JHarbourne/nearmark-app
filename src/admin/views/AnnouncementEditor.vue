@@ -84,6 +84,39 @@
           <input id="ann-alt" type="text" v-model="form.imageAlt" placeholder="e.g. Stalls in the Parish Rooms" />
         </template>
 
+        <!-- Optional second image — a plain photo shown in the event-page content (like a location's portrait) -->
+        <label for="ann-img2" style="margin-top:18px;">Second image <span class="hint">optional · shown in the page, under the description</span></label>
+        <div class="media-row">
+          <div class="media-input">
+            <input id="ann-img2" type="url" v-model="form.image2Url" placeholder="Paste a URL, or use the icons →" />
+            <div class="media-actions">
+              <label class="icon-btn" :class="{ busy: uploading2 }" :title="uploading2 ? 'Uploading…' : 'Upload an image from your device'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4" /><path d="m6 10 6-6 6 6" /><path d="M4 20h16" /></svg>
+                <input type="file" accept="image/*" aria-label="Upload a second image from your device" style="display:none" @change="up2" />
+              </label>
+              <button type="button" class="icon-btn" title="Choose from the media library" aria-label="Choose from the media library" @click="picker2.open = true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.6" /><path d="m21 15-5-5L5 21" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <template v-if="form.image2Url">
+          <img :src="form.image2Url" alt="" style="width:100%; border-radius:10px; margin-top:10px; display:block;" />
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin:14px 0 6px;">
+            <label for="ann-credit2" style="margin:0;">Photo credit <span class="hint">photographer / source</span></label>
+            <label style="display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;" title="Off = kept on record, hidden in the app">
+              <input type="checkbox" v-model="form.showImage2Credit" style="margin:0;" /> Show
+            </label>
+          </div>
+          <input id="ann-credit2" type="text" v-model="form.image2Credit" placeholder="Photographer / source" />
+          <label for="ann-credit2-link">Credit link <span class="hint">optional</span></label>
+          <input id="ann-credit2-link" type="url" v-model="form.image2CreditUrl" placeholder="https://…" />
+          <label for="ann-caption2">Image caption <span class="hint">under the photo</span></label>
+          <input id="ann-caption2" type="text" v-model="form.image2Caption" placeholder="e.g. Pressing apples last year" />
+          <label for="ann-alt2">Alt text <span class="hint">screen readers · skipped if a caption is set</span></label>
+          <input id="ann-alt2" type="text" v-model="form.image2Alt" placeholder="e.g. Children pressing apples" />
+        </template>
+
         <div class="field-row">
           <div>
             <label for="ann-link">Link <span class="hint">optional · tickets / Facebook event</span></label>
@@ -135,6 +168,7 @@
     </div>
 
     <MediaPicker :open="picker.open" :current="form.imageUrl" @select="onPickImage" @close="picker.open = false" />
+    <MediaPicker :open="picker2.open" :current="form.image2Url" @select="onPickImage2" @close="picker2.open = false" />
   </div>
 </template>
 
@@ -163,15 +197,18 @@ const blank = {
   id: 'ann-' + Math.random().toString(36).slice(2, 8), recordId: undefined,
   title: '', eventStart: '', eventEnd: '', place: '', address: '', lat: null, lng: null,
   description: '', imageUrl: '', imageAlt: '', imageCaption: '', imageCredit: '', imageCreditUrl: '',
-  showImageCredit: true, imagePosition: '50% 50%', linkUrl: '', linkLabel: '', tourSlug: '',
+  showImageCredit: true, imagePosition: '50% 50%',
+  image2Url: '', image2Alt: '', image2Caption: '', image2Credit: '', image2CreditUrl: '', showImage2Credit: true,
+  linkUrl: '', linkLabel: '', tourSlug: '',
   bookingKey: '', status: 'draft', sortOrder: 0,
 }
 const form = reactive(existing ? JSON.parse(JSON.stringify(existing)) : { ...blank })
-for (const k of ['eventStart', 'eventEnd', 'place', 'address', 'description', 'imageUrl', 'imageAlt', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'linkUrl', 'linkLabel', 'tourSlug', 'bookingKey']) {
+for (const k of ['eventStart', 'eventEnd', 'place', 'address', 'description', 'imageUrl', 'imageAlt', 'imageCaption', 'imageCredit', 'imageCreditUrl', 'image2Url', 'image2Alt', 'image2Caption', 'image2Credit', 'image2CreditUrl', 'linkUrl', 'linkLabel', 'tourSlug', 'bookingKey']) {
   if (form[k] == null) form[k] = ''
 }
 if (!form.imagePosition) form.imagePosition = '50% 50%'
 if (form.showImageCredit === undefined) form.showImageCredit = true
+if (form.showImage2Credit === undefined) form.showImage2Credit = true
 
 // event_start/end are ISO timestamps; <input type="datetime-local"> is local time.
 function toLocalInput(iso) {
@@ -244,6 +281,18 @@ async function up(e) {
   try { form.imageUrl = await store.upload(file, 'image') }
   catch (err) { alert('Upload failed: ' + err.message) }
   finally { uploading.value = false; e.target.value = '' }
+}
+// second (optional) image — a plain photo shown in the content, like a location's portrait
+const uploading2 = ref(false)
+const picker2 = reactive({ open: false })
+function onPickImage2(url) { form.image2Url = url }
+async function up2(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  uploading2.value = true
+  try { form.image2Url = await store.upload(file, 'image') }
+  catch (err) { alert('Upload failed: ' + err.message) }
+  finally { uploading2.value = false; e.target.value = '' }
 }
 
 // ── unsaved-changes guard ──

@@ -19,6 +19,14 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.11] — 2026-10-25
+
+### Added
+- **A second image on events.** An event can now carry an optional second photo (as a location does), shown in the event-page content under the description with its own caption and credit (+ "Show" toggle and credit link). Upload or pick from the media library, same as the main image. (Migration 044.)
+
+### Fixed
+- **Admin pin map came up blank until you zoomed.** Forced a resize + repaint on load so the map requests its tiles without needing an interaction (the container is a fixed size, so the earlier resize-observer had no size change to react to).
+
 ## [1.18.10] — 2026-10-25
 
 ### Fixed
