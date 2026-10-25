@@ -106,7 +106,15 @@ onMounted(() => {
   }
   map.on('load', () => {
     mapReady = true
-    map.resize()
+    // Force the map to size + paint. The container is a fixed 320px, so the ResizeObserver
+    // above never sees a size *change* — yet on some setups (slow/proxied networks, a late
+    // grid reflow when the editor's left-column image loads) the raster tiles aren't
+    // requested until a manual zoom. Resizing + repainting now, next frame, and shortly
+    // after reliably kicks the tile load without any interaction.
+    const kick = () => { if (map) { map.resize(); map.triggerRepaint() } }
+    kick()
+    requestAnimationFrame(kick)
+    setTimeout(kick, 400)
     if (props.routeOnly) {
       map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } } })
       map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#2E7CF6', 'line-width': 4, 'line-opacity': 0.85 } })
@@ -117,7 +125,7 @@ onMounted(() => {
     }
   })
 })
-onUnmounted(() => { if (ro) ro.disconnect(); if (map) map.remove() })
+onUnmounted(() => { if (ro) ro.disconnect(); if (map) map.remove(); map = null }) // null so any pending delayed resize no-ops
 
 watch(() => [props.routePoints, props.routeGeometry], () => { if (props.routeOnly) drawRoute() }, { deep: true })
 
