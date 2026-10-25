@@ -11,14 +11,18 @@ function inline(s) {
   return typo(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/&lt;br\s*\/?&gt;/gi, '<br>')            // allow a literal <br> for a manual line break
-    // auto-link bare http(s) URLs. The text is already HTML-escaped; we only ever
-    // match http/https (no javascript:/data:), disallow quotes/angle brackets in
-    // the URL (no attribute breakout), and leave trailing sentence punctuation
-    // outside the link — so there is still nothing to sanitise.
-    .replace(/\bhttps?:\/\/[^\s<"]+/g, (u) => {
-      const tail = (u.match(/[.,!?)\]}]+$/) || [''])[0]
-      const url = tail ? u.slice(0, -tail.length) : u
-      return `<a href="${url}" target="_blank" rel="noopener nofollow">${url}</a>${tail}`
+    // auto-link bare http(s) URLs, bare "www." web addresses, and email addresses.
+    // The text is already HTML-escaped; we only ever build an href of http/https (web)
+    // or mailto (email) — never javascript:/data: — disallow quotes/angle brackets/
+    // spaces in it (no attribute breakout), and leave trailing sentence punctuation
+    // outside the link, so there is still nothing to sanitise.
+    .replace(/\bhttps?:\/\/[^\s<"]+|\bwww\.[^\s<"]+|\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, (m) => {
+      const kind = /^https?:\/\//.test(m) ? 'http' : /^www\./i.test(m) ? 'www' : 'email'
+      const tail = kind === 'email' ? '' : (m.match(/[.,!?)\]}]+$/) || [''])[0]
+      const token = tail ? m.slice(0, -tail.length) : m
+      const href = kind === 'http' ? token : kind === 'www' ? `https://${token}` : `mailto:${token}`
+      const attrs = kind === 'email' ? 'rel="noopener"' : 'target="_blank" rel="noopener nofollow"'
+      return `<a href="${href}" ${attrs}>${token}</a>${tail}`
     })
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // bold first
     .replace(/\*(.+?)\*/g, '<em>$1</em>')             // then italic

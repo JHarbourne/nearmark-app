@@ -19,6 +19,11 @@ The [README](README.md) is documentation; this file is the release history.
   `anon`, so `anon` is SELECT-only on existing tables too. Applied to the Tollesbury, LGBT
   and staging projects. No app-code change.
 
+## [1.18.12] — 2026-10-25
+
+### Added
+- **Email and web addresses in descriptions become live links automatically.** Typing an email (`someone@example.org`), a web address (`https://…`) or a bare `www.` address in any description – an event, a story or a tour – now turns it into a tappable link (emails open the mail app, web addresses open in a new tab). No need to do anything special. Safe by construction: links are only ever built as `mailto:`/`https:` from the already-escaped text.
+
 ## [1.18.11] — 2026-10-25
 
 ### Added
